@@ -1,0 +1,39 @@
+spring:
+ application:
+  name: 
+   HAAS-USERS
+ datasource:
+  url:
+   jdbc:mysql://localhost:3306/users?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Madrid
+  username:
+   haas
+  password:
+   haas123
+  driver-class-name: 
+     com.mysql.cj.jdbc.Driver     
+ jpa:
+    database-platform:
+     org.hibernate.dialect.MySQL8Dialect  
+    hibernate:
+     ddl-auto:
+      create-drop
+       
+server:
+ port: 
+  ${PORT:0}
+
+eureka:
+ instance:
+  instance-id: 
+   ${spring.application.name}:${spring.application.instance_id:${random.value}}
+ client:
+  service-url:
+   defaultZone: 
+    http://localhost:8761/eureka
+
+logging:
+ level:
+  org:
+   hibernate:
+    SQL:
+     debug
