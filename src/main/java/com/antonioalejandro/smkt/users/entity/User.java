@@ -1,12 +1,14 @@
-package com.antonioalejandro.haas.users.entity;
+package com.antonioalejandro.smkt.users.entity;
 
 import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -24,21 +26,22 @@ public class User implements Serializable {
 	private String name;
 	@Column(nullable = false)
 	private String lastname;
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String username;
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String email;
 	@Column(nullable = false)
 	private String password;
 	@Column(nullable = false)
 	private String photo;
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	private Role role;
 
 	public User() {
-		// TODO Auto-generated constructor stub
 	}
 
-	public User(final Long id, final String name, final String lastname, final String username, final String email,
-			final String password, final String photo) {
+	public User(Long id, String name, String lastname, String username, String email, String password, String photo,
+			Role role) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -47,8 +50,20 @@ public class User implements Serializable {
 		this.email = email;
 		this.password = password;
 		this.photo = photo;
+		this.role = role;
 	}
 
+	public User(String name, String lastname, String username, String email, String password, String photo,
+			Role role) {
+		super();
+		this.name = name;
+		this.lastname = lastname;
+		this.username = username;
+		this.email = email;
+		this.password = password;
+		this.photo = photo;
+		this.role = role;
+	}
 	public Long getId() {
 		return id;
 	}
@@ -103,6 +118,14 @@ public class User implements Serializable {
 
 	public void setPhoto(final String photo) {
 		this.photo = photo;
+	}
+
+	public Role getRole() {
+		return role;
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
 	}
 
 }

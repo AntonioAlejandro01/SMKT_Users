@@ -1,4 +1,4 @@
-package com.antonioalejandro.haas.users;
+package com.antonioalejandro.smkt.users;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
