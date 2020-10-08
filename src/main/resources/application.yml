@@ -4,7 +4,7 @@ spring:
    smkt-users
  datasource:
   url:
-   jdbc:mysql://localhost:3306/SMKT_USERS?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Madrid
+   jdbc:mysql://172.0.0.20:3306/SMKT_USERS?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Madrid
   username:
    smkt
   password:
@@ -16,11 +16,11 @@ spring:
      org.hibernate.dialect.MySQL8Dialect  
     hibernate:
      ddl-auto:
-      create-drop
+      create
        
 server:
  port: 
-  ${PORT:0}
+  4060
 
 eureka:
  instance:
@@ -29,7 +29,7 @@ eureka:
  client:
   service-url:
    defaultZone: 
-    http://localhost:8761/eureka
+    http://172.0.0.3:8761/eureka
   fetchRegistry: true
 
 logging:

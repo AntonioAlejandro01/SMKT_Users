@@ -26,7 +26,6 @@ import com.antonioalejandro.smkt.users.pojo.UserResponse;
 import com.antonioalejandro.smkt.users.service.RoleService;
 import com.antonioalejandro.smkt.users.service.UserService;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/users")
 public class UserController {
