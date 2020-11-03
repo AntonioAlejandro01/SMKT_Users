@@ -8,20 +8,17 @@ public class UserRegistrationDTO {
 	private String username;
 	private String password;
 	private String email;
-	private String photo;
 	public UserRegistrationDTO() {
 		// TODO Auto-generated constructor stub
 	}
 	@JsonCreator
-	public UserRegistrationDTO(String name, String lastname, String username, String password, String email,
-			String photo) {
+	public UserRegistrationDTO(String name, String lastname, String username, String password, String email) {
 		super();
 		this.name = name;
 		this.lastname = lastname;
 		this.username = username;
 		this.password = password;
 		this.email = email;
-		this.photo = photo;
 	}
 	public String getName() {
 		return name;
@@ -52,12 +49,6 @@ public class UserRegistrationDTO {
 	}
 	public void setEmail(String email) {
 		this.email = email;
-	}
-	public String getPhoto() {
-		return photo;
-	}
-	public void setPhoto(String photo) {
-		this.photo = photo;
 	}
 	
 	

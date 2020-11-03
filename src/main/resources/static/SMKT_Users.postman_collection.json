@@ -1,0 +1,287 @@
+{
+	"info": {
+		"_postman_id": "d81fdef6-8c87-4f3f-86c1-e1b87237ada5",
+		"name": "SMKT_Users",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "GET",
+					"item": [
+						{
+							"name": "All Users",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:4060/users/all",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4060",
+									"path": [
+										"users",
+										"all"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Search by username",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:4060/users/search/{{username}}",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4060",
+									"path": [
+										"users",
+										"search",
+										"{{username}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "User by email",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"{{email}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:4060/users/byEmail",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4060",
+									"path": [
+										"users",
+										"byEmail"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "User by Id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:4060/users/byId/{{id}}",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4060",
+									"path": [
+										"users",
+										"byId",
+										"{{id}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "POST",
+					"item": [
+						{
+							"name": "Create User",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"test\",\n    \"lastname\": \"test2\",\n    \"username\": \"test\",\n    \"password\": \"password\",\n    \"email\": {{$randomEmail}}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:4060/users/user",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4060",
+									"path": [
+										"users",
+										"user"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "PUT",
+					"item": [
+						{
+							"name": "Update User",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"test updated\",\n    \"lastname\": \"test2\",\n    \"username\": \"test\",\n    \"password\": \"password\",\n    \"email\": {{$randomEmail}}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:4060/users/user/{{idUpdate}}",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4060",
+									"path": [
+										"users",
+										"user",
+										"{{idUpdate}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "DELETE",
+					"item": [
+						{
+							"name": "Delete User",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:4060/users/{{idDelete}}",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4060",
+									"path": [
+										"users",
+										"{{idDelete}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Roles",
+			"item": [
+				{
+					"name": "GET",
+					"item": [
+						{
+							"name": "Roles",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:4060/users/roles/all",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4060",
+									"path": [
+										"users",
+										"roles",
+										"all"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Roles by id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:4060/users/roles/{{idRole}}",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4060",
+									"path": [
+										"users",
+										"roles",
+										"{{idRole}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "13331",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "smartkitchenapp",
+				"type": "string"
+			}
+		]
+	},
+	"protocolProfileBehavior": {}
+}
