@@ -88,7 +88,6 @@ public class UserService implements IUserService {
 			currentUser.setPassword(bCryptPasswordEncoder.encode(userRegistrationDTO.getPassword()));
 			currentUser.setName(userRegistrationDTO.getName());
 			currentUser.setLastname(userRegistrationDTO.getLastname());
-			currentUser.setPhoto(userRegistrationDTO.getPhoto());
 			currentUser.setRole(roleConverter.apply(roleService.getRoleById(repository.getIdRoleByUserId(id))));
 			
 			return new UserResponse(HttpStatus.OK, repository.save(currentUser));
@@ -121,7 +120,7 @@ public class UserService implements IUserService {
 		if (user.getPassword() == null) {
 			return null;
 		}
-		final User userX = repository.save(new User(user.getName(), user.getLastname(), user.getUsername(), user.getEmail(),bCryptPasswordEncoder.encode(user.getPassword()), user.getPhoto(), roleConverter.apply(roleService.getRoleById(DEFAULT_ROLE_ID))));
+		final User userX = repository.save(new User(user.getName(), user.getLastname(), user.getUsername(), user.getEmail(),bCryptPasswordEncoder.encode(user.getPassword()), roleConverter.apply(roleService.getRoleById(DEFAULT_ROLE_ID))));
 		final UserDTO userY = userConverter.convert(userX);
 		return userY;
 	}

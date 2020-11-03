@@ -32,16 +32,13 @@ public class User implements Serializable {
 	private String email;
 	@Column(nullable = false)
 	private String password;
-	@Column(nullable = false)
-	private String photo;
 	@ManyToOne(optional = false, fetch = FetchType.LAZY)
 	private Role role;
 
 	public User() {
 	}
 
-	public User(Long id, String name, String lastname, String username, String email, String password, String photo,
-			Role role) {
+	public User(Long id, String name, String lastname, String username, String email, String password, Role role) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -49,19 +46,16 @@ public class User implements Serializable {
 		this.username = username;
 		this.email = email;
 		this.password = password;
-		this.photo = photo;
 		this.role = role;
 	}
 
-	public User(String name, String lastname, String username, String email, String password, String photo,
-			Role role) {
+	public User(String name, String lastname, String username, String email, String password, Role role) {
 		super();
 		this.name = name;
 		this.lastname = lastname;
 		this.username = username;
 		this.email = email;
 		this.password = password;
-		this.photo = photo;
 		this.role = role;
 	}
 	public Long getId() {
@@ -110,14 +104,6 @@ public class User implements Serializable {
 
 	public void setPassword(final String password) {
 		this.password = password;
-	}
-
-	public String getPhoto() {
-		return photo;
-	}
-
-	public void setPhoto(final String photo) {
-		this.photo = photo;
 	}
 
 	public Role getRole() {

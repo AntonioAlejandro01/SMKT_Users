@@ -12,11 +12,11 @@ public class UserConverter implements GenericConverter<User, UserDTO>{
 	
 	@Override
 	public UserDTO apply(User arg0) {
-		return new UserDTO(arg0.getId(), arg0.getName(), arg0.getLastname(), arg0.getUsername(), arg0.getPassword(), arg0.getEmail(), arg0.getPhoto(),roleConverter.convert(arg0.getRole()));
+		return new UserDTO(arg0.getId(), arg0.getName(), arg0.getLastname(), arg0.getUsername(), arg0.getPassword(), arg0.getEmail(),roleConverter.convert(arg0.getRole()));
 	}
 	
 	public User apply(UserDTO arg0) {
-		return new User(arg0.getId(), arg0.getName(), arg0.getLastname(), arg0.getUsername(), arg0.getEmail(), arg0.getPassword(), arg0.getPhoto(),roleConverter.apply(arg0.getRole()));
+		return new User(arg0.getId(), arg0.getName(), arg0.getLastname(), arg0.getUsername(), arg0.getEmail(), arg0.getPassword(),roleConverter.apply(arg0.getRole()));
 	}
 
 }

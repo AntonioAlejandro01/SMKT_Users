@@ -10,11 +10,9 @@ public class UserDTO {
 	private String username;
 	private String password;
 	private String email;
-	private String photo;
 	private RoleDTO role;
 	@JsonCreator
-	public UserDTO(Long id, String name, String lastname, String username, String password, String email, String photo,
-			RoleDTO role) {
+	public UserDTO(Long id, String name, String lastname, String username, String password, String email, RoleDTO role) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -22,7 +20,6 @@ public class UserDTO {
 		this.username = username;
 		this.password = password;
 		this.email = email;
-		this.photo = photo;
 		this.role = role;
 	}
 	public Long getId() {
@@ -60,12 +57,6 @@ public class UserDTO {
 	}
 	public void setEmail(String email) {
 		this.email = email;
-	}
-	public String getPhoto() {
-		return photo;
-	}
-	public void setPhoto(String photo) {
-		this.photo = photo;
 	}
 	public RoleDTO getRole() {
 		return role;
