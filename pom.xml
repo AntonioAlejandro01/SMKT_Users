@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.antonioalejandro.smkt</groupId>
 	<artifactId>smkt-users</artifactId>
-	<version>0.0.1</version>
+	<version>1.0.0</version>
 	<name>smkt-users</name>
 	<description>Users server for SmartKitchen</description>
 
