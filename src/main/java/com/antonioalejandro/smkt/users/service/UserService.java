@@ -1,7 +1,5 @@
 package com.antonioalejandro.smkt.users.service;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -17,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.antonioalejandro.smkt.users.converter.RoleConverter;
 import com.antonioalejandro.smkt.users.converter.UserConverter;
 import com.antonioalejandro.smkt.users.dao.UserDao;
+import com.antonioalejandro.smkt.users.entity.Role;
 import com.antonioalejandro.smkt.users.entity.User;
 import com.antonioalejandro.smkt.users.pojo.UserDTO;
 import com.antonioalejandro.smkt.users.pojo.UserRegistrationDTO;
@@ -35,13 +34,14 @@ public class UserService implements IUserService {
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	private static final Logger log = Logger.getLogger(UserService.class.getName());
-	
-	private final Long DEFAULT_ROLE_ID = 2l;
+
+	private static final Long DEFAULTROLEID = 2l;
 
 	@Override
 	public List<UserDTO> getUsers() {
 		log.log(Level.INFO, "Call to getUsers");
-		return userConverter.convert(StreamSupport.stream(repository.findAll().spliterator(), false).collect(Collectors.toList()));
+		return userConverter
+				.convert(StreamSupport.stream(repository.findAll().spliterator(), false).collect(Collectors.toList()));
 	}
 
 	@Override
@@ -59,29 +59,29 @@ public class UserService implements IUserService {
 	@Transactional(readOnly = true)
 	public UserDTO getUserById(final long id) {
 		log.log(Level.INFO, "Call to getUserById");
-		return userConverter.convert(repository.findById(id).get());
+		Optional<User> optUser = repository.findById(id);
+		User user = optUser.isPresent() ? optUser.get() : null;
+		return userConverter.convert(user);
 	}
 
 	@Override
 	@Transactional
-	public UserResponse UpdateUser(final UserRegistrationDTO userRegistrationDTO, final Long id) {
+	public UserResponse updateUser(final UserRegistrationDTO userRegistrationDTO, final Long id) {
 		log.log(Level.INFO, "Call to UpdateUser");
 		final Optional<User> oUser = repository.findById(id);
-		if(oUser.isPresent()) {
+		if (oUser.isPresent()) {
 			final User currentUser = oUser.get();
-			if(!currentUser.getEmail().equals(userRegistrationDTO.getEmail())) {
+			if (!currentUser.getEmail().equals(userRegistrationDTO.getEmail())) {
 				if (repository.getUsersSameEmail(userRegistrationDTO.getEmail()) == 0) {// valid
 					currentUser.setEmail(userRegistrationDTO.getEmail());
-				}
-				else {
-					return new UserResponse(HttpStatus.BAD_REQUEST,"Email already exists");
+				} else {
+					return new UserResponse(HttpStatus.BAD_REQUEST, "Email already exists");
 				}
 			}
 			if (!currentUser.getUsername().equals(userRegistrationDTO.getUsername())) {
-				if(repository.getUsersSameUsername(userRegistrationDTO.getUsername()) == 0) { // valid
+				if (repository.getUsersSameUsername(userRegistrationDTO.getUsername()) == 0) { // valid
 					currentUser.setUsername(userRegistrationDTO.getUsername());
-				}
-				else {
+				} else {
 					return new UserResponse(HttpStatus.BAD_REQUEST, "Username already exists");
 				}
 			}
@@ -89,8 +89,8 @@ public class UserService implements IUserService {
 			currentUser.setName(userRegistrationDTO.getName());
 			currentUser.setLastname(userRegistrationDTO.getLastname());
 			currentUser.setRole(roleConverter.apply(roleService.getRoleById(repository.getIdRoleByUserId(id))));
-			
-			return new UserResponse(HttpStatus.OK, repository.save(currentUser));
+
+			return new UserResponse(HttpStatus.OK, "", repository.save(currentUser));
 		} else {
 			return new UserResponse(HttpStatus.I_AM_A_TEAPOT, "User " + id + "don't exists");
 		}
@@ -120,31 +120,21 @@ public class UserService implements IUserService {
 		if (user.getPassword() == null) {
 			return null;
 		}
-		final User userX = repository.save(new User(user.getName(), user.getLastname(), user.getUsername(), user.getEmail(),bCryptPasswordEncoder.encode(user.getPassword()), roleConverter.apply(roleService.getRoleById(DEFAULT_ROLE_ID))));
-		final UserDTO userY = userConverter.convert(userX);
-		return userY;
-	}
 
-	@Override
-	public boolean verifyUser(final String usernameOrEmail, final String password) {
-		final User user = repository.searchByUserNameOrEmail(usernameOrEmail);
-		final String passwordToCompare = getSHA256(password);
-		return passwordToCompare != null && passwordToCompare.equals(user.getPassword());
-	}
+		final Role role = roleConverter.apply(roleService.getRoleById(DEFAULTROLEID));
 
-	private String getSHA256(final String input) {
+		final User userToSave = new User();
 
-		String toReturn = null;
-		try {
-			final MessageDigest digest = MessageDigest.getInstance("SHA-256");
-			digest.reset();
-			digest.update(input.getBytes("utf8"));
-			toReturn = String.format("%064x", new BigInteger(1, digest.digest()));
-		} catch (final Exception e) {
-			e.printStackTrace();
-		}
+		userToSave.setName(user.getName());
+		userToSave.setLastname(user.getLastname());
+		userToSave.setUsername(user.getUsername());
+		userToSave.setEmail(user.getEmail());
+		userToSave.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+		userToSave.setRole(role);
 
-		return toReturn;
+		final User userX = repository.save(userToSave);
+
+		return userConverter.convert(userX);
 	}
 
 }

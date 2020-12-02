@@ -16,7 +16,7 @@ public interface GenericConverter<I, O> extends Function<I, O> {
 	}
 
 	default List<O> convert(final List<I> input) {
-		List<O> output = new ArrayList<O>();
+		List<O> output = new ArrayList<>();
 		if (input != null) {
 			output = input.stream().map(this::apply).collect(Collectors.toList());
 		}
