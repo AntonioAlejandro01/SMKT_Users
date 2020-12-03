@@ -1,10 +1,13 @@
 package com.antonioalejandro.smkt.users.pojo;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
 
-public @Data class RoleDTO {
+@Data
+public class RoleDTO {
 
 	/** id */
 	@JsonProperty("id")
@@ -13,5 +16,9 @@ public @Data class RoleDTO {
 	/** name */
 	@JsonProperty("name")
 	private String name;
+
+	/** scopes */
+	@JsonProperty("scopes")
+	private List<String> scopes;
 
 }

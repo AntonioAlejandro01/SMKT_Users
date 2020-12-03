@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,21 +23,21 @@ public class RoleController {
 
 	@Autowired
 	private IRoleService roleService;
-	
-	
+
 	@GetMapping("/all")
-	public ResponseEntity<List<RoleDTO>> getRoles() {
+	public ResponseEntity<List<RoleDTO>> getRoles(
+			@RequestHeader(name = "Authorization", required = true) final String token) {
 		log.info("Call roles/all");
 		return new ResponseEntity<>(roleService.getRoles(), HttpStatus.OK);
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<RoleDTO> getRoleById(@PathVariable("id") final long id) {
+	public ResponseEntity<RoleDTO> getRoleById(
+			@RequestHeader(name = "Authorization", required = true) final String token,
+			@PathVariable("id") final long id) {
 		log.info("Call roles/{}", id);
 		final RoleDTO role = roleService.getRoleById(id);
 		return role == null ? new ResponseEntity<>(HttpStatus.NO_CONTENT) : new ResponseEntity<>(role, HttpStatus.OK);
 	}
-	
-	
-	
+
 }

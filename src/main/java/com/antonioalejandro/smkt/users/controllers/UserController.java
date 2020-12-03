@@ -1,16 +1,12 @@
 package com.antonioalejandro.smkt.users.controllers;
 
-import java.net.URI;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,16 +17,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import com.antonioalejandro.smkt.users.pojo.TokenContent;
 import com.antonioalejandro.smkt.users.pojo.UserDTO;
 import com.antonioalejandro.smkt.users.pojo.UserRegistrationDTO;
 import com.antonioalejandro.smkt.users.pojo.UserResponse;
 import com.antonioalejandro.smkt.users.pojo.UserUpdateRequest;
 import com.antonioalejandro.smkt.users.service.UserService;
-import com.netflix.appinfo.InstanceInfo;
-import com.netflix.discovery.DiscoveryClient;
+//import com.netflix.discovery.DiscoveryClient;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,17 +35,14 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 
-	@Autowired
-	private DiscoveryClient discoveryClient;
+	// @Autowired
+	// private DiscoveryClient discoveryClient;
 
 	@Value("${oauth.user}")
 	private String appUser;
 
 	@Value("${oauth.secret}")
 	private String appSecret;
-	
-	
-	private final static String TOKENKEY = "Bearer ";
 
 	@GetMapping("/all")
 	public ResponseEntity<List<UserDTO>> getUsers(
@@ -140,24 +130,6 @@ public class UserController {
 
 		return userResponse.getUser() == null ? new ResponseEntity<>(userResponse.getStatus())
 				: new ResponseEntity<>(userResponse, userResponse.getStatus());
-	}
-
-	private TokenContent getDataToken(String token) {
-		if (token.contains(TOKENKEY)) {
-			token = token.replace(TOKENKEY, "");
-		}
-		InstanceInfo instance = discoveryClient.getNextServerFromEureka("SMKT-Oauth", false);
-
-		String basicAuthHeader = "basic " + Base64Utils.encodeToString((appUser + ":" + appSecret).getBytes());
-
-
-		WebClient webClient = WebClient.builder().baseUrl("http://" + instance.getIPAddr() + ":" + instance.getPort())
-				.defaultHeader(HttpHeaders.AUTHORIZATION, basicAuthHeader).build();
-
-		 return webClient.post().uri(URI.create("/oauth/check_token")).bodyValue("token="+token).acceptCharset(
-				Charset.forName("UTF-8")).retrieve().bodyToMono(TokenContent.class).block();
-		 
-
 	}
 
 }
