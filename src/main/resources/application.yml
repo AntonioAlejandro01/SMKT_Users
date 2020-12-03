@@ -25,7 +25,7 @@ server:
 eureka:
  instance:
   instance-id: 
-   ${spring.application.name}:${spring.application.instance_id:${random.value}}
+   ${spring.application.name}:${spring.application.instance_id:${server.port}}
  client:
   service-url:
    defaultZone: 
@@ -38,3 +38,14 @@ logging:
    hibernate:
     SQL:
      debug
+     
+     
+default:
+ params:
+  roles:
+  id:
+   2
+   
+oauth:
+ user: smkt-users
+ secret: smkt-users

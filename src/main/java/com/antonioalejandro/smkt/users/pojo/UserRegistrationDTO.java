@@ -1,28 +1,24 @@
 package com.antonioalejandro.smkt.users.pojo;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
 
 public @Data class UserRegistrationDTO {
-	
+
+	@JsonProperty("name")
 	private String name;
 
+	@JsonProperty("lastname")
 	private String lastname;
 
+	@JsonProperty("username")
 	private String username;
 
+	@JsonIgnore
 	private String password;
 
+	@JsonProperty("email")
 	private String email;
-
-	@JsonCreator
-	public UserRegistrationDTO(String name, String lastname, String username, String password, String email) {
-		super();
-		this.name = name;
-		this.lastname = lastname;
-		this.username = username;
-		this.password = password;
-		this.email = email;
-	}
 }

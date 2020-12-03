@@ -1,45 +1,28 @@
 package com.antonioalejandro.smkt.users.pojo;
 
-
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
 public @Data class UserDTO {
-	
+
+	@JsonProperty("id")
 	private Long id;
-	
+	@JsonProperty("name")
 	private String name;
-	
+	@JsonProperty("lastname")
 	private String lastname;
-	
+	@JsonProperty("username")
 	private String username;
-	
+
+	@JsonIgnore
 	private String password;
-	
+
+	@JsonProperty("email")
 	private String email;
-	
+
+	@JsonProperty("role")
 	private RoleDTO role;
 
-	@JsonCreator
-	public UserDTO(Long id, String name, String lastname, String username, String password, String email, RoleDTO role) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.lastname = lastname;
-		this.username = username;
-		this.password = password;
-		this.email = email;
-		this.role = role;
-	}
-
-	
-	
-	
-	
-	
-	
-	
 }

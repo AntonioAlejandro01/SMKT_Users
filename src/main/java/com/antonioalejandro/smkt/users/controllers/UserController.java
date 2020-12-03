@@ -1,104 +1,163 @@
 package com.antonioalejandro.smkt.users.controllers;
 
+import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.WebClient;
 
-import com.antonioalejandro.smkt.users.entity.User;
-import com.antonioalejandro.smkt.users.pojo.RoleDTO;
+import com.antonioalejandro.smkt.users.pojo.TokenContent;
 import com.antonioalejandro.smkt.users.pojo.UserDTO;
 import com.antonioalejandro.smkt.users.pojo.UserRegistrationDTO;
 import com.antonioalejandro.smkt.users.pojo.UserResponse;
-import com.antonioalejandro.smkt.users.service.RoleService;
+import com.antonioalejandro.smkt.users.pojo.UserUpdateRequest;
 import com.antonioalejandro.smkt.users.service.UserService;
+import com.netflix.appinfo.InstanceInfo;
+import com.netflix.discovery.DiscoveryClient;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
 	@Autowired
 	private UserService userService;
-	@Autowired
-	private RoleService roleService;
 
-	private static final Logger log = Logger.getLogger(UserController.class.getName());
+	@Autowired
+	private DiscoveryClient discoveryClient;
+
+	@Value("${oauth.user}")
+	private String appUser;
+
+	@Value("${oauth.secret}")
+	private String appSecret;
+	
+	
+	private final static String TOKENKEY = "Bearer ";
 
 	@GetMapping("/all")
-	public ResponseEntity<List<UserDTO>> getUsers() {
-		log.log(Level.INFO, "Call users/all");
-		return new ResponseEntity<>(userService.getUsers(), HttpStatus.OK);
+	public ResponseEntity<List<UserDTO>> getUsers(
+			@RequestHeader(name = "Authorization", required = true) final String token) {
+
+		log.info("Call users/all");
+
+		List<UserDTO> users = userService.getUsers();
+
+		return users.isEmpty() ? new ResponseEntity<>(HttpStatus.NO_CONTENT)
+				: new ResponseEntity<>(users, HttpStatus.OK);
 	}
 
-	@GetMapping("/search/{username}")
-	public ResponseEntity<UserDTO> searchUser(@PathVariable("username") final String username) {
-		log.log(Level.INFO, "Call users/search/ {}", username);
-		final Optional<UserDTO> user = userService.getUsers().stream()
-				.filter(userItem -> userItem.getUsername().equals(username)).findFirst();
+	@GetMapping("/search")
+	public ResponseEntity<UserDTO> searchUser(
+			@RequestHeader(name = "Authorization", required = true) final String token,
+			@RequestParam(name = "username", required = false) final String username,
+			@RequestParam(name = "email", required = false) final String email,
+			@RequestParam(name = "id", required = false) final Long id) {
+
+		Optional<UserDTO> user;
+
+		if (username != null) {
+
+			log.info("Call users/search?username={}", username);
+
+			user = userService.getUsers().stream().filter(userItem -> userItem.getUsername().equals(username))
+					.findFirst();
+
+		} else if (email != null) {
+			log.info("Call users/search?email={}", email);
+
+			user = userService.getUsers().stream().filter(userItem -> userItem.getEmail().equals(email)).findFirst();
+
+		} else if (id != null) {
+
+			log.info("Call users/search?id={}", id);
+
+			user = userService.getUsers().stream().filter(userItem -> userItem.getId().toString().equals(id.toString()))
+					.findFirst();
+
+		} else {
+
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+
 		return user.isPresent() ? new ResponseEntity<>(user.get(), HttpStatus.OK)
 				: new ResponseEntity<>(HttpStatus.NO_CONTENT);
-	}
 
-	@GetMapping("/byEmail")
-	public ResponseEntity<List<UserDTO>> getUsersByEmail(@RequestBody final String email) {
-		log.log(Level.INFO, "Call users/by");
-		return new ResponseEntity<>(userService.getUsersByEmail(email), HttpStatus.OK);
-	}
-
-	@GetMapping("/byId/{id}")
-	public ResponseEntity<UserDTO> getUserById(@PathVariable("id") final long id) {
-		log.log(Level.INFO, "Call users/byId/{}", id);
-		return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
 	}
 
 	@PostMapping("/user")
-	public ResponseEntity<UserDTO> create(final @RequestBody UserRegistrationDTO user) {
-		log.log(Level.INFO, "Call users/create");
+	public ResponseEntity<UserDTO> create(@RequestHeader(name = "Authorization", required = true) final String token,
+			final @RequestBody UserRegistrationDTO user) {
+
+		log.info("Call users/create");
+
+		log.debug("User -> {}", user.toString());
+
 		final UserDTO newUser = userService.create(user);
 
-		return new ResponseEntity<>(newUser, HttpStatus.OK);
+		return newUser == null ? new ResponseEntity<>(HttpStatus.BAD_REQUEST)
+				: new ResponseEntity<>(newUser, HttpStatus.CREATED);
 	}
 
 	@DeleteMapping("/user/{id}")
-	public ResponseEntity<String> deleteUser(@PathVariable("id") final Long id) {
-		log.log(Level.INFO, "Call users/delete/{}", id);
+	public ResponseEntity<UserResponse> deleteUser(
+			@RequestHeader(name = "Authorization", required = true) final String token, @PathVariable final Long id) {
+
+		log.info("Call users/delete/{}", id);
+
 		final UserResponse userResponse = userService.delete(id);
-		return new ResponseEntity<>(userResponse.getMessage(), userResponse.getStatus());
+
+		return new ResponseEntity<>(userResponse, userResponse.getStatus());
 	}
 
 	@PutMapping("/user/{id}")
-	public ResponseEntity<User> putUserById(@RequestBody final UserRegistrationDTO userRegistrationDTO,
-			@PathVariable("id") final Long id) {
-		log.log(Level.INFO, "Call users/id");
-		final UserResponse userResponse = userService.updateUser(userRegistrationDTO, id);
+	public ResponseEntity<UserResponse> putUserById(
+			@RequestHeader(name = "Authorization", required = true) final String token,
+			@RequestBody final UserUpdateRequest req, @PathVariable("id") final Long id) {
+
+		log.info("Call users/id");
+
+		final UserResponse userResponse = userService.updateUser(req, id);
+
 		return userResponse.getUser() == null ? new ResponseEntity<>(userResponse.getStatus())
-				: new ResponseEntity<>(userResponse.getUser(), userResponse.getStatus());
+				: new ResponseEntity<>(userResponse, userResponse.getStatus());
 	}
 
-	@GetMapping("roles/all")
-	public ResponseEntity<List<RoleDTO>> getRoles() {
-		log.log(Level.INFO, "Call users/roles/all");
-		return new ResponseEntity<>(roleService.getRoles(), HttpStatus.OK);
-	}
+	private TokenContent getDataToken(String token) {
+		if (token.contains(TOKENKEY)) {
+			token = token.replace(TOKENKEY, "");
+		}
+		InstanceInfo instance = discoveryClient.getNextServerFromEureka("SMKT-Oauth", false);
 
-	@GetMapping("roles/{id}")
-	public ResponseEntity<RoleDTO> getRoleById(@PathVariable("id") final long id) {
-		log.log(Level.INFO, "Call users/roles/{}", id);
-		final RoleDTO role = roleService.getRoleById(id);
-		return role == null ? new ResponseEntity<>(HttpStatus.NO_CONTENT)
-				: new ResponseEntity<>(role, HttpStatus.OK);
+		String basicAuthHeader = "basic " + Base64Utils.encodeToString((appUser + ":" + appSecret).getBytes());
+
+
+		WebClient webClient = WebClient.builder().baseUrl("http://" + instance.getIPAddr() + ":" + instance.getPort())
+				.defaultHeader(HttpHeaders.AUTHORIZATION, basicAuthHeader).build();
+
+		 return webClient.post().uri(URI.create("/oauth/check_token")).bodyValue("token="+token).acceptCharset(
+				Charset.forName("UTF-8")).retrieve().bodyToMono(TokenContent.class).block();
+		 
+
 	}
 
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import com.antonioalejandro.smkt.users.pojo.UserDTO;
 import com.antonioalejandro.smkt.users.pojo.UserRegistrationDTO;
 import com.antonioalejandro.smkt.users.pojo.UserResponse;
+import com.antonioalejandro.smkt.users.pojo.UserUpdateRequest;
 
 public interface IUserService {
 
@@ -14,7 +15,7 @@ public interface IUserService {
 
 	public UserDTO getUserById(long id);
 
-	public UserResponse updateUser(UserRegistrationDTO registrationDTO, Long id);
+	public UserResponse updateUser(UserUpdateRequest userUpdateRequest, Long id);
 
 	public UserDTO create(UserRegistrationDTO user);
 
