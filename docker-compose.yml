@@ -1,0 +1,47 @@
+version: '3.1'
+
+services:
+  mysqlDB: 
+    image: mysql:latest
+    container_name: user-mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'SMKT_USERS'
+      MYSQL_USER: 'smkt'
+      MYSQL_PASSWORD: 'Smkt@123'
+      MYSQL_ROOT_PASSWORD: 'password'
+    networks: 
+      userRed:
+        ipv4_address: 172.0.0.2
+  users:
+    build:
+      context: ./
+      dockerfile: Dockerfile-compose2
+    container_name: user-users
+    depends_on:
+      - mysqlDB
+    expose:
+      - 4500
+    ports:
+      - "4500:4500"
+    networks: 
+      userRed:
+        ipv4_address: 172.0.0.4
+  eureka:
+    image: antonioalejandro01/smkt-eureka:1
+    container_name: smkt-eureka
+    expose:
+      - "8761"
+    ports: 
+      - "8761:8761"
+    networks:
+      userRed:
+        ipv4_address: 172.0.0.3
+
+networks:
+  userRed:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.0.0.0/24
+    
