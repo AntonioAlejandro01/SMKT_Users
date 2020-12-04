@@ -11,11 +11,14 @@ public class ScopesService implements IScopesService {
 
 	@Autowired
 	private IRoleService roleService;
-	
+
 	@Override
 	public List<String> getScopesForRole(Long roleId) {
-		
-		List<Scopes> scopes = roleService.getRoleById(roleId).get
+		List<String> scopes = roleService.getRoleById(roleId).getScopes();
+		log.debug("Roles for {} : {}", roleId,
+				scopes.stream().reduce((acum, scope) -> acum + " " + scope).orElseGet(() -> "error scopes"));
+		return scopes;
+
 	}
 
 }
