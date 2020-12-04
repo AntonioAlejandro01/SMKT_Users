@@ -14,7 +14,7 @@ public class ScopesService implements IScopesService {
 
 	@Override
 	public List<String> getScopesForRole(Long roleId) {
-		List<String> scopes = roleService.getRoleById(roleId).getScopes();
+		List<String> scopes = roleService.getScopesByIdRole(roleId);
 		log.debug("Roles for {} : {}", roleId,
 				scopes.stream().reduce((acum, scope) -> acum + " " + scope).orElseGet(() -> "error scopes"));
 		return scopes;

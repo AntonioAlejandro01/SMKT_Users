@@ -1,18 +1,24 @@
 package com.antonioalejandro.smkt.users.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
 
-public @Data class UserDTO {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Data
+public class UserDTO {
 
 	@JsonProperty("id")
 	private Long id;
+	
 	@JsonProperty("name")
 	private String name;
-	@JsonProperty("lastname")
+	
+	@JsonProperty(value = "lastname", required = false)
 	private String lastname;
+	
 	@JsonProperty("username")
 	private String username;
 
@@ -23,6 +29,6 @@ public @Data class UserDTO {
 	private String email;
 
 	@JsonProperty("role")
-	private RoleDTO role;
+	private String role;
 
 }

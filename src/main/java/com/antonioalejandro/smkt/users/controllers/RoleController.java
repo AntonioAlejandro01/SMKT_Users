@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.antonioalejandro.smkt.users.pojo.BadRequestResponse;
 import com.antonioalejandro.smkt.users.pojo.RoleDTO;
 import com.antonioalejandro.smkt.users.service.IRoleService;
 
@@ -31,13 +32,27 @@ public class RoleController {
 		return new ResponseEntity<>(roleService.getRoles(), HttpStatus.OK);
 	}
 
-	@GetMapping("/{id}")
-	public ResponseEntity<RoleDTO> getRoleById(
+	@GetMapping("/{name}")
+	public ResponseEntity<?> getRoleById(
 			@RequestHeader(name = "Authorization", required = true) final String token,
-			@PathVariable("id") final long id) {
-		log.info("Call roles/{}", id);
-		final RoleDTO role = roleService.getRoleById(id);
+			@PathVariable("name") final String name) {
+		log.info("Call roles/{}", name);
+		
+		String ms = validateName(name);
+		if (!ms.isEmpty()) {
+			return new ResponseEntity<>(new BadRequestResponse(ms, HttpStatus.BAD_REQUEST.toString()),
+					HttpStatus.BAD_REQUEST);
+		}
+		
+		final RoleDTO role = roleService.getRoleByName(name);
 		return role == null ? new ResponseEntity<>(HttpStatus.NO_CONTENT) : new ResponseEntity<>(role, HttpStatus.OK);
+	}
+	
+	private String validateName(String name) {
+		if (name.isBlank()) {
+			return "Name is mandatory. ";
+		}
+		return "";
 	}
 
 }

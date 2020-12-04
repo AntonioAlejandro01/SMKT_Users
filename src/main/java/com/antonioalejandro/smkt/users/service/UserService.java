@@ -17,7 +17,7 @@ import com.antonioalejandro.smkt.users.dao.UserDao;
 import com.antonioalejandro.smkt.users.entity.Role;
 import com.antonioalejandro.smkt.users.entity.User;
 import com.antonioalejandro.smkt.users.pojo.UserDTO;
-import com.antonioalejandro.smkt.users.pojo.UserRegistrationDTO;
+import com.antonioalejandro.smkt.users.pojo.UserRegistrationRequest;
 import com.antonioalejandro.smkt.users.pojo.UserResponse;
 import com.antonioalejandro.smkt.users.pojo.UserUpdateRequest;
 
@@ -47,19 +47,13 @@ public class UserService implements IUserService {
 	}
 
 	@Override
-	public List<UserDTO> getUsersByEmail(final String email) {
+	public UserDTO getUserByEmailOrUsername(final String value, final boolean isEmail) {
 
-		log.debug("Call to getUsersByEmail");
+		log.debug("Call to getUserByEmailOrUsername. Value:{}, IsEmail:{}", value, isEmail);
 
-		final String searchValue = email.toLowerCase();
+		final User user = isEmail ? repository.findByEmail(value) : repository.findByUsername(value);
 
-		final List<User> list = StreamSupport.stream(repository.findAll().spliterator(), false)
-				.collect(Collectors.toList());
-
-		list.removeIf(x -> !x.getEmail().contains(searchValue)
-				&& !(x.getName().toLowerCase() + " " + x.getLastname().toLowerCase()).contains(searchValue));
-
-		return userConverter.convert(list);
+		return userConverter.convert(user);
 	}
 
 	@Override
@@ -100,7 +94,7 @@ public class UserService implements IUserService {
 			currentUser.setLastname(userUpdateRequest.getLastname());
 			currentUser.setRole(roleConverter.apply(roleService.getRoleById(repository.getIdRoleByUserId(id))));
 
-			return new UserResponse(HttpStatus.CREATED, "Updated", repository.save(currentUser));
+			return new UserResponse(HttpStatus.CREATED, "Updated", userConverter.convert(repository.save(currentUser)));
 		} else {
 			return new UserResponse(HttpStatus.I_AM_A_TEAPOT, "User " + id + "don't exists");
 		}
@@ -119,28 +113,32 @@ public class UserService implements IUserService {
 
 	@Override
 	@Transactional
-	public UserDTO create(final UserRegistrationDTO user) {
+	public UserDTO create(final UserRegistrationRequest userRequest) {
 		log.debug("Call to Save");
-		
-		if (repository.getUsersSameEmail(user.getEmail()) == 1
-				|| repository.getUsersSameUsername(user.getUsername()) == 1 || user.getPassword() == null) {
-			return null;
-		}
 
 		final Role role = roleConverter.apply(roleService.getRoleById(defaultRoleId));
 
-		final User userToSave = new User();
+		final User newUser = new User();
 
-		userToSave.setName(user.getName());
-		userToSave.setLastname(user.getLastname());
-		userToSave.setUsername(user.getUsername());
-		userToSave.setEmail(user.getEmail());
-		userToSave.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-		userToSave.setRole(role);
+		newUser.setName(userRequest.getName());
+		newUser.setUsername(userRequest.getUsername());
+		newUser.setEmail(userRequest.getEmail());
+		newUser.setPassword(bCryptPasswordEncoder.encode(userRequest.getPassword()));
+		newUser.setRole(role);
 
-		final User userX = repository.save(userToSave);
+		if (userRequest.getLastname() != null) {
+			newUser.setLastname(userRequest.getLastname());
+		}
 
-		return userConverter.convert(userX);
+		return userConverter.convert(repository.save(newUser));
+	}
+
+	public boolean existsEmail(String email) {
+		return repository.getUsersSameEmail(email) == 1L;
+	}
+
+	public boolean existsUsername(String username) {
+		return repository.getUsersSameUsername(username) == 1L;
 	}
 
 }

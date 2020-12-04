@@ -2,7 +2,7 @@ package com.antonioalejandro.smkt.users.pojo;
 
 import org.springframework.http.HttpStatus;
 
-import com.antonioalejandro.smkt.users.entity.User;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -11,10 +11,12 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @RequiredArgsConstructor
-public @Data class UserResponse {
+public class UserResponse {
 	
 	@JsonProperty("status")
 	@NonNull
@@ -24,7 +26,8 @@ public @Data class UserResponse {
 	@NonNull
 	private String message;
 	
-	private User user;
+	@JsonProperty
+	private UserDTO user;
 	
 
 }

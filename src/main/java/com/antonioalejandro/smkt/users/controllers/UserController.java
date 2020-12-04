@@ -1,7 +1,8 @@
 package com.antonioalejandro.smkt.users.controllers;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,12 +19,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.antonioalejandro.smkt.users.pojo.BadRequestResponse;
 import com.antonioalejandro.smkt.users.pojo.UserDTO;
-import com.antonioalejandro.smkt.users.pojo.UserRegistrationDTO;
+import com.antonioalejandro.smkt.users.pojo.UserRegistrationRequest;
 import com.antonioalejandro.smkt.users.pojo.UserResponse;
 import com.antonioalejandro.smkt.users.pojo.UserUpdateRequest;
 import com.antonioalejandro.smkt.users.service.UserService;
-//import com.netflix.discovery.DiscoveryClient;
+import com.antonioalejandro.smkt.users.utils.TokenUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,23 +34,32 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/users")
 public class UserController {
 
+	@Value("${scopes.read}")
+	private String scopeRead;
+	@Value("${scopes.write}")
+	private String scopeWrite;
+	@Value("${scopes.delete}")
+	private String scopeDelete;
+
+	private static final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern
+			.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+
+	private static final Pattern VALID_PASSWORD_REGEX = Pattern
+			.compile("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{8,20}$");
+
 	@Autowired
 	private UserService userService;
 
-	// @Autowired
-	// private DiscoveryClient discoveryClient;
 
-	@Value("${oauth.user}")
-	private String appUser;
 
-	@Value("${oauth.secret}")
-	private String appSecret;
-
-	@GetMapping("/all")
+	@GetMapping()
 	public ResponseEntity<List<UserDTO>> getUsers(
 			@RequestHeader(name = "Authorization", required = true) final String token) {
 
 		log.info("Call users/all");
+		if (!TokenUtils.isAuthorized(token, scopeRead)) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
 
 		List<UserDTO> users = userService.getUsers();
 
@@ -57,79 +68,204 @@ public class UserController {
 	}
 
 	@GetMapping("/search")
-	public ResponseEntity<UserDTO> searchUser(
-			@RequestHeader(name = "Authorization", required = true) final String token,
+	public ResponseEntity<?> searchUser(@RequestHeader(name = "Authorization", required = true) final String token,
 			@RequestParam(name = "username", required = false) final String username,
 			@RequestParam(name = "email", required = false) final String email,
 			@RequestParam(name = "id", required = false) final Long id) {
 
-		Optional<UserDTO> user;
+		if (!TokenUtils.isAuthorized(token, scopeRead)) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
 
+		UserDTO user;
+		String ms;
 		if (username != null) {
 
 			log.info("Call users/search?username={}", username);
 
-			user = userService.getUsers().stream().filter(userItem -> userItem.getUsername().equals(username))
-					.findFirst();
+			ms = validateUsername(username, false);
+			if (!ms.isEmpty()) {
+				return new ResponseEntity<>(new BadRequestResponse(ms, HttpStatus.BAD_REQUEST.toString()),
+						HttpStatus.BAD_REQUEST);
+			}
+			user = userService.getUserByEmailOrUsername(username, false);
 
 		} else if (email != null) {
 			log.info("Call users/search?email={}", email);
-
-			user = userService.getUsers().stream().filter(userItem -> userItem.getEmail().equals(email)).findFirst();
+			ms = validateEmail(email, false);
+			if (!ms.isEmpty()) {
+				return new ResponseEntity<>(new BadRequestResponse(ms, HttpStatus.BAD_REQUEST.toString()),
+						HttpStatus.BAD_REQUEST);
+			}
+			user = userService.getUserByEmailOrUsername(email, true);
 
 		} else if (id != null) {
 
 			log.info("Call users/search?id={}", id);
-
-			user = userService.getUsers().stream().filter(userItem -> userItem.getId().toString().equals(id.toString()))
-					.findFirst();
-
+			ms = validateId(id);
+			if (!ms.isEmpty()) {
+				return new ResponseEntity<>(new BadRequestResponse(ms, HttpStatus.BAD_REQUEST.toString()),
+						HttpStatus.BAD_REQUEST);
+			}
+			user = userService.getUserById(id);
 		} else {
 
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(
+					new BadRequestResponse("One of these params (username, email or id) can't be null",
+							HttpStatus.BAD_REQUEST.toString()),
+					HttpStatus.BAD_REQUEST);
 		}
 
-		return user.isPresent() ? new ResponseEntity<>(user.get(), HttpStatus.OK)
-				: new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		return user != null ? new ResponseEntity<>(user, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
 	}
 
-	@PostMapping("/user")
-	public ResponseEntity<UserDTO> create(@RequestHeader(name = "Authorization", required = true) final String token,
-			final @RequestBody UserRegistrationDTO user) {
+	@PostMapping()
+	public ResponseEntity<?> create(@RequestHeader(name = "Authorization", required = true) final String token,
+			final @RequestBody UserRegistrationRequest req) {
 
 		log.info("Call users/create");
 
-		log.debug("User -> {}", user.toString());
+		if (!TokenUtils.isAuthorized(token, scopeWrite)) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
 
-		final UserDTO newUser = userService.create(user);
+		log.debug("User -> {}", req.toString());
 
-		return newUser == null ? new ResponseEntity<>(HttpStatus.BAD_REQUEST)
-				: new ResponseEntity<>(newUser, HttpStatus.CREATED);
+		StringBuilder badReqMs = new StringBuilder();
+
+		badReqMs.append(validateEmail(req.getEmail(), true)).append(validateName(req.getName()))
+				.append(validateUsername(req.getUsername(), true)).append(validatePassword(req.getPassword()))
+				.append(validateLastname(req.getLastname()));
+
+		if (!badReqMs.isEmpty()) {
+			return new ResponseEntity<>(new BadRequestResponse(badReqMs.toString(), HttpStatus.BAD_REQUEST.toString()),
+					HttpStatus.BAD_REQUEST);
+		}
+
+		return new ResponseEntity<>(userService.create(req), HttpStatus.CREATED);
 	}
 
-	@DeleteMapping("/user/{id}")
-	public ResponseEntity<UserResponse> deleteUser(
-			@RequestHeader(name = "Authorization", required = true) final String token, @PathVariable final Long id) {
+	@DeleteMapping("/{id}")
+	public ResponseEntity<?> deleteUser(@RequestHeader(name = "Authorization", required = true) final String token,
+			@PathVariable final Long id) {
 
 		log.info("Call users/delete/{}", id);
 
+		if (!TokenUtils.isAuthorized(token, scopeDelete)) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+		String ms = validateId(id);
+		if (!ms.isEmpty()) {
+			return new ResponseEntity<>(new BadRequestResponse(ms, HttpStatus.BAD_REQUEST.toString()),
+					HttpStatus.BAD_REQUEST);
+		}
 		final UserResponse userResponse = userService.delete(id);
 
 		return new ResponseEntity<>(userResponse, userResponse.getStatus());
 	}
 
-	@PutMapping("/user/{id}")
-	public ResponseEntity<UserResponse> putUserById(
-			@RequestHeader(name = "Authorization", required = true) final String token,
+	@PutMapping("/{id}")
+	public ResponseEntity<?> putUserById(@RequestHeader(name = "Authorization", required = true) final String token,
 			@RequestBody final UserUpdateRequest req, @PathVariable("id") final Long id) {
 
 		log.info("Call users/id");
+
+		if (!TokenUtils.isAuthorized(token, scopeWrite)) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+
+		String ms = validateId(id);
+		if (!ms.isEmpty()) {
+			return new ResponseEntity<>(new BadRequestResponse(ms, HttpStatus.BAD_REQUEST.toString()),
+					HttpStatus.BAD_REQUEST);
+		}
 
 		final UserResponse userResponse = userService.updateUser(req, id);
 
 		return userResponse.getUser() == null ? new ResponseEntity<>(userResponse.getStatus())
 				: new ResponseEntity<>(userResponse, userResponse.getStatus());
+	}
+
+	private String validateEmail(String email, boolean search) {
+		if (email.isBlank()) {
+			return "Email is mandatory. ";
+		} else {
+			if (!validateEmailRegex(email)) {
+				return "Email is not valid. ";
+			} else {
+				if (search && userService.existsEmail(email)) {
+					return "Email exists. ";
+				}
+			}
+		}
+		return "";
+
+	}
+
+	private boolean validateEmailRegex(String email) {
+		Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(email);
+		return matcher.find();
+	}
+
+	private String validateName(String name) {
+		if (name.isBlank()) {
+			return "Name is mandatory. ";
+		} else {
+			if (name.length() < 3) {
+				return "Name minimun length is 3. ";
+			}
+		}
+		return "";
+	}
+
+	private String validateUsername(String username, boolean search) {
+
+		if (username.isBlank()) {
+			return "username is mandatory. ";
+		} else {
+			if (username.length() < 5) {
+				return "Username minimun length is 5. ";
+			} else {
+				if (search && userService.existsUsername(username)) {
+					return "Username exists. ";
+				}
+			}
+		}
+
+		return "";
+	}
+
+	private String validatePassword(String password) {
+		if (password.isBlank()) {
+			return "Password is mandatory. ";
+		} else {
+			if (!validatePasswordRegex(password)) {
+				return "Password is not valid. " + "The password minimun requirements are: "
+						+ "one number, one upper case ," + " one lower case,"
+						+ " one special character ( !, @, #, (, &, ) ) and length 8~20. ";
+			}
+		}
+		return "";
+	}
+
+	private boolean validatePasswordRegex(String password) {
+		Matcher matcher = VALID_PASSWORD_REGEX.matcher(password);
+		return matcher.find();
+	}
+
+	private String validateLastname(String lastname) {
+		if (!lastname.isBlank() && lastname.length() < 3) {
+			return "Lastname minimun length is 3. ";
+		}
+		return "";
+	}
+
+	private String validateId(Long id) {
+		if (id < 1) {
+			return "id can't be less or equal than zero. ";
+		}
+		return "";
 	}
 
 }

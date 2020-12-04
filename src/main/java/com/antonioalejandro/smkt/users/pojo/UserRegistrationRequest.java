@@ -5,23 +5,22 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class UserUpdateRequest {
+public class UserRegistrationRequest {
 	
 	@JsonProperty
 	private String name;
 	
-	@JsonProperty
+	@JsonProperty(value="lastname",required = false)
 	private String lastname;
 	
+	@JsonProperty
+	private String email;
+
 	@JsonProperty
 	private String username;
 	
 	@JsonProperty
-	private String email;
-	
-	@JsonProperty
 	private String password;
 	
-	@JsonProperty
-	private String role;
+	
 }
