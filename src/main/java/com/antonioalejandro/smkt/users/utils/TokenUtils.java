@@ -28,14 +28,14 @@ public class TokenUtils {
 	 * @param token
 	 * @return TokenContent
 	 */
-	public static TokenContent getDataToken(String token, String address, String port) {
+	public static TokenContent getDataToken(String token) {
 		if (token.contains(TOKEN_KEY)) {
 			token = token.replace(TOKEN_KEY, "");
 		}
 
 		String basicAuthHeader = "basic " + Base64Utils.encodeToString((appUser + ":" + appSecret).getBytes());
 
-		WebClient webClient = WebClient.builder().baseUrl("http://" + address + ":" + port)
+		WebClient webClient = WebClient.builder().baseUrl("http://" + "" + ":" + 3333)
 				.defaultHeader(HttpHeaders.AUTHORIZATION, basicAuthHeader).build();
 
 		return webClient.post().uri(URI.create("/oauth/check_token")).bodyValue("token=" + token)

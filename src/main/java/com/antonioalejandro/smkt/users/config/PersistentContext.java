@@ -7,6 +7,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.antonioalejandro.smkt.users.converter.RoleConverter;
 import com.antonioalejandro.smkt.users.converter.UserConverter;
 import com.antonioalejandro.smkt.users.service.RoleService;
+import com.antonioalejandro.smkt.users.service.ScopesService;
 import com.antonioalejandro.smkt.users.service.UserService;
 
 @Configuration
@@ -34,6 +35,11 @@ public class PersistentContext {
 	@Bean
 	public BCryptPasswordEncoder getEncoder() {
 		return new BCryptPasswordEncoder();
+	}
+	
+	@Bean
+	public ScopesService getScopesService() {
+		return new ScopesService();
 	}
 
 }

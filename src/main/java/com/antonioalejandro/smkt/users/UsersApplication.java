@@ -8,7 +8,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@EnableDiscoveryClient
 @SpringBootApplication
 public class UsersApplication {
 

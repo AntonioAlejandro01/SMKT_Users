@@ -36,10 +36,18 @@ public class UserController {
 
 	@Value("${scopes.read}")
 	private String scopeRead;
+
 	@Value("${scopes.write}")
 	private String scopeWrite;
+
 	@Value("${scopes.delete}")
 	private String scopeDelete;
+
+	@Value("${scopes.update}")
+	private String scopeUpdate;
+
+	@Value("${scopes.update-self}")
+	private String scopeUpdateSelf;
 
 	private static final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern
 			.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
@@ -49,8 +57,6 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
-
-
 
 	@GetMapping()
 	public ResponseEntity<List<UserDTO>> getUsers(
@@ -138,7 +144,7 @@ public class UserController {
 				.append(validateUsername(req.getUsername(), true)).append(validatePassword(req.getPassword()))
 				.append(validateLastname(req.getLastname()));
 
-		if (!badReqMs.isEmpty()) {
+		if (!badReqMs.toString().isEmpty()) {
 			return new ResponseEntity<>(new BadRequestResponse(badReqMs.toString(), HttpStatus.BAD_REQUEST.toString()),
 					HttpStatus.BAD_REQUEST);
 		}
@@ -171,7 +177,8 @@ public class UserController {
 
 		log.info("Call users/id");
 
-		if (!TokenUtils.isAuthorized(token, scopeWrite)) {
+		if (!TokenUtils.isAuthorized(token, scopeUpdate) || (TokenUtils.isAuthorized(token, scopeUpdateSelf)
+				&& !TokenUtils.getDataToken(token).getId().toString().equals(id.toString()))) {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		}
 

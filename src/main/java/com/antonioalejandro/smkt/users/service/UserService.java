@@ -37,7 +37,7 @@ public class UserService implements IUserService {
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	@Value("${default.params.roles.id}")
-	private static Long defaultRoleId;
+	private Long defaultRoleId;
 
 	@Override
 	public List<UserDTO> getUsers() {

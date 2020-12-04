@@ -4,11 +4,11 @@ spring:
    smkt-users
  datasource:
   url:
-   jdbc:mysql://172.0.0.20:3306/SMKT_USERS?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Madrid
+   jdbc:mysql://localhost:3306/SMKT_USERS?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Madrid
   username:
-   smkt
+   root
   password:
-   Smkt@123
+   root
   driver-class-name: 
      com.mysql.cj.jdbc.Driver     
  jpa:
@@ -16,7 +16,7 @@ spring:
      org.hibernate.dialect.MySQL8Dialect  
     hibernate:
      ddl-auto:
-      create
+      create-drop
        
 server:
  port: 
@@ -43,9 +43,15 @@ logging:
 default:
  params:
   roles:
-  id:
-   2
+   id: 2
    
 oauth:
  user: smkt-users
  secret: smkt-users
+ 
+scopes:
+ read: users.read
+ write: users.write
+ delete: users.delete
+ update: users.update
+ update-self: users.update-self

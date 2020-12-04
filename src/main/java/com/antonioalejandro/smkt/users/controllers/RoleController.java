@@ -25,7 +25,7 @@ public class RoleController {
 	@Autowired
 	private IRoleService roleService;
 
-	@GetMapping("/all")
+	@GetMapping()
 	public ResponseEntity<List<RoleDTO>> getRoles(
 			@RequestHeader(name = "Authorization", required = true) final String token) {
 		log.info("Call roles/all");
