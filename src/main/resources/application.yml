@@ -49,6 +49,9 @@ oauth:
  user: smkt-users
  secret: smkt-users
  
+superadmin:
+ id: 1
+ 
 scopes:
  read: users.read
  read-min: users.read-min

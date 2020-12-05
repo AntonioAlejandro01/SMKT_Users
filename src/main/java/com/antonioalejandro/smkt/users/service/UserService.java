@@ -16,6 +16,7 @@ import com.antonioalejandro.smkt.users.converter.UserConverter;
 import com.antonioalejandro.smkt.users.dao.UserDao;
 import com.antonioalejandro.smkt.users.entity.Role;
 import com.antonioalejandro.smkt.users.entity.User;
+import com.antonioalejandro.smkt.users.pojo.RoleDTO;
 import com.antonioalejandro.smkt.users.pojo.UserDTO;
 import com.antonioalejandro.smkt.users.pojo.UserRegistrationRequest;
 import com.antonioalejandro.smkt.users.pojo.UserResponse;
@@ -38,6 +39,9 @@ public class UserService implements IUserService {
 
 	@Value("${default.params.roles.id}")
 	private Long defaultRoleId;
+
+	@Value("${superadmin.id}")
+	private Long superAdminId;
 
 	@Override
 	public List<UserDTO> getUsers() {
@@ -76,33 +80,45 @@ public class UserService implements IUserService {
 		if (oUser.isPresent()) {
 			final User currentUser = oUser.get();
 			if (!currentUser.getEmail().equals(userUpdateRequest.getEmail())) {
-				if (repository.getUsersSameEmail(userUpdateRequest.getEmail()) == 0) {// valid
-					currentUser.setEmail(userUpdateRequest.getEmail());
+				if (existsEmail(userUpdateRequest.getEmail())) {
+					return new UserResponse(HttpStatus.BAD_REQUEST, "The email exists. ");
 				} else {
-					return new UserResponse(HttpStatus.BAD_REQUEST, "Email already exists");
+					currentUser.setEmail(userUpdateRequest.getEmail());
 				}
 			}
 			if (!currentUser.getUsername().equals(userUpdateRequest.getUsername())) {
-				if (repository.getUsersSameUsername(userUpdateRequest.getUsername()) == 0) { // valid
-					currentUser.setUsername(userUpdateRequest.getUsername());
+				if (existsUsername(userUpdateRequest.getUsername())) {
+					return new UserResponse(HttpStatus.BAD_REQUEST, "The username exists. ");
 				} else {
-					return new UserResponse(HttpStatus.BAD_REQUEST, "Username already exists");
+					currentUser.setUsername(userUpdateRequest.getUsername());
 				}
 			}
+			if (!currentUser.getRole().getName().equalsIgnoreCase(userUpdateRequest.getRole())) {
+				RoleDTO roleAsParameter = roleService.getRoleByName(userUpdateRequest.getRole());
+				if (roleAsParameter == null) {
+					return new UserResponse(HttpStatus.BAD_REQUEST,
+							"The Role " + userUpdateRequest.getRole() + " doesn't exists. ");
+				} else {
+					currentUser.setRole(roleConverter.apply(roleAsParameter));
+				}
+			}
+
 			currentUser.setPassword(bCryptPasswordEncoder.encode(userUpdateRequest.getPassword()));
 			currentUser.setName(userUpdateRequest.getName());
 			currentUser.setLastname(userUpdateRequest.getLastname());
-			currentUser.setRole(roleConverter.apply(roleService.getRoleById(repository.getIdRoleByUserId(id))));
 
 			return new UserResponse(HttpStatus.CREATED, "Updated", userConverter.convert(repository.save(currentUser)));
 		} else {
-			return new UserResponse(HttpStatus.I_AM_A_TEAPOT, "User " + id + "don't exists");
+			return new UserResponse(HttpStatus.BAD_REQUEST, "User " + id + "don't exists");
 		}
 	}
 
 	@Override
 	@Transactional
 	public UserResponse delete(final Long id) {
+		if (id.equals(superAdminId)) {
+			return new UserResponse(HttpStatus.BAD_REQUEST, "Super Admin user can't be deleted. ");
+		}
 		if (repository.findById(id).isPresent()) {
 			repository.deleteById(id);
 			return new UserResponse(HttpStatus.ACCEPTED, "User was deleted");

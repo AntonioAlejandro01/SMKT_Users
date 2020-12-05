@@ -35,12 +35,13 @@ public class TokenUtils {
 
 		String basicAuthHeader = "basic " + Base64Utils.encodeToString((appUser + ":" + appSecret).getBytes());
 
-		WebClient webClient = WebClient.builder().baseUrl("http://" + "" + ":" + 3333)
-				.defaultHeader(HttpHeaders.AUTHORIZATION, basicAuthHeader).build();
+		//WebClient webClient = WebClient.builder().baseUrl("http://" + "" + ":" + 3333)
+			//	.defaultHeader(HttpHeaders.AUTHORIZATION, basicAuthHeader).build();
 
-		return webClient.post().uri(URI.create("/oauth/check_token")).bodyValue("token=" + token)
-				.acceptCharset(StandardCharsets.UTF_8).retrieve().bodyToMono(TokenContent.class).block();
+		//return webClient.post().uri(URI.create("/oauth/check_token")).bodyValue("token=" + token)
+			//	.acceptCharset(StandardCharsets.UTF_8).retrieve().bodyToMono(TokenContent.class).block();
 
+		return new TokenContent();
 	}
 	/**
 	 * 

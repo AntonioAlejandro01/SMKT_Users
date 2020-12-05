@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class TokenContent {
 
-	private Long id;
+	private Long id = 2L;
 }

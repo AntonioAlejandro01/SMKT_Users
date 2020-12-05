@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.antonioalejandro.smkt.users.exceptions.RequestException;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -13,7 +15,7 @@ public class ScopesService implements IScopesService {
 	private IRoleService roleService;
 
 	@Override
-	public List<String> getScopesForRole(Long roleId) {
+	public List<String> getScopesForRole(Long roleId) throws RequestException{
 		List<String> scopes = roleService.getScopesByIdRole(roleId);
 		log.debug("Roles for {} : {}", roleId,
 				scopes.stream().reduce((acum, scope) -> acum + " " + scope).orElseGet(() -> "error scopes"));
