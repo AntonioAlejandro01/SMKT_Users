@@ -36,6 +36,9 @@ public class UserController {
 
 	@Value("${scopes.read}")
 	private String scopeRead;
+	
+	@Value("${scopes.read-min}")
+	private String scopeReadMin;
 
 	@Value("${scopes.write}")
 	private String scopeWrite;

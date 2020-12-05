@@ -51,6 +51,7 @@ oauth:
  
 scopes:
  read: users.read
+ read-min: users.read-min
  write: users.write
  delete: users.delete
  update: users.update
