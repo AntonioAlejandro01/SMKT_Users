@@ -9,9 +9,7 @@ package com.antonioalejandro.smkt.users.pojo;
 
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 @Getter
 public class TokenContent {
 
@@ -25,6 +23,10 @@ public class TokenContent {
 	public TokenContent() {
 		id = 2L;
 		token = "";
+	}
+	
+	public TokenContent(String token) {
+		this.token = token;
 	}
 
 }
