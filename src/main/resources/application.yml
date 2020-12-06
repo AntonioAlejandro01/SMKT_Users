@@ -77,5 +77,3 @@ sonar:
   reportsPath: build/test-reports
  java:
   coveragePlugin: jacoco
- jacoco:
-  reportPath: build/test-reports/jacoco.exec
