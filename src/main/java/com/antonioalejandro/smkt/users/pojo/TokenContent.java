@@ -7,12 +7,12 @@
  */
 package com.antonioalejandro.smkt.users.pojo;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@Data
+@Getter
 public class TokenContent {
 
 	/** The id. */
