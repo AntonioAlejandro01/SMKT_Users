@@ -57,3 +57,25 @@ scopes:
  adm: users.adm
  read-min: users.read-min
  update-self: users.update-self
+ 
+ 
+ 
+ 
+ 
+sonar:
+ jdbc:
+  dialect: mssql
+ projectKey: smkt_users
+ projectName: smkt_users
+ projectVersion: 1.0
+ sources: src
+ language: java
+ binaries: build/classes
+ tests: junit
+ dynamicAnalysis: reuseReports
+ junit:
+  reportsPath: build/test-reports
+ java:
+  coveragePlugin: jacoco
+ jacoco:
+  reportPath: build/test-reports/jacoco.exec
