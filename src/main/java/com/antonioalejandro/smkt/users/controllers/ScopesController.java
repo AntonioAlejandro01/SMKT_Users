@@ -1,60 +1,87 @@
+/*
+ * @Author AntonioAlejandro01
+ * 
+ * @link http://antonioalejandro.com
+ * @link https://github.com/AntonioAlejandro01/SMKT_Users
+ * 
+ */
 package com.antonioalejandro.smkt.users.controllers;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.antonioalejandro.smkt.users.exceptions.BadRequestException;
-import com.antonioalejandro.smkt.users.exceptions.NotFoundException;
-import com.antonioalejandro.smkt.users.exceptions.RequestException;
+import com.antonioalejandro.smkt.users.pojo.response.ScopeResponse;
 import com.antonioalejandro.smkt.users.service.IScopesService;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
+/**
+ * The Class ScopesController.
+ */
 @RestController
+@Slf4j
 @RequestMapping("/scopes")
+@Api(value = "/scopes", tags = { "Scopes" }, produces = "application/json")
 public class ScopesController {
 
+	/** The scope service. */
 	@Autowired
 	private IScopesService scopeService;
 
-	@ApiOperation(value = "Get list of scopes by the role id ", response = List.class, tags = "getScopesForRole")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Ok", response = List.class),
+	/**
+	 * Gets the scopes for role.
+	 *
+	 * @param roleId the role id
+	 * @return the scopes for role
+	 */
+	@ApiOperation(value = "Get list of scopes by the role id ", response = ScopeResponse.class, tags = "Scopes")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Ok", response = ScopeResponse.class),
 			@ApiResponse(code = 204, message = "No Content", response = void.class),
-			@ApiResponse(code = 400, message = "Bad Request", response = BadRequestException.class),
-			@ApiResponse(code = 404, message = "Not Found", response = NotFoundException.class),
-			@ApiResponse(code = 500, message = "Internal Server Error", response = Exception.class) })
+			@ApiResponse(code = 400, message = "Bad Request", response = ScopeResponse.class),
+			@ApiResponse(code = 404, message = "Not Found", response = ScopeResponse.class) })
 	@GetMapping()
-	public List<String> getScopesForRole(@RequestHeader(name = "Authorization", required = true) final String token,
-			@RequestParam(name = "roleId", required = true) final Long roleId) throws RequestException {
+	public ResponseEntity<ScopeResponse> getScopesForRole(
+			@RequestParam(name = "roleId", required = true) final Long roleId) {
 
-		validateId(roleId);
+		String ms = validateId(roleId);
+
+		if (!ms.isEmpty()) {
+			return new ResponseEntity<>(new ScopeResponse(HttpStatus.BAD_REQUEST, ms), HttpStatus.BAD_REQUEST);
+		}
 
 		log.info("Call get scopes for role {}", roleId);
+		ScopeResponse response = scopeService.getScopesForRole(roleId);
 
-		return scopeService.getScopesForRole(roleId);
+		if (!response.haveData()) {
+			return new ResponseEntity<>(response, response.getHttpStatus());
+		}
+
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	private void validateId(Long id) throws BadRequestException {
-		String ms = "";
+	/**
+	 * Validate id.
+	 *
+	 * @param id the id
+	 * @return the string
+	 */
+	private String validateId(Long id) {
 		if (id == null) {
-			ms = "Role id is mandatory. ";
+			return "Role id is mandatory. ";
 		} else {
 			if (id < 1) {
-				ms = "id can't be less or equal than zero. ";
+				return "id can't be less or equal than zero. ";
 			}
 		}
-		if (!ms.isEmpty()) {
-			throw new BadRequestException(ms);
-		}
+		return "";
 	}
 }

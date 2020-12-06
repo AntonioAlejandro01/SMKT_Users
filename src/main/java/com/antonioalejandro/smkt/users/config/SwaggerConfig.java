@@ -1,3 +1,10 @@
+/*
+ * @Author AntonioAlejandro01
+ * 
+ * @link http://antonioalejandro.com
+ * @link https://github.com/AntonioAlejandro01/SMKT_Users
+ * 
+ */
 package com.antonioalejandro.smkt.users.config;
 
 import org.springframework.context.annotation.Bean;
@@ -11,14 +18,17 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+/**
+ * The Class SwaggerConfig.
+ */
 @Configuration
 @EnableSwagger2
 public class SwaggerConfig {
 
 	/**
-	 * Publish a bean to generate swagger2 endpoints
-	 * 
-	 * @return a swagger configuration bean
+	 * Users api.
+	 *
+	 * @return the docket
 	 */
 	@Bean
 	public Docket usersApi() {
@@ -26,6 +36,11 @@ public class SwaggerConfig {
 				.apis(RequestHandlerSelectors.basePackage("com.antonioalejandro.smkt.users.controllers")).build();
 	}
 
+	/**
+	 * Users api info.
+	 *
+	 * @return the api info
+	 */
 	private ApiInfo usersApiInfo() {
 		return new ApiInfoBuilder().title("SMKT_USERS").version("1.0").license("MIT License").build();
 	}

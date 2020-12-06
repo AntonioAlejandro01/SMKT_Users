@@ -1,55 +1,59 @@
+/*
+ * @Author AntonioAlejandro01
+ * 
+ * @link http://antonioalejandro.com
+ * @link https://github.com/AntonioAlejandro01/SMKT_Users
+ * 
+ */
 package com.antonioalejandro.smkt.users.utils;
 
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.util.Base64Utils;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import com.antonioalejandro.smkt.users.pojo.TokenContent;
 
+/**
+ * The Class TokenUtils.
+ */
 public class TokenUtils {
 
-	private static final String TOKEN_KEY = "Bearer ";
+	/** The Constant TOKEN_KEY. */
+	public static final String TOKEN_KEY = "Bearer ";
 
+	/** The app user. */
 	@Value("${oauth.user}")
 	private static String appUser;
 
+	/** The app secret. */
 	@Value("${oauth.secret}")
 	private static String appSecret;
-	
+
+	/**
+	 * Instantiates a new token utils.
+	 */
 	private TokenUtils() {
 	}
 
 	/**
-	 * 
-	 * @param token
-	 * @return TokenContent
+	 * Gets the data token.
+	 *
+	 * @param token the token
+	 * @return the data token
 	 */
 	public static TokenContent getDataToken(String token) {
-		if (token.contains(TOKEN_KEY)) {
-			token = token.replace(TOKEN_KEY, "");
-		}
-
-		String basicAuthHeader = "basic " + Base64Utils.encodeToString((appUser + ":" + appSecret).getBytes());
-
-		//WebClient webClient = WebClient.builder().baseUrl("http://" + "" + ":" + 3333)
-			//	.defaultHeader(HttpHeaders.AUTHORIZATION, basicAuthHeader).build();
-
-		//return webClient.post().uri(URI.create("/oauth/check_token")).bodyValue("token=" + token)
-			//	.acceptCharset(StandardCharsets.UTF_8).retrieve().bodyToMono(TokenContent.class).block();
-
-		return new TokenContent();
+		return new TokenContent(TOKEN_KEY + token);
 	}
+
 	/**
-	 * 
-	 * @param token
-	 * @param scope
-	 * @return boolean
+	 * Checks if is authorized.
+	 *
+	 * @param token           the token
+	 * @param scopesPermitted the scopes permitted
+	 * @return true, if is authorized
 	 */
-	public static boolean isAuthorized(String token, String scope) {
+	public static boolean isAuthorized(String token, List<String> scopesPermitted) {
+
 		return true;
 	}
 }

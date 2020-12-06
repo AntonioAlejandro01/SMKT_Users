@@ -6,23 +6,23 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 import org.junit.jupiter.api.Test;
 
-import com.antonioalejandro.smkt.users.UtilTest;
+import com.antonioalejandro.smkt.users.UtilsForTesting;
 import com.antonioalejandro.smkt.users.entity.Scope;
 
-public class ScopesTest {
+ class ScopesTest {
 
 	@Test
 	void test() throws Exception {
-		Scope scope = UtilTest.getScope();
+		Scope scope = UtilsForTesting.getScope();
 
-		Scope scope2 = UtilTest.getScope();
+		Scope scope2 = UtilsForTesting.getScope();
 
 		assertNotSame(scope, scope2);
 		assertEquals(scope.getId(), scope2.getId());
 		assertEquals(scope.getName(), scope2.getName());
 
-		scope2.setId(UtilTest.LONGKO);
-		scope2.setName(UtilTest.DATAKO);
+		scope2.setId(UtilsForTesting.LONGKO);
+		scope2.setName(UtilsForTesting.DATAKO);
 
 		assertNotSame(scope, scope2);
 		assertNotEquals(scope.getId(), scope2.getId());

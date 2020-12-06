@@ -17,7 +17,7 @@ spring:
     hibernate:
      ddl-auto:
       create-drop
-       
+
 server:
  port: 
   4060
@@ -53,9 +53,7 @@ superadmin:
  id: 1
  
 scopes:
- read: users.read
+ super: users.super
+ adm: users.adm
  read-min: users.read-min
- write: users.write
- delete: users.delete
- update: users.update
  update-self: users.update-self

@@ -1,3 +1,10 @@
+/*
+ * @Author AntonioAlejandro01
+ * 
+ * @link http://antonioalejandro.com
+ * @link https://github.com/AntonioAlejandro01/SMKT_Users
+ * 
+ */
 package com.antonioalejandro.smkt.users.entity;
 
 import java.io.Serializable;
@@ -13,20 +20,26 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * The Class Scope.
+ */
+@Table(name = "scopes")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "scopes")
-public class Scope implements Serializable{
-	
+public class Scope implements Serializable {
+
+	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 2948627530474012160L;
-	
+
+	/** The id. */
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	/** The name. */
 	@Column(nullable = false, unique = true)
 	private String name;
-	
+
 }

@@ -1,7 +1,13 @@
+/*
+ * @Author AntonioAlejandro01
+ * 
+ * @link http://antonioalejandro.com
+ * @link https://github.com/AntonioAlejandro01/SMKT_Users
+ * 
+ */
 package com.antonioalejandro.smkt.users.controllers;
 
-import java.text.ParseException;
-import java.util.List;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,195 +26,262 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.antonioalejandro.smkt.users.exceptions.BadRequestException;
-import com.antonioalejandro.smkt.users.exceptions.BadRequestResponse;
-import com.antonioalejandro.smkt.users.exceptions.NotFoundException;
-import com.antonioalejandro.smkt.users.exceptions.RequestException;
-import com.antonioalejandro.smkt.users.exceptions.UnauthorizedException;
-import com.antonioalejandro.smkt.users.pojo.RoleDTO;
-import com.antonioalejandro.smkt.users.pojo.UserDTO;
-import com.antonioalejandro.smkt.users.pojo.UserRegistrationRequest;
-import com.antonioalejandro.smkt.users.pojo.UserResponse;
-import com.antonioalejandro.smkt.users.pojo.UserUpdateRequest;
+import com.antonioalejandro.smkt.users.pojo.request.UserRegistrationRequest;
+import com.antonioalejandro.smkt.users.pojo.request.UserUpdateRequest;
+import com.antonioalejandro.smkt.users.pojo.response.GenericResponse;
+import com.antonioalejandro.smkt.users.pojo.response.UserResponse;
 import com.antonioalejandro.smkt.users.service.UserService;
 import com.antonioalejandro.smkt.users.utils.TokenUtils;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
+/**
+ * The Class UserController.
+ */
 @RestController
+@Slf4j
 @RequestMapping("/users")
+@Api(value = "/users", tags = { "Users" }, produces = "application/json", consumes = "application/json")
 public class UserController {
 
-	@Value("${scopes.read}")
-	private String scopeRead;
+	/** The scope super. */
+	@Value("${scopes.super}")
+	private String scopeSuper;
 
+	/** The scope read min. */
 	@Value("${scopes.read-min}")
 	private String scopeReadMin;
 
-	@Value("${scopes.write}")
-	private String scopeWrite;
-
-	@Value("${scopes.delete}")
-	private String scopeDelete;
-
-	@Value("${scopes.update}")
-	private String scopeUpdate;
-
+	/** The scope update self. */
 	@Value("${scopes.update-self}")
 	private String scopeUpdateSelf;
 
+	/** The scope adm. */
+	@Value("${scopes.adm}")
+	private String scopeAdm;
+
+	/** The Constant VALID_EMAIL_ADDRESS_REGEX. */
 	private static final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern
 			.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
+	/** The Constant VALID_PASSWORD_REGEX. */
 	private static final Pattern VALID_PASSWORD_REGEX = Pattern
 			.compile("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{8,20}$");
 
+	/** The user service. */
 	@Autowired
 	private UserService userService;
 
+	/**
+	 * Gets the users.
+	 *
+	 * @param token the token
+	 * @return the users
+	 */
+	@ApiOperation(value = "Get all users", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
+			@Authorization(value = "GetUsers", scopes = {
+					@AuthorizationScope(scope = "users.super", description = "Can see all data for all users, be admin or not"),
+					@AuthorizationScope(scope = "users.admin", description = "Only can see all data for normal users"),
+					@AuthorizationScope(scope = "users.read-min", description = "Only can see a usernames of all users"), }), })
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Ok", response = UserResponse.class),
+			@ApiResponse(code = 204, message = "No Content", response = GenericResponse.class),
+			@ApiResponse(code = 401, message = "Unauthorized", response = GenericResponse.class) })
 	@GetMapping()
-	public List<UserDTO> getUsers(@RequestHeader(name = "Authorization", required = true) final String token) {
+	public ResponseEntity<UserResponse> getUsers(
+			@RequestHeader(name = "Authorization", required = true) final String token) {
 
 		log.info("Call users/all");
-		if (!TokenUtils.isAuthorized(token, scopeRead)) {
-			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		if (!TokenUtils.isAuthorized(token, Arrays.asList(scopeAdm, scopeSuper, scopeReadMin))) {
+			return createUnathorizedResponse(null);
 		}
 
-		List<UserDTO> users = userService.getUsers();
+		return prepareResponse(userService.getUsers(), HttpStatus.OK);
 
-		return users.isEmpty() ? new ResponseEntity<>(HttpStatus.NO_CONTENT)
-				: new ResponseEntity<>(users, HttpStatus.OK);
 	}
 
-	@ApiOperation(value = "Saerch user by username, email or id ", response = UserDTO.class, tags = "searchUser")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Ok", response = UserDTO.class),
-			@ApiResponse(code = 400, message = "Bad Request", response = BadRequestException.class),
-			@ApiResponse(code = 401, message = "Unauthorized", response = UnauthorizedException.class),
-			@ApiResponse(code = 404, message = "Not Found", response = NotFoundException.class),
-			@ApiResponse(code = 500, message = "Internal Server Error", response = Exception.class) })
+	/**
+	 * Search user.
+	 *
+	 * @param token  the token
+	 * @param filter the filter
+	 * @param value  the value
+	 * @return the response entity
+	 */
+	@ApiOperation(value = "Saerch user by username, email or id ", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
+			@Authorization(value = "SearchUsers", scopes = {
+					@AuthorizationScope(scope = "users.super", description = "Can see all data for all users, be admin or not"),
+					@AuthorizationScope(scope = "users.admin", description = "Only can see all data for normal users"),
+					@AuthorizationScope(scope = "users.read-min", description = "Only can see a usernames of all users and only can filter by username"), }), })
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Ok", response = UserResponse.class),
+			@ApiResponse(code = 400, message = "Bad Request", response = UserResponse.class),
+			@ApiResponse(code = 401, message = "Unauthorized", response = UserResponse.class),
+			@ApiResponse(code = 404, message = "Not Found", response = UserResponse.class) })
 	@GetMapping("/search")
-	public UserDTO searchUser(@RequestHeader(name = "Authorization", required = true) final String token,
-			@RequestParam(name = "filter", required = false) final String filter,
-			@RequestParam(name = "value", required = false) final String value) throws RequestException {
+	public ResponseEntity<UserResponse> searchUser(
+			@RequestHeader(name = "Authorization", required = true) final String token,
+			@RequestParam(name = "filter", required = true) final String filter,
+			@RequestParam(name = "value", required = true) final String value) {
 
-		if (!TokenUtils.isAuthorized(token, scopeRead)) {
-			throw new UnauthorizedException();
+		if (!TokenUtils.isAuthorized(token, Arrays.asList(scopeAdm, scopeSuper, scopeReadMin))) {
+			return createUnathorizedResponse(null);
 		}
 
-		UserDTO user;
-		StringBuilder ms = new StringBuilder();
 		if (filter == null || value == null) {
-			throw new BadRequestException("The filter and value are mandatory. ");
+			return createBadRequestException("The filter and value are mandatory. ");
 		}
+
+		UserResponse userResponse;
 
 		if (filter.equalsIgnoreCase("id")) {
 			long id;
 			try {
 				id = Long.parseLong(value);
 			} catch (Exception e) {
-				throw new BadRequestException("The id must be a number");
+				return createBadRequestException("The id must be a number");
 			}
-			ms.append(validateId(id));
+			String ms = validateId(id);
 			if (!ms.isEmpty()) {
-				throw new BadRequestException(ms.toString());
+				return createBadRequestException(ms);
 			}
-			user = userService.getUserById(id);
+			userResponse = userService.getUserById(id);
 		} else if (filter.equalsIgnoreCase("username") || filter.equalsIgnoreCase("email")) {
 			boolean isUsername = filter.equalsIgnoreCase("username");
-			ms.append(isUsername ? validateUsername(value) : validateEmail(value));
+			String ms = isUsername ? validateUsername(value) : validateEmail(value);
 			if (!ms.isEmpty()) {
-				throw new BadRequestException(ms.toString());
+				return createBadRequestException(ms);
 			}
-			user = userService.getUserByEmailOrUsername(value, !isUsername);
+			userResponse = userService.getUserByEmailOrUsername(value, !isUsername);
 		} else {
-
-			throw new BadRequestException("filter typoe is not valid. (id, username or email). ");
+			return createBadRequestException("Filter type is not valid. (id, username or email). ");
 		}
 
-		return user;
+		return prepareResponse(userResponse, HttpStatus.OK);
 
 	}
 
-	@ApiOperation(value = "Saerch user by username, email or id ", response = UserDTO.class, tags = "searchUser")
-	@ApiResponses(value = { @ApiResponse(code = 201, message = "Created", response = UserDTO.class),
-			@ApiResponse(code = 400, message = "Bad Request", response = BadRequestException.class),
-			@ApiResponse(code = 401, message = "Unauthorized", response = UnauthorizedException.class),
-			@ApiResponse(code = 404, message = "Not Found", response = NotFoundException.class),
-			@ApiResponse(code = 500, message = "Internal Server Error", response = Exception.class) })
+	/**
+	 * Creates the.
+	 *
+	 * @param token the token
+	 * @param req   the req
+	 * @return the response entity
+	 */
+	@ApiOperation(value = "Create a user ", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
+			@Authorization(value = "Create", scopes = {
+					@AuthorizationScope(scope = "users.super", description = "Can create Admins and normal users"),
+					@AuthorizationScope(scope = "users.admin", description = "Only can create normal users"), }), })
+	@ApiResponses(value = { @ApiResponse(code = 201, message = "Created", response = UserResponse.class),
+			@ApiResponse(code = 400, message = "Bad Request", response = UserResponse.class),
+			@ApiResponse(code = 401, message = "Unauthorized", response = UserResponse.class),
+			@ApiResponse(code = 404, message = "Not Found", response = UserResponse.class) })
 	@PostMapping()
-	public UserDTO create(@RequestHeader(name = "Authorization", required = true) final String token,
-			final @RequestBody UserRegistrationRequest req) throws RequestException {
+	public ResponseEntity<UserResponse> create(
+			@RequestHeader(name = "Authorization", required = true) final String token,
+			final @RequestBody(required = true) UserRegistrationRequest req) {
 
 		log.info("Call users/create");
 
-		if (!TokenUtils.isAuthorized(token, scopeWrite)) {
-			throw new UnauthorizedException();
+		if (!TokenUtils.isAuthorized(token, Arrays.asList(scopeAdm, scopeReadMin))) {
+			return createUnathorizedResponse(null);
 		}
 
 		log.debug("User -> {}", req.toString());
 
-		StringBuilder badReqMs = new StringBuilder();
+		StringBuilder ms = new StringBuilder();
 
-		badReqMs.append(validateEmail(req.getEmail())).append(validateName(req.getName()))
+		ms.append(validateEmail(req.getEmail())).append(validateName(req.getName()))
 				.append(validateUsername(req.getUsername())).append(validatePassword(req.getPassword()))
 				.append(validateLastname(req.getLastname()));
 
-		if (!badReqMs.toString().isEmpty()) {
-			throw new BadRequestException(badReqMs.toString());
+		if (!ms.toString().isEmpty()) {
+			return createBadRequestException(ms.toString());
 		}
 
-		return userService.create(req);
+		return prepareResponse(userService.createUser(req), HttpStatus.CREATED);
 	}
-	@ApiOperation(value = "Saerch user by username, email or id ", response = UserResponse.class, tags = "searchUser")
+
+	/**
+	 * Delete user.
+	 *
+	 * @param token the token
+	 * @param id    the id
+	 * @return the response entity
+	 */
+	@ApiOperation(value = "Delete user by id ", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
+			@Authorization(value = "DeleteUser", scopes = {
+					@AuthorizationScope(scope = "users.super", description = "Can delete admins and normal users"),
+					@AuthorizationScope(scope = "users.admin", description = "Only can delete normal users") }), })
 	@ApiResponses(value = { @ApiResponse(code = 202, message = "Accepted", response = UserResponse.class),
-			@ApiResponse(code = 400, message = "Bad Request", response = BadRequestException.class),
-			@ApiResponse(code = 401, message = "Unauthorized", response = UnauthorizedException.class),
-			@ApiResponse(code = 404, message = "Not Found", response = NotFoundException.class),
-			@ApiResponse(code = 500, message = "Internal Server Error", response = Exception.class) })
+			@ApiResponse(code = 400, message = "Bad Request", response = UserResponse.class),
+			@ApiResponse(code = 401, message = "Unauthorized", response = UserResponse.class),
+			@ApiResponse(code = 404, message = "Not Found", response = UserResponse.class) })
 	@DeleteMapping("/{id}")
-	public UserResponse deleteUser(@RequestHeader(name = "Authorization", required = true) final String token,
-			@PathVariable final Long id) throws RequestException{
+	public ResponseEntity<UserResponse> deleteUser(
+			@RequestHeader(name = "Authorization", required = true) final String token,
+			@PathVariable(name = "id", required = true) final Long id) {
 
 		log.info("Call users/delete/{}", id);
 
-		if (!TokenUtils.isAuthorized(token, scopeDelete)) {
-			throw new UnauthorizedException();
+		if (!TokenUtils.isAuthorized(token, Arrays.asList(scopeAdm, scopeSuper))) {
+			return createUnathorizedResponse(null);
 		}
 		String ms = validateId(id);
 		if (!ms.isEmpty()) {
-			throw new BadRequestException(ms);
+			createBadRequestException(ms);
 		}
 
-		return userService.delete(id);
+		return prepareResponse(userService.deleteUser(id), null);
 	}
 
+	/**
+	 * Put user by id.
+	 *
+	 * @param token the token
+	 * @param req   the req
+	 * @param id    the id
+	 * @return the response entity
+	 */
+	@ApiOperation(value = "Update user by id", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
+			@Authorization(value = "putUser", scopes = {
+					@AuthorizationScope(scope = "users.super", description = "Can update admins and normal users"),
+					@AuthorizationScope(scope = "users.admin", description = "Only can update normal users"),
+					@AuthorizationScope(scope = "users.update-self", description = "Only can update hisself") }), })
+	@ApiResponses(value = { @ApiResponse(code = 202, message = "Accepted", response = UserResponse.class),
+			@ApiResponse(code = 400, message = "Bad Request", response = UserResponse.class),
+			@ApiResponse(code = 401, message = "Unauthorized", response = UserResponse.class),
+			@ApiResponse(code = 404, message = "Not Found", response = UserResponse.class) })
 	@PutMapping("/{id}")
-	public ResponseEntity<?> putUserById(@RequestHeader(name = "Authorization", required = true) final String token,
-			@RequestBody final UserUpdateRequest req, @PathVariable("id") final Long id) {
+	public ResponseEntity<UserResponse> putUserById(
+			@RequestHeader(name = "Authorization", required = true) final String token,
+			@RequestBody(required = true) final UserUpdateRequest req,
+			@PathVariable(value = "id", required = true) final Long id) {
 
 		log.info("Call users/id");
 
-		if (!TokenUtils.isAuthorized(token, scopeUpdate) || (TokenUtils.isAuthorized(token, scopeUpdateSelf)
-				&& !TokenUtils.getDataToken(token).getId().toString().equals(id.toString()))) {
-			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		if (!TokenUtils.isAuthorized(token, Arrays.asList(scopeAdm, scopeSuper, scopeUpdateSelf))) {
+			return createUnathorizedResponse(null);
 		}
 
 		String ms = validateId(id);
 		if (!ms.isEmpty()) {
-			return new ResponseEntity<>(new BadRequestResponse(ms, HttpStatus.BAD_REQUEST.toString()),
-					HttpStatus.BAD_REQUEST);
+			return createBadRequestException(ms);
 		}
 
-		final UserResponse userResponse = userService.updateUser(req, id);
-
-		return userResponse.getUser() == null ? new ResponseEntity<>(userResponse.getStatus())
-				: new ResponseEntity<>(userResponse, userResponse.getStatus());
+		return prepareResponse(userService.updateUser(req, id), HttpStatus.ACCEPTED);
 	}
 
+	/**
+	 * Validate email.
+	 *
+	 * @param email the email
+	 * @return the string
+	 */
 	private String validateEmail(String email) {
 		if (email.isBlank()) {
 			return "Email is mandatory. ";
@@ -221,11 +294,23 @@ public class UserController {
 
 	}
 
+	/**
+	 * Validate email regex.
+	 *
+	 * @param email the email
+	 * @return true, if successful
+	 */
 	private boolean validateEmailRegex(String email) {
 		Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(email);
 		return matcher.find();
 	}
 
+	/**
+	 * Validate name.
+	 *
+	 * @param name the name
+	 * @return the string
+	 */
 	private String validateName(String name) {
 		if (name.isBlank()) {
 			return "Name is mandatory. ";
@@ -237,6 +322,12 @@ public class UserController {
 		return "";
 	}
 
+	/**
+	 * Validate username.
+	 *
+	 * @param username the username
+	 * @return the string
+	 */
 	private String validateUsername(String username) {
 
 		if (username.isBlank()) {
@@ -250,6 +341,12 @@ public class UserController {
 		return "";
 	}
 
+	/**
+	 * Validate password.
+	 *
+	 * @param password the password
+	 * @return the string
+	 */
 	private String validatePassword(String password) {
 		if (password.isBlank()) {
 			return "Password is mandatory. ";
@@ -263,11 +360,23 @@ public class UserController {
 		return "";
 	}
 
+	/**
+	 * Validate password regex.
+	 *
+	 * @param password the password
+	 * @return true, if successful
+	 */
 	private boolean validatePasswordRegex(String password) {
 		Matcher matcher = VALID_PASSWORD_REGEX.matcher(password);
 		return matcher.find();
 	}
 
+	/**
+	 * Validate lastname.
+	 *
+	 * @param lastname the lastname
+	 * @return the string
+	 */
 	private String validateLastname(String lastname) {
 		if (lastname != null && !lastname.isBlank() && lastname.length() < 3) {
 			return "Lastname minimun length is 3. ";
@@ -275,11 +384,52 @@ public class UserController {
 		return "";
 	}
 
+	/**
+	 * Validate id.
+	 *
+	 * @param id the id
+	 * @return the string
+	 */
 	private String validateId(Long id) {
 		if (id < 1) {
 			return "id can't be less or equal than zero. ";
 		}
 		return "";
+	}
+
+	/**
+	 * Creates the unathorized response.
+	 *
+	 * @param ms the ms
+	 * @return the response entity
+	 */
+	private ResponseEntity<UserResponse> createUnathorizedResponse(String ms) {
+		return new ResponseEntity<>(
+				new UserResponse(HttpStatus.UNAUTHORIZED, ms == null || ms.isBlank() ? "Unauthorized" : ms),
+				HttpStatus.UNAUTHORIZED);
+	}
+
+	/**
+	 * Creates the bad request exception.
+	 *
+	 * @param ms the ms
+	 * @return the response entity
+	 */
+	private ResponseEntity<UserResponse> createBadRequestException(String ms) {
+		return new ResponseEntity<>(
+				new UserResponse(HttpStatus.BAD_REQUEST, ms == null || ms.isBlank() ? "Bad Request" : ms),
+				HttpStatus.BAD_REQUEST);
+	}
+
+	/**
+	 * Prepare response.
+	 *
+	 * @param userResponse the user response
+	 * @param okOption     the ok option
+	 * @return the response entity
+	 */
+	private ResponseEntity<UserResponse> prepareResponse(UserResponse userResponse, HttpStatus okOption) {
+		return new ResponseEntity<>(userResponse, userResponse.haveData() ? okOption : userResponse.getHttpStatus());
 	}
 
 }

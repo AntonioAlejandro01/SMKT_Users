@@ -6,7 +6,7 @@ import com.antonioalejandro.smkt.users.entity.Role;
 import com.antonioalejandro.smkt.users.entity.Scope;
 import com.antonioalejandro.smkt.users.entity.User;
 
-public class UtilTest {
+public class UtilsForTesting {
 
 	public static final String DATAOK = "ok";
 	public static final String DATAKO = "ko";
@@ -18,8 +18,8 @@ public class UtilTest {
 	public static Role getRole() {
 		Role role = new Role();
 
-		role.setId(UtilTest.LONGOK);
-		role.setName(UtilTest.DATAOK);
+		role.setId(UtilsForTesting.LONGOK);
+		role.setName(UtilsForTesting.DATAOK);
 
 		HashSet<Scope> scopes = new HashSet<>();
 
@@ -33,8 +33,8 @@ public class UtilTest {
 	public static Scope getScope() {
 		Scope scope = new Scope();
 
-		scope.setId(UtilTest.LONGOK);
-		scope.setName(UtilTest.DATAOK);
+		scope.setId(UtilsForTesting.LONGOK);
+		scope.setName(UtilsForTesting.DATAOK);
 
 		return scope;
 	}

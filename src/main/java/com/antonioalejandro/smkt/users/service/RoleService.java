@@ -1,72 +1,79 @@
+/*
+ * @Author AntonioAlejandro01
+ * 
+ * @link http://antonioalejandro.com
+ * @link https://github.com/AntonioAlejandro01/SMKT_Users
+ * 
+ */
 package com.antonioalejandro.smkt.users.service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 
-import com.antonioalejandro.smkt.users.converter.RoleConverter;
 import com.antonioalejandro.smkt.users.dao.RoleDao;
 import com.antonioalejandro.smkt.users.entity.Role;
-import com.antonioalejandro.smkt.users.entity.Scope;
-import com.antonioalejandro.smkt.users.exceptions.NotFoundException;
-import com.antonioalejandro.smkt.users.exceptions.RequestException;
-import com.antonioalejandro.smkt.users.pojo.RoleDTO;
+import com.antonioalejandro.smkt.users.pojo.response.RoleResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * The Class RoleService.
+ */
 @Slf4j
 public class RoleService implements IRoleService {
 
-	@Autowired
-	private RoleConverter roleConverter;
+	/** The repository. */
 	@Autowired
 	private RoleDao repository;
 
+	/**
+	 * Gets the roles.
+	 *
+	 * @return the roles
+	 */
 	@Override
-	public List<RoleDTO> getRoles() {
+	public RoleResponse getRoles() {
 		log.debug("Call get all roles");
-		return roleConverter
-				.convert(StreamSupport.stream(repository.findAll().spliterator(), false).collect(Collectors.toList()));
+		return new RoleResponse(
+				StreamSupport.stream(repository.findAll().spliterator(), false).collect(Collectors.toList()));
 	}
 
+	/**
+	 * Gets the role by id.
+	 *
+	 * @param id the id
+	 * @return the role by id
+	 */
 	@Override
-	public RoleDTO getRoleById(long id) throws RequestException {
+	public RoleResponse getRoleById(long id) {
 
 		log.debug("Call get role: {}", id);
 		Optional<Role> role = repository.findById(id);
 		if (!role.isPresent()) {
-			throw new NotFoundException("Id role not found. ");
+			return new RoleResponse(HttpStatus.NOT_FOUND, "Not Found");
 		}
-		return roleConverter.convert(role.get());
+		return new RoleResponse(role.get());
 	}
 
+	/**
+	 * Gets the role by name.
+	 *
+	 * @param name the name
+	 * @return the role by name
+	 */
 	@Override
-	public RoleDTO getRoleByName(String name) throws RequestException {
+	public RoleResponse getRoleByName(String name) {
 		log.debug("Call get Role by name: {}", name);
 
 		Role role = repository.findByName(name);
 		if (role == null) {
-			throw new NotFoundException("This name role doesn't exists");
+			return new RoleResponse(HttpStatus.NOT_FOUND, "Not Found by name");
 		}
-
-		return roleConverter.convert(role);
-	}
-
-	@Override
-	public List<String> getScopesByIdRole(long idRole) throws RequestException {
-		log.debug("Scopes for role: " + idRole);
-
-		Optional<Role> role = repository.findById(idRole);
-
-		if (!role.isPresent()) {
-			throw new NotFoundException("Id role not found. ");
-		}
-
-		return role.get().getScopes().stream().map(Scope::getName).collect(Collectors.toList());
-
+		return new RoleResponse(role);
 	}
 
 }

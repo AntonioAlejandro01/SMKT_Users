@@ -6,17 +6,17 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 import org.junit.jupiter.api.Test;
 
-import com.antonioalejandro.smkt.users.UtilTest;
+import com.antonioalejandro.smkt.users.UtilsForTesting;
 import com.antonioalejandro.smkt.users.entity.User;
 
-public class UserTest {
+ class UserTest {
 
 	@Test
 	void test() throws Exception {
 
-		User user1 = UtilTest.getUser();
+		User user1 = UtilsForTesting.getUser();
 
-		User user2 = UtilTest.getUser();
+		User user2 = UtilsForTesting.getUser();
 
 		assertNotSame(user1, user2);
 		assertEquals(user1.getId(), user2.getId());
@@ -27,7 +27,7 @@ public class UserTest {
 		assertEquals(user1.getPassword(), user2.getPassword());
 		assertEquals(user1.getRole().getClass().toString(), user2.getRole().getClass().toString());
 
-		UtilTest.modifyUser(user2);
+		UtilsForTesting.modifyUser(user2);
 
 		assertNotSame(user1, user2);
 		assertNotEquals(user1.getId(), user2.getId());

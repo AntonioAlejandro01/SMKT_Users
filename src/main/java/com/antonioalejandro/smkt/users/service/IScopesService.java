@@ -1,10 +1,24 @@
+/*
+ * @Author AntonioAlejandro01
+ * 
+ * @link http://antonioalejandro.com
+ * @link https://github.com/AntonioAlejandro01/SMKT_Users
+ * 
+ */
 package com.antonioalejandro.smkt.users.service;
 
-import java.util.List;
+import com.antonioalejandro.smkt.users.pojo.response.ScopeResponse;
 
-import com.antonioalejandro.smkt.users.exceptions.RequestException;
-
+/**
+ * The Interface IScopesService.
+ */
 public interface IScopesService {
-	
-	public List<String> getScopesForRole(Long roleId) throws RequestException;
+
+	/**
+	 * Gets the scopes for role.
+	 *
+	 * @param roleId the role id
+	 * @return the scopes for role
+	 */
+	public ScopeResponse getScopesForRole(Long roleId);
 }

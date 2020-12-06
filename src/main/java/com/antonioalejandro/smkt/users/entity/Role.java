@@ -1,3 +1,10 @@
+/*
+ * @Author AntonioAlejandro01
+ * 
+ * @link http://antonioalejandro.com
+ * @link https://github.com/AntonioAlejandro01/SMKT_Users
+ * 
+ */
 package com.antonioalejandro.smkt.users.entity;
 
 import java.io.Serializable;
@@ -12,29 +19,39 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * The Class Role.
+ */
+@Table(name = "roles")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "roles")
 public class Role implements Serializable {
 
-	/**
-	 * 
-	 */
+	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 5901144055586256656L;
 
+	/** The id. */
+	@JsonProperty(value = "id", required = true)
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	/** The name. */
+	@JsonProperty(value = "name", required = true)
 	@Column(nullable = false, unique = true)
 	private String name;
 
+	/** The scopes. */
+	@JsonIgnore
 	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Scope.class)
 	private Set<Scope> scopes;
 
