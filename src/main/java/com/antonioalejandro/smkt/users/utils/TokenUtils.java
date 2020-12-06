@@ -54,6 +54,6 @@ public class TokenUtils {
 	 */
 	public static boolean isAuthorized(String token, List<String> scopesPermitted) {
 
-		return true;
+		return !token.isEmpty() && scopesPermitted != null;
 	}
 }
