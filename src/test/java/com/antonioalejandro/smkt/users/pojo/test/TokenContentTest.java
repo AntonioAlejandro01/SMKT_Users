@@ -17,6 +17,6 @@ class TokenContentTest {
 		token = new TokenContent("Token");
 		
 		assertNull(token.getId());
-		assertEquals("Token", token.getToken());
+		assertEquals("Token", token.getToken()); 
 	}
 }

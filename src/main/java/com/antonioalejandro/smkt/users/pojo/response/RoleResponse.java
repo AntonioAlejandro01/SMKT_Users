@@ -18,14 +18,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * The Class RoleResponse.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
-@Setter
 @ApiModel(value = "RoleResponse", description = "Response for roles endpoints")
 public class RoleResponse extends GenericResponse {
 

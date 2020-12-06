@@ -16,16 +16,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 
 /**
  * The Class UserResponse.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
-@Setter
-@ToString
 public class UserResponse extends GenericResponse {
 
 	/** The user. */

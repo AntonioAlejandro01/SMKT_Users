@@ -16,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.annotations.ApiModel;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * The Class ScopeResponse.
@@ -26,6 +25,8 @@ import lombok.Setter;
 		List.class }, parent = GenericResponse.class)
 public class ScopeResponse extends GenericResponse {
 
+	/** The scopes. */
+
 	/**
 	 * Gets the scopes.
 	 *
@@ -33,12 +34,6 @@ public class ScopeResponse extends GenericResponse {
 	 */
 	@Getter
 
-	/**
-	 * Sets the scopes.
-	 *
-	 * @param scopes the new scopes
-	 */
-	@Setter
 	@JsonProperty("scopes")
 	private List<String> scopes;
 
