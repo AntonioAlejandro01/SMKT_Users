@@ -16,10 +16,15 @@ import lombok.RequiredArgsConstructor;
 public class TokenContent {
 
 	/** The id. */
-	private Long id = 2L;
+	private Long id;
 
 	/** The token. */
 	@NonNull
 	private String token;
+	
+	public TokenContent() {
+		id = 2L;
+		token = "";
+	}
 
 }

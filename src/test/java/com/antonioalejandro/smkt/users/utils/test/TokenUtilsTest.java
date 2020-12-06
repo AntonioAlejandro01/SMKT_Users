@@ -1,6 +1,7 @@
 package com.antonioalejandro.smkt.users.utils.test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 
@@ -12,14 +13,13 @@ import com.antonioalejandro.smkt.users.utils.TokenUtils;
 class TokenUtilsTest {
 
 	private final static String TOKEN = "asd";
-	private final static Long DATAOK = 2L;
 
 	@Test
 	void test() throws Exception {
 		TokenContent x = TokenUtils.getDataToken(TOKEN);
-		assertEquals(DATAOK,x.getId());
-		assertEquals(TokenUtils.TOKEN_KEY + TOKEN,x.getToken());
-		
+		assertThat(x).isInstanceOf(TokenContent.class);
+		assertEquals(TokenUtils.TOKEN_KEY + TOKEN, x.getToken());
+
 		assertEquals(true, TokenUtils.isAuthorized(TOKEN, Arrays.asList("")));
 	}
 }
