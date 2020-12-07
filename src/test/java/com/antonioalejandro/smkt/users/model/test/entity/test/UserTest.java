@@ -37,7 +37,7 @@ class UserTest {
 		assertEquals(UtilsForTesting.LONGKO, user1.getId());
 
 		user1 = new User(1L, UtilsForTesting.DATAOK, UtilsForTesting.DATAOK, UtilsForTesting.DATAOK,
-				UtilsForTesting.DATAOK, UtilsForTesting.DATAOK, new Role());
+				UtilsForTesting.DATAOK, UtilsForTesting.DATAOK, new Role(1L,UtilsForTesting.DATAOK,null));
 
 		assertEquals(UtilsForTesting.DATAOK, user1.getRoleName());
 		assertEquals(UtilsForTesting.DATAOK, user1.getEmail());
