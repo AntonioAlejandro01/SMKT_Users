@@ -34,7 +34,7 @@ class UserTest {
 		assertEquals(UtilsForTesting.DATAKO, user1.getName());
 		assertEquals(UtilsForTesting.DATAKO, user1.getPassword());
 		assertEquals(UtilsForTesting.DATAKO, user1.getUsername());
-		assertEquals(UtilsForTesting.LONGOK, user1.getId());
+		assertEquals(UtilsForTesting.LONGKO, user1.getId());
 
 	}
 }
