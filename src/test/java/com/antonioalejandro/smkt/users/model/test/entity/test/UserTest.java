@@ -36,5 +36,17 @@ class UserTest {
 		assertEquals(UtilsForTesting.DATAKO, user1.getUsername());
 		assertEquals(UtilsForTesting.LONGKO, user1.getId());
 
+		user1 = new User(1L, UtilsForTesting.DATAOK, UtilsForTesting.DATAOK, UtilsForTesting.DATAOK,
+				UtilsForTesting.DATAOK, UtilsForTesting.DATAOK, new Role());
+
+		assertEquals(UtilsForTesting.DATAOK, user1.getRoleName());
+		assertEquals(UtilsForTesting.DATAOK, user1.getEmail());
+		assertEquals(UtilsForTesting.DATAOK, user1.getLastname());
+		assertEquals(UtilsForTesting.DATAOK, user1.getName());
+		assertEquals(UtilsForTesting.DATAOK, user1.getPassword());
+		assertEquals(UtilsForTesting.DATAOK, user1.getUsername());
+		assertEquals(UtilsForTesting.LONGOK, user1.getId());
+		assertThat(user1.getRole()).isInstanceOf(Role.class);
+
 	}
 }
