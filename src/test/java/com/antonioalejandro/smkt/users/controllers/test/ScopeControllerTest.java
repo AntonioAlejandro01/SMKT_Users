@@ -32,8 +32,6 @@ class ScopeControllerTest {
 	@Mock
 	private ScopesService service;
 
-	private List<String> scopes = createListScopes();
-
 	private final Long MOCK_ID = 1L;
 
 	@BeforeEach
@@ -43,7 +41,7 @@ class ScopeControllerTest {
 
 	@Test
 	void testGetScopesByRoleIdOk() throws Exception {
-		when(service.getScopesForRole(MOCK_ID)).thenReturn(new ScopeResponse(scopes));
+		when(service.getScopesForRole(MOCK_ID)).thenReturn(new ScopeResponse(createListScopes()));
 
 		ResponseEntity<ScopeResponse> response = controller.getScopesForRole(MOCK_ID);
 		

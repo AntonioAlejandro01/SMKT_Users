@@ -55,9 +55,12 @@ public class RoleController {
 		log.info("Call getRoles");
 
 		RoleResponse roleResponse = roleService.getRoles();
-
-		return new ResponseEntity<>(roleResponse,
-				roleResponse.haveData() ? HttpStatus.OK : roleResponse.getHttpStatus());
+		
+		if (roleResponse.getRoles().isEmpty()) {
+			return new ResponseEntity<>(new RoleResponse(HttpStatus.NO_CONTENT,"No Content"),HttpStatus.NO_CONTENT);
+		}
+		
+		return new ResponseEntity<>(roleResponse,HttpStatus.OK);
 	}
 
 	/**
@@ -74,7 +77,7 @@ public class RoleController {
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "Authorization", value = "toke JWT", required = true, dataType = "string", paramType = "header", readOnly = true) })
 	@GetMapping("/{name}")
-	public ResponseEntity<RoleResponse> getRoleById(
+	public ResponseEntity<RoleResponse> getRoleByName(
 			@RequestHeader(name = "Authorization", required = true) final String token,
 			@PathVariable(name = "name", required = true) final String name) {
 		log.info("Call roles/{}", name);
@@ -95,7 +98,7 @@ public class RoleController {
 	 * @return the string
 	 */
 	private String validateName(String name) {
-		if (name.isBlank()) {
+		if (name == null || name.isBlank()) {
 			return "Name is mandatory. ";
 		}
 		return "";
