@@ -27,7 +27,7 @@ import com.antonioalejandro.smkt.users.pojo.response.RoleResponse;
 import com.antonioalejandro.smkt.users.service.RoleService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RoleServiceTest {
+class RoleServiceTest {
 
 	@InjectMocks
 	private RoleService roleService;

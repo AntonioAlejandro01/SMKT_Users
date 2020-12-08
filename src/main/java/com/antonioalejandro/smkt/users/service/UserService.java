@@ -51,8 +51,17 @@ public class UserService implements IUserService {
 	private Long defaultRoleId;
 
 	/** The super admin id. */
-	@Value("${superadmin.id}")
+	@Value(value = "${superadmin.id}")
 	private Long superAdminId;
+	
+	public UserService() {
+		if (superAdminId == null) {
+			superAdminId = 1L;
+		}
+		if (defaultRoleId == null) {
+			defaultRoleId = 3L;
+		}
+	}
 
 	/**
 	 * Gets the users.
