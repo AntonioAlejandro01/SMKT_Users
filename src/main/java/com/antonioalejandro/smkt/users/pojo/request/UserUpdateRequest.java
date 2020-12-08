@@ -9,12 +9,16 @@ package com.antonioalejandro.smkt.users.pojo.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Instantiates a new user update request.
  */
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 public class UserUpdateRequest {
 
 	/** The name. */
