@@ -97,7 +97,7 @@ public class UserController {
 			@RequestHeader(name = "Authorization", required = true) final String token) {
 
 		log.info("Call users/all");
-		if (!TokenUtils.isAuthorized(token, Arrays.asList(scopeAdm, scopeSuper, scopeReadMin))) {
+		if (!new TokenUtils(token).isAuthorized(Arrays.asList(scopeAdm, scopeSuper, scopeReadMin))) {
 			return createUnathorizedResponse(null);
 		}
 
@@ -128,7 +128,7 @@ public class UserController {
 			@RequestParam(name = "filter", required = true) final String filter,
 			@RequestParam(name = "value", required = true) final String value) {
 
-		if (!TokenUtils.isAuthorized(token, Arrays.asList(scopeAdm, scopeSuper, scopeReadMin))) {
+		if (!new TokenUtils(token).isAuthorized(Arrays.asList(scopeAdm, scopeSuper, scopeReadMin))) {
 			return createUnathorizedResponse(null);
 		}
 
@@ -187,7 +187,7 @@ public class UserController {
 
 		log.info("Call users/create");
 
-		if (!TokenUtils.isAuthorized(token, Arrays.asList(scopeAdm, scopeReadMin))) {
+		if (!new TokenUtils(token).isAuthorized(Arrays.asList(scopeAdm, scopeReadMin))) {
 			return createUnathorizedResponse(null);
 		}
 
@@ -228,7 +228,7 @@ public class UserController {
 
 		log.info("Call users/delete/{}", id);
 
-		if (!TokenUtils.isAuthorized(token, Arrays.asList(scopeAdm, scopeSuper))) {
+		if (!new TokenUtils(token).isAuthorized(Arrays.asList(scopeAdm, scopeSuper))) {
 			return createUnathorizedResponse(null);
 		}
 		String ms = validateId(id);
@@ -264,7 +264,7 @@ public class UserController {
 
 		log.info("Call users/id");
 
-		if (!TokenUtils.isAuthorized(token, Arrays.asList(scopeAdm, scopeSuper, scopeUpdateSelf))) {
+		if (!new TokenUtils(token).isAuthorized(Arrays.asList(scopeAdm, scopeSuper, scopeUpdateSelf))) {
 			return createUnathorizedResponse(null);
 		}
 

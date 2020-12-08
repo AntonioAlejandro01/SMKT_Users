@@ -16,12 +16,13 @@ class TokenUtilsTest {
 
 	@Test
 	void test() throws Exception {
-		TokenContent x = TokenUtils.getDataToken(TOKEN);
+		TokenUtils utils = new TokenUtils(TOKEN);
+		TokenContent x = utils.getDataToken(TOKEN);
 		assertThat(x).isInstanceOf(TokenContent.class);
 		assertEquals(TokenUtils.TOKEN_KEY + TOKEN, x.getToken());
 
-		assertEquals(true, TokenUtils.isAuthorized(TOKEN, Arrays.asList("")));
-		assertEquals(false, TokenUtils.isAuthorized(TOKEN, null));
-		assertEquals(false, TokenUtils.isAuthorized("", null));
+		assertEquals(true, utils.isAuthorized(Arrays.asList("")));
+		assertEquals(false, utils.isAuthorized(null));
+		assertEquals(false, utils.isAuthorized(null));
 	}
 }

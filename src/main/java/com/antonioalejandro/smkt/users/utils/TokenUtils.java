@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.antonioalejandro.smkt.users.pojo.TokenContent;
 
+import lombok.Getter;
+
 /**
  * The Class TokenUtils.
  */
@@ -29,10 +31,14 @@ public class TokenUtils {
 	@Value("${oauth.secret}")
 	private static String appSecret;
 
+	@Getter
+	private String token;
+
 	/**
 	 * Instantiates a new token utils.
 	 */
-	private TokenUtils() {
+	public TokenUtils(String token) {
+		this.token = token;
 	}
 
 	/**
@@ -41,7 +47,7 @@ public class TokenUtils {
 	 * @param token the token
 	 * @return the data token
 	 */
-	public static TokenContent getDataToken(String token) {
+	public TokenContent getDataToken(String token) {
 		return new TokenContent(TOKEN_KEY + token);
 	}
 
@@ -52,7 +58,7 @@ public class TokenUtils {
 	 * @param scopesPermitted the scopes permitted
 	 * @return true, if is authorized
 	 */
-	public static boolean isAuthorized(String token, List<String> scopesPermitted) {
+	public boolean isAuthorized(List<String> scopesPermitted) {
 
 		return !token.isEmpty() && scopesPermitted != null;
 	}
