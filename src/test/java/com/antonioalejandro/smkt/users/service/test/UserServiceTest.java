@@ -47,7 +47,7 @@ class UserServiceTest {
 	private BCryptPasswordEncoder encoder;
 
 	private final String MOCK_USERNAME_EMAIL = "admin";
-	private final Long MOCK_ID = 0L;
+	private final Long MOCK_ID = 1L;
 	private final String MOCK_ROLE_NAME = "ADMIN";
 
 	@BeforeEach
@@ -189,9 +189,38 @@ class UserServiceTest {
 		when(userDao.save(user)).thenReturn(user);
 
 		UserUpdateRequest request = createUserUpdateResquest();
+		request.setRole(MOCK_ROLE_NAME + "X");
+		when(roleService.getRoleByName(request.getRole())).thenReturn(new RoleResponse(new Role()));
 
-		when(roleService.getRoleByName(request.getRole()))
-				.thenReturn(new RoleResponse(new Role(MOCK_ID, MOCK_ROLE_NAME, null)));
+		UserResponse response = userService.updateUser(request, MOCK_ID);
+
+		assertThat(response).isInstanceOf(UserResponse.class);
+		assertNull(response.getUsers());
+		assertNotNull(response.getUser());
+		assertNull(response.getHttpStatus());
+		assertNull(response.getMessage());
+		assertThat(response.getUser()).isInstanceOf(User.class);
+
+	}
+
+	@Test
+	void testUpdateUserOkWithoutChangesOnUsernameAndEmail() throws Exception {
+		User user = createMockUser();
+
+		user.setEmail(UtilsForTesting.DATAOK);
+		user.setUsername(UtilsForTesting.DATAOK);
+
+		when(userDao.findById(MOCK_ID)).thenReturn(Optional.of(user));
+
+		when(userDao.getUsersSameEmail(UtilsForTesting.DATAOK)).thenReturn(0L);
+
+		when(userDao.getUsersSameUsername(UtilsForTesting.DATAOK)).thenReturn(0L);
+
+		when(userDao.save(user)).thenReturn(user);
+
+		UserUpdateRequest request = createUserUpdateResquest();
+
+		when(roleService.getRoleByName(request.getRole())).thenReturn(new RoleResponse(new Role()));
 
 		UserResponse response = userService.updateUser(request, MOCK_ID);
 
@@ -321,7 +350,7 @@ class UserServiceTest {
 	@Test
 	void testDeleteFailSuper() throws Exception {
 
-		UserResponse response = userService.deleteUser(1L);
+		UserResponse response = userService.deleteUser(0L);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -338,7 +367,30 @@ class UserServiceTest {
 
 		UserRegistrationRequest request = createUserRegistrationRequest();
 
-		when(roleService.getRoleById(3L)).thenReturn(new RoleResponse(new Role()));
+		when(roleService.getRoleById(0L)).thenReturn(new RoleResponse(new Role()));
+
+		when(userDao.getUsersSameEmail(request.getEmail())).thenReturn(0L);
+
+		when(userDao.getUsersSameUsername(request.getUsername())).thenReturn(0L);
+
+		UserResponse response = userService.createUser(request);
+
+		assertThat(response).isInstanceOf(UserResponse.class);
+		assertNull(response.getUsers());
+		assertNull(response.getUser());
+		assertNull(response.getHttpStatus());
+		assertNull(response.getMessage());
+
+	}
+
+	@Test
+	void testCreateUserOkWithoutLastname() throws Exception {
+
+		UserRegistrationRequest request = createUserRegistrationRequest();
+
+		request.setLastname(null);
+
+		when(roleService.getRoleById(0L)).thenReturn(new RoleResponse(new Role()));
 
 		when(userDao.getUsersSameEmail(request.getEmail())).thenReturn(0L);
 
@@ -359,7 +411,7 @@ class UserServiceTest {
 
 		UserRegistrationRequest request = createUserRegistrationRequest();
 
-		when(roleService.getRoleById(3L)).thenReturn(new RoleResponse(new Role()));
+		when(roleService.getRoleById(0L)).thenReturn(new RoleResponse(new Role()));
 
 		when(userDao.getUsersSameEmail(request.getEmail())).thenReturn(1L);
 
@@ -380,7 +432,7 @@ class UserServiceTest {
 
 		UserRegistrationRequest request = createUserRegistrationRequest();
 
-		when(roleService.getRoleById(3L)).thenReturn(new RoleResponse(new Role()));
+		when(roleService.getRoleById(0L)).thenReturn(new RoleResponse(new Role()));
 
 		when(userDao.getUsersSameEmail(request.getEmail())).thenReturn(0L);
 

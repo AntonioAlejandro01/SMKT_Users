@@ -47,7 +47,7 @@ public interface IUserService {
 	 * @param id                the id
 	 * @return the user response
 	 */
-	public UserResponse updateUser(UserUpdateRequest userUpdateRequest, Long id);
+	public UserResponse updateUser(UserUpdateRequest userUpdateRequest, long id);
 
 	/**
 	 * Creates the user.
@@ -63,6 +63,6 @@ public interface IUserService {
 	 * @param id the id
 	 * @return the user response
 	 */
-	public UserResponse deleteUser(Long id);
+	public UserResponse deleteUser(long id);
 
 }

@@ -48,20 +48,12 @@ public class UserService implements IUserService {
 
 	/** The default role id. */
 	@Value("${default.params.roles.id}")
-	private Long defaultRoleId;
+	private long defaultRoleId;
 
 	/** The super admin id. */
 	@Value(value = "${superadmin.id}")
-	private Long superAdminId;
-	
-	public UserService() {
-		if (superAdminId == null) {
-			superAdminId = 1L;
-		}
-		if (defaultRoleId == null) {
-			defaultRoleId = 3L;
-		}
-	}
+	private long superAdminId;
+
 
 	/**
 	 * Gets the users.
@@ -128,7 +120,7 @@ public class UserService implements IUserService {
 	 */
 	@Override
 	@Transactional
-	public UserResponse updateUser(final UserUpdateRequest userUpdateRequest, final Long id) {
+	public UserResponse updateUser(final UserUpdateRequest userUpdateRequest, final long id) {
 		log.debug("Call to UpdateUser -> id: {}, user: {}", id, userUpdateRequest);
 		final User currentUser = repository.findById(id).orElse(null);
 		if (currentUser == null) {
@@ -153,8 +145,8 @@ public class UserService implements IUserService {
 	 */
 	@Override
 	@Transactional
-	public UserResponse deleteUser(final Long id) {
-		if (id.equals(superAdminId)) {
+	public UserResponse deleteUser(final long id) {
+		if (id == superAdminId) {
 			return new UserResponse(HttpStatus.BAD_REQUEST, "Super Admin user can't be deleted. ");
 		}
 		if (repository.findById(id).isPresent()) {
