@@ -1,7 +1,7 @@
 package com.antonioalejandro.smkt.users.utils.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 
@@ -24,5 +24,14 @@ class TokenUtilsTest {
 		assertEquals(true, utils.isAuthorized(Arrays.asList("")));
 		assertEquals(false, utils.isAuthorized(null));
 		assertEquals(false, utils.isAuthorized(null));
+	}
+	
+	@Test
+	void test2() throws Exception {
+		TokenUtils utils = new TokenUtils("");
+		assertTrue(utils.getToken().isEmpty());
+		
+		assertFalse(utils.isAuthorized(Arrays.asList("")));
+		
 	}
 }

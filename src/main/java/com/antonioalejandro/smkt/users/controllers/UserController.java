@@ -233,7 +233,7 @@ public class UserController {
 		}
 		String ms = validateId(id);
 		if (!ms.isEmpty()) {
-			createBadRequestException(ms);
+			return createBadRequestException(ms);
 		}
 
 		return prepareResponse(userService.deleteUser(id), null);
