@@ -7,26 +7,39 @@
  */
 package com.antonioalejandro.smkt.users.pojo;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Getter;
-import lombok.NonNull;
 
 @Getter
 public class TokenContent {
 
-	/** The id. */
-	private Long id;
-
-	/** The token. */
-	@NonNull
-	private String token;
+	@JsonProperty("user_name")
+	private String username;
 	
-	public TokenContent() {
-		id = 2L;
-		token = "";
-	}
+	private List<String> scope;
 	
-	public TokenContent(String token) {
-		this.token = token;
-	}
+	private String name;
+	
+	private boolean active;
+	
+	private Long exp;
+	
+	private List<String> authorities;
+	
+	private String jti;
+	
+	private String email;
+	
+	@JsonProperty("client_id")
+	private String clientId;
+	
+	private String lastname;
+	
+	@JsonProperty("username")
+	private String usernameC;
+	
 
 }

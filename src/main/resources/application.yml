@@ -29,7 +29,7 @@ eureka:
  client:
   service-url:
    defaultZone: 
-    http://172.0.0.3:8761/eureka
+    http://localhost:8761/eureka
   fetchRegistry: true
 
 logging:
@@ -48,6 +48,9 @@ default:
 oauth:
  user: smkt-users
  secret: smkt-users
+ app-key-secret: 58c4581b7d7f9ab295ac3a273d15ad77af90d429f986dbfe82ca3241d9ef3dbb
+ 
+ 
  
 superadmin:
  id: 1

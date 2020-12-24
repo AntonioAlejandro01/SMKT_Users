@@ -7,10 +7,10 @@
  */
 package com.antonioalejandro.smkt.users.controllers;
 
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -31,7 +31,6 @@ import com.antonioalejandro.smkt.users.pojo.request.UserUpdateRequest;
 import com.antonioalejandro.smkt.users.pojo.response.GenericResponse;
 import com.antonioalejandro.smkt.users.pojo.response.UserResponse;
 import com.antonioalejandro.smkt.users.service.UserService;
-import com.antonioalejandro.smkt.users.utils.TokenUtils;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -50,21 +49,8 @@ import lombok.extern.slf4j.Slf4j;
 @Api(value = "/users", tags = { "Users" }, produces = "application/json", consumes = "application/json")
 public class UserController {
 
-	/** The scope super. */
-	@Value("${scopes.super}")
-	private String scopeSuper;
-
-	/** The scope read min. */
-	@Value("${scopes.read-min}")
-	private String scopeReadMin;
-
-	/** The scope update self. */
-	@Value("${scopes.update-self}")
-	private String scopeUpdateSelf;
-
-	/** The scope adm. */
-	@Value("${scopes.adm}")
-	private String scopeAdm;
+	@Value("${oauth.app-key-secret}")
+	private String secretApp;
 
 	/** The Constant VALID_EMAIL_ADDRESS_REGEX. */
 	private static final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern
@@ -97,10 +83,6 @@ public class UserController {
 			@RequestHeader(name = "Authorization", required = true) final String token) {
 
 		log.info("Call users/all");
-		if (!new TokenUtils(token).isAuthorized(Arrays.asList(scopeAdm, scopeSuper, scopeReadMin))) {
-			return createUnathorizedResponse(null);
-		}
-
 		return prepareResponse(userService.getUsers(), HttpStatus.OK);
 
 	}
@@ -125,13 +107,14 @@ public class UserController {
 	@GetMapping("/search")
 	public ResponseEntity<UserResponse> searchUser(
 			@RequestHeader(name = "Authorization", required = true) final String token,
+			@RequestHeader(name = "App-Key", required = false) final String appKey,
 			@RequestParam(name = "filter", required = true) final String filter,
 			@RequestParam(name = "value", required = true) final String value) {
 
-		if (!new TokenUtils(token).isAuthorized(Arrays.asList(scopeAdm, scopeSuper, scopeReadMin))) {
-			return createUnathorizedResponse(null);
+		if (validateAppKey(appKey)) {
+			return createUnathorizedResponse("The AppKey is not valid");
 		}
-
+		
 		if (filter == null || value == null) {
 			return createBadRequestException("The filter and value are mandatory. ");
 		}
@@ -187,10 +170,6 @@ public class UserController {
 
 		log.info("Call users/create");
 
-		if (!new TokenUtils(token).isAuthorized(Arrays.asList(scopeAdm, scopeReadMin))) {
-			return createUnathorizedResponse(null);
-		}
-
 		log.debug("User -> {}", req.toString());
 
 		StringBuilder ms = new StringBuilder();
@@ -228,9 +207,6 @@ public class UserController {
 
 		log.info("Call users/delete/{}", id);
 
-		if (!new TokenUtils(token).isAuthorized(Arrays.asList(scopeAdm, scopeSuper))) {
-			return createUnathorizedResponse(null);
-		}
 		String ms = validateId(id);
 		if (!ms.isEmpty()) {
 			return createBadRequestException(ms);
@@ -263,10 +239,6 @@ public class UserController {
 			@PathVariable(value = "id", required = true) final Long id) {
 
 		log.info("Call users/id");
-
-		if (!new TokenUtils(token).isAuthorized(Arrays.asList(scopeAdm, scopeSuper, scopeUpdateSelf))) {
-			return createUnathorizedResponse(null);
-		}
 
 		String ms = validateId(id);
 		if (!ms.isEmpty()) {
@@ -430,6 +402,10 @@ public class UserController {
 	 */
 	private ResponseEntity<UserResponse> prepareResponse(UserResponse userResponse, HttpStatus okOption) {
 		return new ResponseEntity<>(userResponse, userResponse.haveData() ? okOption : userResponse.getHttpStatus());
+	}
+	
+	private boolean validateAppKey(String appKey) {
+		return appKey != null && !secretApp.equals(DigestUtils.sha256Hex(appKey));
 	}
 
 }
