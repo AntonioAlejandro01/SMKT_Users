@@ -1,6 +1,8 @@
 # SMKT_Users
 This MS serve users in the database
 
+![Java CI with Maven](https://github.com/AntonioAlejandro01/SMKT_Users/workflows/Java%20CI%20with%20Maven/badge.svg?branch=master)
+
 ![](smktusers.png)
 
 ## Others Micro-services
