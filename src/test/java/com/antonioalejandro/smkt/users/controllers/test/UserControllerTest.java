@@ -14,18 +14,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.antonioalejandro.smkt.users.controllers.UserController;
 import com.antonioalejandro.smkt.users.entity.User;
+import com.antonioalejandro.smkt.users.pojo.TokenContent;
 import com.antonioalejandro.smkt.users.pojo.request.UserRegistrationRequest;
 import com.antonioalejandro.smkt.users.pojo.response.UserResponse;
 import com.antonioalejandro.smkt.users.service.UserService;
 import com.antonioalejandro.smkt.users.utils.TokenUtils;
-
-import antlr.collections.List;
 
 class UserControllerTest {
 
@@ -49,7 +47,7 @@ class UserControllerTest {
 
 	@Test
 	void testGetUsers() throws Exception {
-		when(utils.isAuthorized(Arrays.asList(null, null, null))).thenReturn(true);
+		when(utils.isAuthorized(Arrays.asList(null, null, null), new TokenContent())).thenReturn(true);
 
 		when(Userservice.getUsers()).thenReturn(new UserResponse(new ArrayList<User>()));
 
