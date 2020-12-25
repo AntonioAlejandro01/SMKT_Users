@@ -24,6 +24,7 @@ import com.antonioalejandro.smkt.users.UtilsForTesting;
 import com.antonioalejandro.smkt.users.dao.UserDao;
 import com.antonioalejandro.smkt.users.entity.Role;
 import com.antonioalejandro.smkt.users.entity.User;
+import com.antonioalejandro.smkt.users.pojo.TokenData;
 import com.antonioalejandro.smkt.users.pojo.request.UserRegistrationRequest;
 import com.antonioalejandro.smkt.users.pojo.request.UserUpdateRequest;
 import com.antonioalejandro.smkt.users.pojo.response.RoleResponse;
@@ -50,6 +51,8 @@ class UserServiceTest {
 	private final Long MOCK_ID = 1L;
 	private final String MOCK_ROLE_NAME = "ADMIN";
 
+	private TokenData tokenData = new TokenData();
+
 	@BeforeEach
 	public void init() {
 		MockitoAnnotations.initMocks(this);
@@ -59,7 +62,7 @@ class UserServiceTest {
 	void testGetUsersOk() throws Exception {
 		when(userDao.findAll()).thenReturn(createIterableUsers(false));
 
-		UserResponse response = userService.getUsers();
+		UserResponse response = userService.getUsers(tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNotNull(response.getUsers());
@@ -74,7 +77,7 @@ class UserServiceTest {
 	void testGetUsersFail() throws Exception {
 		when(userDao.findAll()).thenReturn(createIterableUsers(true));
 
-		UserResponse response = userService.getUsers();
+		UserResponse response = userService.getUsers(tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -90,7 +93,7 @@ class UserServiceTest {
 	void testGetUserByEmailOk() throws Exception {
 		when(userDao.findByEmail(MOCK_USERNAME_EMAIL)).thenReturn(new User());
 
-		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, true);
+		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, true, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -105,7 +108,7 @@ class UserServiceTest {
 	void testGetUserByEmailFail() throws Exception {
 		when(userDao.findByEmail(MOCK_USERNAME_EMAIL)).thenReturn(null);
 
-		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, true);
+		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, true, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -120,7 +123,7 @@ class UserServiceTest {
 	void testGetUserByUsernameOk() throws Exception {
 		when(userDao.findByUsername(MOCK_USERNAME_EMAIL)).thenReturn(new User());
 
-		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, false);
+		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, false, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -135,7 +138,7 @@ class UserServiceTest {
 	void testGetUserByUsernameFail() throws Exception {
 		when(userDao.findByUsername(MOCK_USERNAME_EMAIL)).thenReturn(null);
 
-		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, false);
+		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, false, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -150,7 +153,7 @@ class UserServiceTest {
 	void testGetUserByIdOk() throws Exception {
 		when(userDao.findById(MOCK_ID)).thenReturn(Optional.of(new User()));
 
-		UserResponse response = userService.getUserById(MOCK_ID);
+		UserResponse response = userService.getUserById(MOCK_ID, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -165,7 +168,7 @@ class UserServiceTest {
 	void testGetUserByIdFail() throws Exception {
 		when(userDao.findById(MOCK_ID)).thenReturn(Optional.empty());
 
-		UserResponse response = userService.getUserById(MOCK_ID);
+		UserResponse response = userService.getUserById(MOCK_ID, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -192,7 +195,7 @@ class UserServiceTest {
 		request.setRole(MOCK_ROLE_NAME + "X");
 		when(roleService.getRoleByName(request.getRole())).thenReturn(new RoleResponse(new Role()));
 
-		UserResponse response = userService.updateUser(request, MOCK_ID);
+		UserResponse response = userService.updateUser(request, MOCK_ID, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -222,7 +225,7 @@ class UserServiceTest {
 
 		when(roleService.getRoleByName(request.getRole())).thenReturn(new RoleResponse(new Role()));
 
-		UserResponse response = userService.updateUser(request, MOCK_ID);
+		UserResponse response = userService.updateUser(request, MOCK_ID, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -239,7 +242,7 @@ class UserServiceTest {
 
 		UserUpdateRequest request = createUserUpdateResquest();
 
-		UserResponse response = userService.updateUser(request, MOCK_ID);
+		UserResponse response = userService.updateUser(request, MOCK_ID, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -258,7 +261,7 @@ class UserServiceTest {
 
 		when(userDao.getUsersSameEmail(UtilsForTesting.DATAOK)).thenReturn(1L);
 
-		UserResponse response = userService.updateUser(createUserUpdateResquest(), MOCK_ID);
+		UserResponse response = userService.updateUser(createUserUpdateResquest(), MOCK_ID, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -278,7 +281,7 @@ class UserServiceTest {
 
 		when(userDao.getUsersSameUsername(UtilsForTesting.DATAOK)).thenReturn(1L);
 
-		UserResponse response = userService.updateUser(createUserUpdateResquest(), MOCK_ID);
+		UserResponse response = userService.updateUser(createUserUpdateResquest(), MOCK_ID, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -304,7 +307,7 @@ class UserServiceTest {
 
 		when(roleService.getRoleByName(request.getRole())).thenReturn(new RoleResponse(HttpStatus.NOT_FOUND, null));
 
-		UserResponse response = userService.updateUser(request, MOCK_ID);
+		UserResponse response = userService.updateUser(request, MOCK_ID, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -319,7 +322,7 @@ class UserServiceTest {
 	void testDeleteOk() throws Exception {
 		when(userDao.findById(MOCK_ID)).thenReturn(Optional.of(createMockUser()));
 
-		UserResponse response = userService.deleteUser(MOCK_ID);
+		UserResponse response = userService.deleteUser(MOCK_ID, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -335,7 +338,7 @@ class UserServiceTest {
 	void testDeleteFailId() throws Exception {
 		when(userDao.findById(MOCK_ID)).thenReturn(Optional.empty());
 
-		UserResponse response = userService.deleteUser(MOCK_ID);
+		UserResponse response = userService.deleteUser(MOCK_ID, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -350,7 +353,7 @@ class UserServiceTest {
 	@Test
 	void testDeleteFailSuper() throws Exception {
 
-		UserResponse response = userService.deleteUser(0L);
+		UserResponse response = userService.deleteUser(0L, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -373,7 +376,7 @@ class UserServiceTest {
 
 		when(userDao.getUsersSameUsername(request.getUsername())).thenReturn(0L);
 
-		UserResponse response = userService.createUser(request);
+		UserResponse response = userService.createUser(request, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -396,7 +399,7 @@ class UserServiceTest {
 
 		when(userDao.getUsersSameUsername(request.getUsername())).thenReturn(0L);
 
-		UserResponse response = userService.createUser(request);
+		UserResponse response = userService.createUser(request, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -415,7 +418,7 @@ class UserServiceTest {
 
 		when(userDao.getUsersSameEmail(request.getEmail())).thenReturn(1L);
 
-		UserResponse response = userService.createUser(request);
+		UserResponse response = userService.createUser(request, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -438,7 +441,7 @@ class UserServiceTest {
 
 		when(userDao.getUsersSameUsername(request.getUsername())).thenReturn(1L);
 
-		UserResponse response = userService.createUser(request);
+		UserResponse response = userService.createUser(request, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
