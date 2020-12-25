@@ -1,25 +1,68 @@
+/*
+ * @Author AntonioAlejandro01
+ * 
+ * @link http://antonioalejandro.com
+ * @link https://github.com/AntonioAlejandro01/SMKT_Users
+ * 
+ */
 package com.antonioalejandro.smkt.users.service;
 
-import java.util.List;
+import com.antonioalejandro.smkt.users.pojo.request.UserRegistrationRequest;
+import com.antonioalejandro.smkt.users.pojo.request.UserUpdateRequest;
+import com.antonioalejandro.smkt.users.pojo.response.UserResponse;
 
-import com.antonioalejandro.smkt.users.entity.User;
-import com.antonioalejandro.smkt.users.pojo.UserDTO;
-import com.antonioalejandro.smkt.users.pojo.UserRegistrationDTO;
-import com.antonioalejandro.smkt.users.pojo.UserResponse;
-
+/**
+ * The Interface IUserService.
+ */
 public interface IUserService {
 
-	public List<UserDTO> getUsers();
+	/**
+	 * Gets the users.
+	 *
+	 * @return the users
+	 */
+	public UserResponse getUsers();
 
-	public List<UserDTO> getUsersByEmail(String email);
+	/**
+	 * Gets the user by email or username.
+	 *
+	 * @param value   the value
+	 * @param isEmail the is email
+	 * @return the user by email or username
+	 */
+	public UserResponse getUserByEmailOrUsername(String value, boolean isEmail);
 
-	public UserDTO getUserById(long id);
+	/**
+	 * Gets the user by id.
+	 *
+	 * @param id the id
+	 * @return the user by id
+	 */
+	public UserResponse getUserById(long id);
 
-	public UserResponse UpdateUser(UserRegistrationDTO registrationDTO, Long id);
+	/**
+	 * Update user.
+	 *
+	 * @param userUpdateRequest the user update request
+	 * @param id                the id
+	 * @return the user response
+	 */
+	public UserResponse updateUser(UserUpdateRequest userUpdateRequest, long id);
 
-	public UserDTO create(UserRegistrationDTO user);
+	/**
+	 * Creates the user.
+	 *
+	 * @param user the user
+	 * @return the user response
+	 */
+	public UserResponse createUser(UserRegistrationRequest user);
 
-	public UserResponse delete(Long id);
+	/**
+	 * Delete user.
+	 *
+	 * @param id the id
+	 * @return the user response
+	 */
+	public UserResponse deleteUser(long id);
 
-	public boolean verifyUser(String usernameOrEmail, String password);
 }

@@ -1,3 +1,10 @@
+/*
+ * @Author AntonioAlejandro01
+ * 
+ * @link http://antonioalejandro.com
+ * @link https://github.com/AntonioAlejandro01/SMKT_Users
+ * 
+ */
 package com.antonioalejandro.smkt.users.entity;
 
 import java.io.Serializable;
@@ -11,107 +18,73 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-@Entity
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+/**
+ * The Class User.
+ */
 @Table(name = "users")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
 public class User implements Serializable {
 
-	/**
-	 *
-	 */
+	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = -8280727779861053395L;
+
+	/** The id. */
+	@JsonProperty
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
+	/** The name. */
+	@JsonProperty
 	@Column(nullable = false)
 	private String name;
-	@Column(nullable = false)
+
+	/** The lastname. */
+	@JsonProperty(required = false)
+	@Column(nullable = true)
 	private String lastname;
+
+	/** The username. */
+	@JsonProperty
 	@Column(nullable = false, unique = true)
 	private String username;
+
+	/** The email. */
+	@JsonProperty
 	@Column(nullable = false, unique = true)
 	private String email;
+
+	/** The password. */
+	@JsonProperty
 	@Column(nullable = false)
 	private String password;
+
+	/** The role. */
+	@JsonIgnore
 	@ManyToOne(optional = false, fetch = FetchType.LAZY)
 	private Role role;
 
-	public User() {
-	}
-
-	public User(Long id, String name, String lastname, String username, String email, String password, Role role) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.lastname = lastname;
-		this.username = username;
-		this.email = email;
-		this.password = password;
-		this.role = role;
-	}
-
-	public User(String name, String lastname, String username, String email, String password, Role role) {
-		super();
-		this.name = name;
-		this.lastname = lastname;
-		this.username = username;
-		this.email = email;
-		this.password = password;
-		this.role = role;
-	}
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(final Long id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(final String name) {
-		this.name = name;
-	}
-
-	public String getLastname() {
-		return lastname;
-	}
-
-	public void setLastname(final String lastname) {
-		this.lastname = lastname;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(final String username) {
-		this.username = username;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(final String email) {
-		this.email = email;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(final String password) {
-		this.password = password;
-	}
-
-	public Role getRole() {
-		return role;
-	}
-
-	public void setRole(Role role) {
-		this.role = role;
+	/**
+	 * Gets the role name.
+	 *
+	 * @return the role name
+	 */
+	@JsonGetter("role")
+	public String getRoleName() {
+		return role.getName();
 	}
 
 }
