@@ -4,7 +4,7 @@ spring:
    smkt-users
  datasource:
   url:
-   jdbc:mysql://localhost:3306/SMKT_USERS?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Madrid
+   jdbc:mysql://smkt-mysql:3306/SMKT_USERS?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Madrid
   username:
    root
   password:
@@ -29,7 +29,7 @@ eureka:
  client:
   service-url:
    defaultZone: 
-    http://localhost:8761/eureka
+    http://smkt-eureka:8761/eureka
   fetchRegistry: true
 
 logging:
@@ -60,23 +60,3 @@ scopes:
  adm: users.adm
  read-min: users.read-min
  update-self: users.update-self
- 
- 
- 
- 
- 
-sonar:
- jdbc:
-  dialect: mssql
- projectKey: smkt_users
- projectName: smkt_users
- projectVersion: 1.0
- sources: src
- language: java
- binaries: build/classes
- tests: junit
- dynamicAnalysis: reuseReports
- junit:
-  reportsPath: build/test-reports
- java:
-  coveragePlugin: jacoco
