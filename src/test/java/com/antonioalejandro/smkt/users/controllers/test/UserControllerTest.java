@@ -19,7 +19,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.antonioalejandro.smkt.users.controllers.UserController;
 import com.antonioalejandro.smkt.users.entity.User;
-import com.antonioalejandro.smkt.users.pojo.TokenContent;
+import com.antonioalejandro.smkt.users.pojo.TokenData;
 import com.antonioalejandro.smkt.users.pojo.request.UserRegistrationRequest;
 import com.antonioalejandro.smkt.users.pojo.response.UserResponse;
 import com.antonioalejandro.smkt.users.service.UserService;
@@ -47,7 +47,7 @@ class UserControllerTest {
 
 	@Test
 	void testGetUsers() throws Exception {
-		when(utils.isAuthorized(Arrays.asList(null, null, null), new TokenContent())).thenReturn(true);
+		when(utils.isAuthorized(Arrays.asList(null, null, null), new TokenData())).thenReturn(true);
 
 		when(Userservice.getUsers()).thenReturn(new UserResponse(new ArrayList<User>()));
 

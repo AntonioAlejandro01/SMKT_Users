@@ -7,6 +7,7 @@
  */
 package com.antonioalejandro.smkt.users.service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -21,10 +22,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.antonioalejandro.smkt.users.dao.UserDao;
 import com.antonioalejandro.smkt.users.entity.Role;
 import com.antonioalejandro.smkt.users.entity.User;
+import com.antonioalejandro.smkt.users.pojo.TokenData;
 import com.antonioalejandro.smkt.users.pojo.request.UserRegistrationRequest;
 import com.antonioalejandro.smkt.users.pojo.request.UserUpdateRequest;
 import com.antonioalejandro.smkt.users.pojo.response.RoleResponse;
 import com.antonioalejandro.smkt.users.pojo.response.UserResponse;
+import com.antonioalejandro.smkt.users.utils.TokenUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,6 +36,26 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class UserService implements IUserService {
+
+	/** The default role id. */
+	@Value("${default.params.roles.id}")
+	private long defaultRoleId;
+
+	/** The super admin id. */
+	@Value(value = "${superadmin.id}")
+	private long superAdminId;
+
+	@Value("${scopes.super}")
+	private String scopeSuper;
+
+	@Value("${scopes.adm}")
+	private String scopeAdm;
+
+	@Value("${scopes.read-min}")
+	private String scopeReadMin;
+
+	@Value("${scopes.super}")
+	private String scopeUpdateSelf;
 
 	/** The repository. */
 	@Autowired
@@ -46,14 +69,8 @@ public class UserService implements IUserService {
 	@Autowired
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-	/** The default role id. */
-	@Value("${default.params.roles.id}")
-	private long defaultRoleId;
-
-	/** The super admin id. */
-	@Value(value = "${superadmin.id}")
-	private long superAdminId;
-
+	@Autowired
+	private TokenUtils tokenUtils;
 
 	/**
 	 * Gets the users.
@@ -61,13 +78,14 @@ public class UserService implements IUserService {
 	 * @return the users
 	 */
 	@Override
-	public UserResponse getUsers() {
+	public UserResponse getUsers(final TokenData tokenData) {
 		log.debug("Call to getUsers");
 		List<User> users = StreamSupport.stream(repository.findAll().spliterator(), false).collect(Collectors.toList());
 		if (users.isEmpty()) {
 			return new UserResponse(HttpStatus.NO_CONTENT, "No Content");
 		}
-		return new UserResponse(users);
+		
+		return adaptUsersByScopes(users, tokenData);
 	}
 
 	/**
@@ -78,7 +96,7 @@ public class UserService implements IUserService {
 	 * @return the user by email or username
 	 */
 	@Override
-	public UserResponse getUserByEmailOrUsername(final String value, final boolean isEmail) {
+	public UserResponse getUserByEmailOrUsername(final String value, final boolean isEmail, final TokenData tokenData) {
 
 		log.debug("Call to getUserByEmailOrUsername. Value:{}, IsEmail:{}", value, isEmail);
 
@@ -86,6 +104,20 @@ public class UserService implements IUserService {
 
 		if (user == null) {
 			return new UserResponse(HttpStatus.NOT_FOUND, isEmail ? "Email does't exists" : "Username does't exists");
+		}
+
+		return adaptUserByScopes(user, tokenData);
+	}
+	
+	@Override
+	public UserResponse getUserByUsernameKey(final String value) {
+
+		log.debug("Call to getUserByEmailOrUsername. Value:{}", value);
+
+		final User user = repository.findByUsername(value);
+
+		if (user == null) {
+			return new UserResponse(HttpStatus.NOT_FOUND, "Username does't exists");
 		}
 
 		return new UserResponse(user);
@@ -99,7 +131,7 @@ public class UserService implements IUserService {
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public UserResponse getUserById(final long id) {
+	public UserResponse getUserById(final long id, final TokenData tokenData) {
 		log.debug("Call to getUserById");
 
 		Optional<User> optUser = repository.findById(id);
@@ -108,7 +140,7 @@ public class UserService implements IUserService {
 			return new UserResponse(HttpStatus.NOT_FOUND, "Id not found. ");
 		}
 
-		return new UserResponse(optUser.get());
+		return adaptUserByScopes(optUser.get(), tokenData);
 	}
 
 	/**
@@ -120,12 +152,19 @@ public class UserService implements IUserService {
 	 */
 	@Override
 	@Transactional
-	public UserResponse updateUser(final UserUpdateRequest userUpdateRequest, final long id) {
+	public UserResponse updateUser(final UserUpdateRequest userUpdateRequest, final long id,
+			final TokenData tokenData) {
 		log.debug("Call to UpdateUser -> id: {}, user: {}", id, userUpdateRequest);
 		final User currentUser = repository.findById(id).orElse(null);
 		if (currentUser == null) {
 			return new UserResponse(HttpStatus.BAD_REQUEST, "Id don't exists. ");
 		}
+		Optional<UserResponse> oUserResponse = canUpdate(tokenData, currentUser,userUpdateRequest);
+		
+		if (oUserResponse.isPresent()) {
+			return oUserResponse.get();
+		}
+		
 		if (!updateEmail(currentUser, userUpdateRequest) || !updateUsername(currentUser, userUpdateRequest)
 				|| !updateRole(currentUser, userUpdateRequest)) {
 			return new UserResponse(HttpStatus.BAD_REQUEST,
@@ -145,11 +184,20 @@ public class UserService implements IUserService {
 	 */
 	@Override
 	@Transactional
-	public UserResponse deleteUser(final long id) {
+	public UserResponse deleteUser(final long id, final TokenData tokenData) {
 		if (id == superAdminId) {
 			return new UserResponse(HttpStatus.BAD_REQUEST, "Super Admin user can't be deleted. ");
 		}
-		if (repository.findById(id).isPresent()) {
+		boolean canDelete = false;
+
+		if (tokenUtils.isAuthorized(Arrays.asList(scopeAdm), tokenData)) {
+			Optional<User> objectiveUser = repository.findById(id);
+			if (objectiveUser.isPresent() && "USER".equals(objectiveUser.get().getRole().getName())) {
+				canDelete = true;
+			}
+		}
+
+		if (canDelete && repository.findById(id).isPresent()) {
 			repository.deleteById(id);
 			return new UserResponse(HttpStatus.ACCEPTED, "User was deleted");
 		} else {
@@ -165,7 +213,7 @@ public class UserService implements IUserService {
 	 */
 	@Override
 	@Transactional
-	public UserResponse createUser(final UserRegistrationRequest userRequest) {
+	public UserResponse createUser(final UserRegistrationRequest userRequest, final TokenData tokenData) {
 		log.debug("Call to Save");
 
 		final Role role = roleService.getRoleById(defaultRoleId).getRole();
@@ -262,6 +310,79 @@ public class UserService implements IUserService {
 			}
 		}
 		return true;
+	}
+
+	private UserResponse adaptUsersByScopes(List<User> users, TokenData tokenData) {
+
+		if (tokenUtils.isAuthorized(Arrays.asList(scopeReadMin), tokenData)) {
+			users = users.stream().map(user -> {
+				User newUser = new User();
+				newUser.setUsername(user.getUsername());
+				return newUser;
+			}).collect(Collectors.toList());
+		} else if (tokenUtils.isAuthorized(Arrays.asList(scopeAdm), tokenData)) {
+			users = users.stream().map(user -> {
+				if ("SUPERADMIN".equals(user.getRole().getName())) {
+					user.setPassword(null);
+					user.setId(null);
+				}
+				return user;
+			}).collect(Collectors.toList());
+		} else if (!tokenUtils.isAuthorized(Arrays.asList(scopeSuper), tokenData)) {
+			return new UserResponse(HttpStatus.UNAUTHORIZED, "You haven't got the correct scope");
+		}
+
+		return new UserResponse(users);
+	}
+	
+	
+	private UserResponse adaptUserByScopes(User user, TokenData tokenData) {
+		if (tokenUtils.isAuthorized(Arrays.asList(scopeReadMin), tokenData)) {
+			String username = user.getUsername();
+			user = new User();
+			user.setUsername(username);
+		} else if (tokenUtils.isAuthorized(Arrays.asList(scopeAdm), tokenData)) {
+			user.setPassword(null);
+			user.setId(null);
+		} else if (!tokenUtils.isAuthorized(Arrays.asList(scopeSuper), tokenData)) {
+			return new UserResponse(HttpStatus.UNAUTHORIZED, "You haven't got the correct scope");
+		}
+		return new UserResponse(user);
+	}
+	
+	private Optional<UserResponse> canUpdate(TokenData tokenData, User currentUser,UserUpdateRequest userUpdateRequest) {
+		
+		if (tokenUtils.isAuthorized(Arrays.asList(scopeUpdateSelf), tokenData)) {
+			if (currentUser.getUsername().equals(tokenData.getUsername())) {
+				userUpdateRequest.setRole("USER");
+				return Optional.empty();
+			} else {				
+				return Optional.of(new UserResponse(HttpStatus.BAD_REQUEST, "You only can update yourself"));
+			}
+		} else if (tokenUtils.isAuthorized(Arrays.asList(scopeAdm), tokenData)) {
+			if (currentUser.getUsername().equals(tokenData.getUsername())) {
+				userUpdateRequest.setRole("ADMIN");
+				return Optional.empty();
+			} else {
+				if ("USER".equals(currentUser.getRole().getName())) {
+					userUpdateRequest.setRole("USER");
+					return Optional.empty();	
+				} else {
+					return Optional.of(new UserResponse(HttpStatus.BAD_REQUEST, "You can't update ADMIN users or SUPERADMIN user"));					
+				}
+			}
+		} else if (tokenUtils.isAuthorized(Arrays.asList(scopeSuper), tokenData)) {
+			if (currentUser.getUsername().equals(tokenData.getUsername())) {
+				userUpdateRequest.setRole("SUPERADMIN");
+				return Optional.empty();
+			} 
+			if ("SUPERADMIN".equals(userUpdateRequest.getRole())) {
+				return Optional.of(new UserResponse(HttpStatus.BAD_REQUEST, "You can't update to SUPERADMIN user"));
+			}
+			return Optional.empty();	
+		} else {
+			return Optional.of(new UserResponse(HttpStatus.UNAUTHORIZED, "You can't update users"));
+		}
 	}
 
 }

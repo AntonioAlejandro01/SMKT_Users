@@ -43,7 +43,7 @@ logging:
 default:
  params:
   roles:
-   id: 2
+   id: 3
    
 oauth:
  user: smkt-users

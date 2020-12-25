@@ -15,7 +15,7 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.antonioalejandro.smkt.users.pojo.TokenContent;
+import com.antonioalejandro.smkt.users.pojo.TokenData;
 
 import lombok.Getter;
 
@@ -50,11 +50,11 @@ public class TokenUtils {
 	 * @param token the token
 	 * @return the data token
 	 */
-	public TokenContent getDataToken(String token) {
+	public TokenData getDataToken(String token) {
 		WebClient client = WebClientFactory
 				.getWebClient(WebClientFactory.getURLInstanceService(oauthId, discoveryClient), appUser, appSecret);
-		HttpEntity<TokenContent> entity = client.post().uri("/oauth/check_token")
-				.body(String.format("token=%s", token), String.class).retrieve().toEntity(TokenContent.class).block();
+		HttpEntity<TokenData> entity = client.post().uri("/oauth/check_token")
+				.body(String.format("token=%s", token), String.class).retrieve().toEntity(TokenData.class).block();
 		return entity.getBody();
 
 	}
@@ -66,12 +66,12 @@ public class TokenUtils {
 	 * @param scopesPermitted the scopes permitted
 	 * @return true, if is authorized
 	 */
-	public boolean isAuthorized(List<String> scopesPermitted, TokenContent tokenContent) {
+	public boolean isAuthorized(List<String> scopesPermitted, TokenData tokenData) {
 		if (scopesPermitted== null || scopesPermitted.isEmpty()) {
 			return false;
 		}
 		for (String scope : scopesPermitted) {
-			if (tokenContent.getScope().contains(scope)) {
+			if (tokenData.getScope().contains(scope)) {
 				return true;
 			}
 		}

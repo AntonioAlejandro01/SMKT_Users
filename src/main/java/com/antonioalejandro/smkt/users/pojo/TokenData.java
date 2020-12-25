@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 
 @Getter
-public class TokenContent {
+public class TokenData {
 
 	@JsonProperty("user_name")
 	private String username;

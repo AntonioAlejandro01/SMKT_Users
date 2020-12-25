@@ -7,8 +7,11 @@
  */
 package com.antonioalejandro.smkt.users.controllers;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,11 +29,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.antonioalejandro.smkt.users.entity.User;
+import com.antonioalejandro.smkt.users.pojo.TokenData;
 import com.antonioalejandro.smkt.users.pojo.request.UserRegistrationRequest;
 import com.antonioalejandro.smkt.users.pojo.request.UserUpdateRequest;
 import com.antonioalejandro.smkt.users.pojo.response.GenericResponse;
 import com.antonioalejandro.smkt.users.pojo.response.UserResponse;
 import com.antonioalejandro.smkt.users.service.UserService;
+import com.antonioalejandro.smkt.users.utils.TokenUtils;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -64,6 +70,9 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private TokenUtils tokenUtils;
+
 	/**
 	 * Gets the users.
 	 *
@@ -83,7 +92,7 @@ public class UserController {
 			@RequestHeader(name = "Authorization", required = true) final String token) {
 
 		log.info("Call users/all");
-		return prepareResponse(userService.getUsers(), HttpStatus.OK);
+		return prepareResponse(userService.getUsers(tokenUtils.getDataToken(token)), HttpStatus.OK);
 
 	}
 
@@ -111,40 +120,51 @@ public class UserController {
 			@RequestParam(name = "filter", required = true) final String filter,
 			@RequestParam(name = "value", required = true) final String value) {
 
+		if (appKey == null || appKey.isBlank()) {
+
+			if (validateNullFields(filter, value)) {
+				return createBadRequestException("The filter and value are mandatory. ");
+			}
+
+			TokenData tokenData = tokenUtils.getDataToken(token);
+
+			UserResponse userResponse;
+
+			if (filter.equalsIgnoreCase("id")) {
+				long id;
+				try {
+					id = Long.parseLong(value);
+				} catch (Exception e) {
+					return createBadRequestException("The id must be a number");
+				}
+				String ms = validateId(id);
+				if (!ms.isEmpty()) {
+					return createBadRequestException(ms);
+				}
+				userResponse = userService.getUserById(id, tokenData);
+			} else if (filter.equalsIgnoreCase("username") || filter.equalsIgnoreCase("email")) {
+				boolean isUsername = filter.equalsIgnoreCase("username");
+				String ms = isUsername ? validateUsername(value) : validateEmail(value);
+				if (!ms.isEmpty()) {
+					return createBadRequestException(ms);
+				}
+				userResponse = userService.getUserByEmailOrUsername(value, !isUsername, tokenData);
+			} else {
+				return createBadRequestException("Filter type is not valid. (id, username or email). ");
+			}
+
+			return prepareResponse(userResponse, HttpStatus.OK);
+		}
+
 		if (validateAppKey(appKey)) {
 			return createUnathorizedResponse("The AppKey is not valid");
-		}
-		
-		if (filter == null || value == null) {
-			return createBadRequestException("The filter and value are mandatory. ");
-		}
-
-		UserResponse userResponse;
-
-		if (filter.equalsIgnoreCase("id")) {
-			long id;
-			try {
-				id = Long.parseLong(value);
-			} catch (Exception e) {
-				return createBadRequestException("The id must be a number");
-			}
-			String ms = validateId(id);
-			if (!ms.isEmpty()) {
-				return createBadRequestException(ms);
-			}
-			userResponse = userService.getUserById(id);
-		} else if (filter.equalsIgnoreCase("username") || filter.equalsIgnoreCase("email")) {
-			boolean isUsername = filter.equalsIgnoreCase("username");
-			String ms = isUsername ? validateUsername(value) : validateEmail(value);
-			if (!ms.isEmpty()) {
-				return createBadRequestException(ms);
-			}
-			userResponse = userService.getUserByEmailOrUsername(value, !isUsername);
 		} else {
-			return createBadRequestException("Filter type is not valid. (id, username or email). ");
+			String ms = validateUsername(value);
+			if (!ms.isEmpty()) {
+				return createBadRequestException(ms);
+			}
+			return prepareResponse(userService.getUserByUsernameKey(value), HttpStatus.OK);
 		}
-
-		return prepareResponse(userResponse, HttpStatus.OK);
 
 	}
 
@@ -182,7 +202,7 @@ public class UserController {
 			return createBadRequestException(ms.toString());
 		}
 
-		return prepareResponse(userService.createUser(req), HttpStatus.CREATED);
+		return prepareResponse(userService.createUser(req, tokenUtils.getDataToken(token)), HttpStatus.CREATED);
 	}
 
 	/**
@@ -212,7 +232,7 @@ public class UserController {
 			return createBadRequestException(ms);
 		}
 
-		return prepareResponse(userService.deleteUser(id), null);
+		return prepareResponse(userService.deleteUser(id, tokenUtils.getDataToken(token)), HttpStatus.ACCEPTED);
 	}
 
 	/**
@@ -245,7 +265,7 @@ public class UserController {
 			return createBadRequestException(ms);
 		}
 
-		return prepareResponse(userService.updateUser(req, id), HttpStatus.ACCEPTED);
+		return prepareResponse(userService.updateUser(req, id, tokenUtils.getDataToken(token)), HttpStatus.ACCEPTED);
 	}
 
 	/**
@@ -403,9 +423,14 @@ public class UserController {
 	private ResponseEntity<UserResponse> prepareResponse(UserResponse userResponse, HttpStatus okOption) {
 		return new ResponseEntity<>(userResponse, userResponse.haveData() ? okOption : userResponse.getHttpStatus());
 	}
-	
+
 	private boolean validateAppKey(String appKey) {
 		return appKey != null && !secretApp.equals(DigestUtils.sha256Hex(appKey));
+	}
+
+	private boolean validateNullFields(String filter, String value) {
+		return filter == null || value == null;
+
 	}
 
 }
