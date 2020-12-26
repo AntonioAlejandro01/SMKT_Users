@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.antonioalejandro.smkt.users.config.AppEnviroment;
 import com.antonioalejandro.smkt.users.dao.UserDao;
 import com.antonioalejandro.smkt.users.entity.Role;
 import com.antonioalejandro.smkt.users.entity.User;
@@ -38,25 +38,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UserService implements IUserService {
 
-	/** The default role id. */
-	@Value("${default.params.roles.id}")
-	private long defaultRoleId;
-
-	/** The super admin id. */
-	@Value(value = "${superadmin.id}")
-	private long superAdminId;
-
-	@Value("${scopes.super}")
-	private String scopeSuper;
-
-	@Value("${scopes.adm}")
-	private String scopeAdm;
-
-	@Value("${scopes.read-min}")
-	private String scopeReadMin;
-
-	@Value("${scopes.update-self}")
-	private String scopeUpdateSelf;
+	/** The env. */
+	@Autowired
+	private AppEnviroment env;
 
 	/** The repository. */
 	@Autowired
@@ -70,12 +54,14 @@ public class UserService implements IUserService {
 	@Autowired
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
 
+	/** The token utils. */
 	@Autowired
 	private TokenUtils tokenUtils;
 
 	/**
 	 * Gets the users.
 	 *
+	 * @param tokenData the token data
 	 * @return the users
 	 */
 	@Override
@@ -92,8 +78,9 @@ public class UserService implements IUserService {
 	/**
 	 * Gets the user by email or username.
 	 *
-	 * @param value   the value
-	 * @param isEmail the is email
+	 * @param value     the value
+	 * @param isEmail   the is email
+	 * @param tokenData the token data
 	 * @return the user by email or username
 	 */
 	@Override
@@ -110,6 +97,12 @@ public class UserService implements IUserService {
 		return adaptUserByScopes(user, tokenData);
 	}
 
+	/**
+	 * Gets the user by username key.
+	 *
+	 * @param value the value
+	 * @return the user by username key
+	 */
 	@Override
 	public UserResponse getUserByUsernameKey(final String value) {
 
@@ -127,7 +120,8 @@ public class UserService implements IUserService {
 	/**
 	 * Gets the user by id.
 	 *
-	 * @param id the id
+	 * @param id        the id
+	 * @param tokenData the token data
 	 * @return the user by id
 	 */
 	@Override
@@ -149,6 +143,7 @@ public class UserService implements IUserService {
 	 *
 	 * @param userUpdateRequest the user update request
 	 * @param id                the id
+	 * @param tokenData         the token data
 	 * @return the user response
 	 */
 	@Override
@@ -180,19 +175,20 @@ public class UserService implements IUserService {
 	/**
 	 * Delete user.
 	 *
-	 * @param id the id
+	 * @param id        the id
+	 * @param tokenData the token data
 	 * @return the user response
 	 */
 	@Override
 	@Transactional
 	public UserResponse deleteUser(final long id, final TokenData tokenData) {
-		if (id == superAdminId) {
+		if (id == env.getSuperAdminId()) {
 			return new UserResponse(HttpStatus.BAD_REQUEST, "Super Admin user can't be deleted. ");
 		}
 		boolean canDelete = false;
-		if(tokenUtils.isAuthorized(Arrays.asList(scopeSuper),tokenData)) {
+		if (tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)) {
 			canDelete = true;
-		} else if (tokenUtils.isAuthorized(Arrays.asList(scopeAdm), tokenData)) {
+		} else if (tokenUtils.isAuthorized(Arrays.asList(env.getScopeAdm()), tokenData)) {
 			Optional<User> objectiveUser = repository.findById(id);
 			if (objectiveUser.isPresent() && Constants.USER_ROLE_NAME.equals(objectiveUser.get().getRole().getName())) {
 				canDelete = true;
@@ -211,6 +207,7 @@ public class UserService implements IUserService {
 	 * Creates the user.
 	 *
 	 * @param userRequest the user request
+	 * @param tokenData   the token data
 	 * @return the user response
 	 */
 	@Override
@@ -218,7 +215,7 @@ public class UserService implements IUserService {
 	public UserResponse createUser(final UserRegistrationRequest userRequest, final TokenData tokenData) {
 		log.debug("Call to Save");
 
-		final Role role = roleService.getRoleById(defaultRoleId).getRole();
+		final Role role = roleService.getRoleById(env.getDefaultRoleId()).getRole();
 
 		if (existsEmail(userRequest.getEmail()) || existsUsername(userRequest.getUsername())) {
 			return new UserResponse(HttpStatus.BAD_REQUEST, "BAD REQUEST");
@@ -314,65 +311,90 @@ public class UserService implements IUserService {
 		return true;
 	}
 
+	/**
+	 * Adapt users by scopes.
+	 *
+	 * @param users     the users
+	 * @param tokenData the token data
+	 * @return the user response
+	 */
 	private UserResponse adaptUsersByScopes(List<User> users, TokenData tokenData) {
 
-		if (tokenUtils.isAuthorized(Arrays.asList(scopeReadMin), tokenData)) {
+		if (tokenUtils.isAuthorized(Arrays.asList(env.getScopeReadMin()), tokenData)) {
 			users = users.stream().map(user -> {
 				User newUser = new User();
 				newUser.setUsername(user.getUsername());
 				return newUser;
 			}).collect(Collectors.toList());
-		} else if (tokenUtils.isAuthorized(Arrays.asList(scopeAdm), tokenData)) {
+		} else if (tokenUtils.isAuthorized(Arrays.asList(env.getScopeAdm()), tokenData)) {
 			users = users.stream().map(user -> {
 				user.setId(null);
-				if (Constants.SUPERADMIN_ROLE_NAME.equals(user.getRole().getName()) || Constants.ADMIN_ROLE_NAME.equals(user.getRole().getName())) {
+				if (Constants.SUPERADMIN_ROLE_NAME.equals(user.getRole().getName())
+						|| Constants.ADMIN_ROLE_NAME.equals(user.getRole().getName())) {
 					user.setPassword(null);
 				}
 				return user;
 			}).collect(Collectors.toList());
-		} else if (!tokenUtils.isAuthorized(Arrays.asList(scopeSuper), tokenData)) {
+		} else if (!tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)) {
 			return new UserResponse(HttpStatus.UNAUTHORIZED, "You haven't got the correct scope");
 		}
 
 		return new UserResponse(users);
 	}
 
+	/**
+	 * Adapt user by scopes.
+	 *
+	 * @param user      the user
+	 * @param tokenData the token data
+	 * @return the user response
+	 */
 	private UserResponse adaptUserByScopes(User user, TokenData tokenData) {
-		if (tokenUtils.isAuthorized(Arrays.asList(scopeReadMin), tokenData)) {
+		if (tokenUtils.isAuthorized(Arrays.asList(env.getScopeReadMin()), tokenData)) {
 			String username = user.getUsername();
 			user = new User();
 			user.setUsername(username);
-		} else if (tokenUtils.isAuthorized(Arrays.asList(scopeAdm), tokenData)) {
+		} else if (tokenUtils.isAuthorized(Arrays.asList(env.getScopeAdm()), tokenData)) {
 			user.setId(null);
-			if (Constants.SUPERADMIN_ROLE_NAME.equals(user.getRole().getName()) || Constants.ADMIN_ROLE_NAME.equals(user.getRole().getName())) {
+			if (Constants.SUPERADMIN_ROLE_NAME.equals(user.getRole().getName())
+					|| Constants.ADMIN_ROLE_NAME.equals(user.getRole().getName())) {
 				user.setPassword(null);
 			}
 
-		} else if (!tokenUtils.isAuthorized(Arrays.asList(scopeSuper), tokenData)) {
+		} else if (!tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)) {
 			return new UserResponse(HttpStatus.UNAUTHORIZED, "You haven't got the correct scope");
 		}
 		return new UserResponse(user);
 	}
 
+	/**
+	 * Can update.
+	 *
+	 * @param tokenData         the token data
+	 * @param currentUser       the current user
+	 * @param userUpdateRequest the user update request
+	 * @return the optional
+	 */
 	private Optional<UserResponse> canUpdate(TokenData tokenData, User currentUser,
 			UserUpdateRequest userUpdateRequest) {
 
-		if (tokenUtils.isAuthorized(Arrays.asList(scopeUpdateSelf), tokenData)) {
+		if (tokenUtils.isAuthorized(Arrays.asList(env.getScopeUpdateSelf()), tokenData)) {
 			return doIfUpdateYourself(currentUser, userUpdateRequest, tokenData);
-		} else if (tokenUtils.isAuthorized(Arrays.asList(scopeAdm), tokenData)) {
+		}
+		if (tokenUtils.isAuthorized(Arrays.asList(env.getScopeAdm()), tokenData)) {
 			if (currentUser.getUsername().equals(tokenData.getUsername())) {
 				userUpdateRequest.setRole(Constants.ADMIN_ROLE_NAME);
 				return Optional.empty();
-			} else {
-				if (Constants.USER_ROLE_NAME.equals(currentUser.getRole().getName())) {
-					userUpdateRequest.setRole(Constants.USER_ROLE_NAME);
-					return Optional.empty();
-				} else {
-					return Optional.of(new UserResponse(HttpStatus.BAD_REQUEST,
-							"You can't update ADMIN users or SUPERADMIN user"));
-				}
 			}
-		} else if (tokenUtils.isAuthorized(Arrays.asList(scopeSuper), tokenData)) {
+			if (Constants.USER_ROLE_NAME.equals(currentUser.getRole().getName())) {
+				userUpdateRequest.setRole(Constants.USER_ROLE_NAME);
+				return Optional.empty();
+			}
+			return Optional
+					.of(new UserResponse(HttpStatus.BAD_REQUEST, "You can't update ADMIN users or SUPERADMIN user"));
+
+		}
+		if (tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)) {
 			if (currentUser.getUsername().equals(tokenData.getUsername())) {
 				userUpdateRequest.setRole(Constants.SUPERADMIN_ROLE_NAME);
 				return Optional.empty();
@@ -381,12 +403,21 @@ public class UserService implements IUserService {
 				return Optional.of(new UserResponse(HttpStatus.BAD_REQUEST, "You can't update to SUPERADMIN user"));
 			}
 			return Optional.empty();
-		} else {
-			return Optional.of(new UserResponse(HttpStatus.UNAUTHORIZED, "You can't update users"));
 		}
+		return Optional.of(new UserResponse(HttpStatus.UNAUTHORIZED, "You can't update users"));
+
 	}
-	
-	private Optional<UserResponse> doIfUpdateYourself(User currentUser,UserUpdateRequest userUpdateRequest, TokenData tokenData) {
+
+	/**
+	 * Do if update yourself.
+	 *
+	 * @param currentUser       the current user
+	 * @param userUpdateRequest the user update request
+	 * @param tokenData         the token data
+	 * @return the optional
+	 */
+	private Optional<UserResponse> doIfUpdateYourself(User currentUser, UserUpdateRequest userUpdateRequest,
+			TokenData tokenData) {
 		if (currentUser.getUsername().equals(tokenData.getUsername())) {
 			userUpdateRequest.setRole(Constants.USER_ROLE_NAME);
 			return Optional.empty();

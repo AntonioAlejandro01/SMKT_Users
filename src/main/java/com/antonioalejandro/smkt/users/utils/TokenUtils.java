@@ -10,7 +10,6 @@ package com.antonioalejandro.smkt.users.utils;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,6 +19,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import com.antonioalejandro.smkt.users.config.AppEnviroment;
 import com.antonioalejandro.smkt.users.pojo.TokenData;
 
 /**
@@ -27,20 +27,11 @@ import com.antonioalejandro.smkt.users.pojo.TokenData;
  */
 public class TokenUtils {
 
-	/** The Constant TOKEN_KEY. */
-	public static final String TOKEN_KEY = "Bearer ";
+	/** The env. */
+	@Autowired
+	private AppEnviroment env;
 
-	/** The app user. */
-	@Value("${oauth.user}")
-	private String appUser;
-
-	/** The app secret. */
-	@Value("${oauth.secret}")
-	private String appSecret;
-
-	@Value("${oauth.id}")
-	private String oauthId;
-
+	/** The discovery client. */
 	@Autowired
 	private DiscoveryClient discoveryClient;
 
@@ -52,14 +43,14 @@ public class TokenUtils {
 	 */
 	public TokenData getDataToken(String token) {
 		WebClient client = WebClientFactory
-				.getWebClient(WebClientFactory.getURLInstanceService(oauthId, discoveryClient));
+				.getWebClient(WebClientFactory.getURLInstanceService(env.getOauthId(), discoveryClient));
 
 		LinkedMultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-		body.add("token", token.split(" ")[1]);
+		body.add(Constants.TOKEN_FIELD_NAME, token.split(" ")[1]);
 
 		TokenData data;
 		try {
-			data = client.post().uri("/oauth/check_token").contentType(MediaType.APPLICATION_FORM_URLENCODED)
+			data = client.post().uri(env.getOauthPath()).contentType(MediaType.APPLICATION_FORM_URLENCODED)
 					.body(BodyInserters.fromFormData(body)).retrieve().bodyToMono(TokenData.class).block();
 		} catch (WebClientResponseException e) {
 			throw new WebClientResponseException(401, HttpStatus.UNAUTHORIZED.toString(), HttpHeaders.EMPTY, null,
@@ -73,8 +64,8 @@ public class TokenUtils {
 	/**
 	 * Checks if is authorized.
 	 *
-	 * @param token           the token
 	 * @param scopesPermitted the scopes permitted
+	 * @param tokenData the token data
 	 * @return true, if is authorized
 	 */
 	public boolean isAuthorized(List<String> scopesPermitted, TokenData tokenData) {

@@ -23,5 +23,6 @@ class TokenDataTest {
 		assertNull(token.getScope());
 		assertNull(token.getUsername());
 		assertNull(token.getUsernameC());
+		assertFalse(token.isActive());
 	}
 }

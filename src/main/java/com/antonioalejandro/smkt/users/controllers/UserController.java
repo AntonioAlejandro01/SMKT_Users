@@ -9,11 +9,9 @@ package com.antonioalejandro.smkt.users.controllers;
 
 import java.util.Optional;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,12 +25,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.antonioalejandro.smkt.users.config.AppEnviroment;
 import com.antonioalejandro.smkt.users.pojo.TokenData;
 import com.antonioalejandro.smkt.users.pojo.request.UserRegistrationRequest;
 import com.antonioalejandro.smkt.users.pojo.request.UserUpdateRequest;
 import com.antonioalejandro.smkt.users.pojo.response.GenericResponse;
 import com.antonioalejandro.smkt.users.pojo.response.UserResponse;
 import com.antonioalejandro.smkt.users.service.UserService;
+import com.antonioalejandro.smkt.users.utils.Constants;
 import com.antonioalejandro.smkt.users.utils.TokenUtils;
 
 import io.swagger.annotations.Api;
@@ -52,23 +52,17 @@ import lombok.extern.slf4j.Slf4j;
 @Api(value = "/users", tags = { "Users" }, produces = "application/json", consumes = "application/json")
 public class UserController {
 
-	@Value("${oauth.app-key-secret}")
-	private String secretApp;
-
-	/** The Constant VALID_EMAIL_ADDRESS_REGEX. */
-	private static final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern
-			.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
-
-	/** The Constant VALID_PASSWORD_REGEX. */
-	private static final Pattern VALID_PASSWORD_REGEX = Pattern
-			.compile("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{8,20}$");
-
 	/** The user service. */
 	@Autowired
 	private UserService userService;
 
+	/** The token utils. */
 	@Autowired
 	private TokenUtils tokenUtils;
+
+	/** The env. */
+	@Autowired
+	private AppEnviroment env;
 
 	/**
 	 * Gets the users.
@@ -96,9 +90,10 @@ public class UserController {
 	/**
 	 * Search user.
 	 *
-	 * @param token  the token
+	 * @param token the token
+	 * @param appKey the app key
 	 * @param filter the filter
-	 * @param value  the value
+	 * @param value the value
 	 * @return the response entity
 	 */
 	@ApiOperation(value = "Saerch user by username, email or id ", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
@@ -134,7 +129,7 @@ public class UserController {
 	 * Creates the.
 	 *
 	 * @param token the token
-	 * @param req   the req
+	 * @param req the req
 	 * @return the response entity
 	 */
 	@ApiOperation(value = "Create a user ", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
@@ -171,7 +166,7 @@ public class UserController {
 	 * Delete user.
 	 *
 	 * @param token the token
-	 * @param id    the id
+	 * @param id the id
 	 * @return the response entity
 	 */
 	@ApiOperation(value = "Delete user by id ", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
@@ -201,8 +196,8 @@ public class UserController {
 	 * Put user by id.
 	 *
 	 * @param token the token
-	 * @param req   the req
-	 * @param id    the id
+	 * @param req the req
+	 * @param id the id
 	 * @return the response entity
 	 */
 	@ApiOperation(value = "Update user by id", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
@@ -255,7 +250,7 @@ public class UserController {
 	 * @return true, if successful
 	 */
 	private boolean validateEmailRegex(String email) {
-		Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(email);
+		Matcher matcher = Constants.VALID_EMAIL_ADDRESS_REGEX.matcher(email);
 		return matcher.find();
 	}
 
@@ -321,7 +316,7 @@ public class UserController {
 	 * @return true, if successful
 	 */
 	private boolean validatePasswordRegex(String password) {
-		Matcher matcher = VALID_PASSWORD_REGEX.matcher(password);
+		Matcher matcher = Constants.VALID_PASSWORD_REGEX.matcher(password);
 		return matcher.find();
 	}
 
@@ -379,22 +374,41 @@ public class UserController {
 	 * Prepare response.
 	 *
 	 * @param userResponse the user response
-	 * @param okOption     the ok option
+	 * @param okOption the ok option
 	 * @return the response entity
 	 */
 	private ResponseEntity<UserResponse> prepareResponse(UserResponse userResponse, HttpStatus okOption) {
 		return new ResponseEntity<>(userResponse, userResponse.haveData() ? okOption : userResponse.getHttpStatus());
 	}
 
+	/**
+	 * Validate app key.
+	 *
+	 * @param appKey the app key
+	 * @return true, if successful
+	 */
 	private boolean validateAppKey(String appKey) {
-		return appKey != null && !secretApp.equals(DigestUtils.sha256Hex(appKey));
+		return appKey != null && !env.getSecretApp().equals(DigestUtils.sha256Hex(appKey));
 	}
 
+	/**
+	 * Validate null fields.
+	 *
+	 * @param filter the filter
+	 * @param value the value
+	 * @return true, if successful
+	 */
 	private boolean validateNullFields(String filter, String value) {
 		return filter == null || value == null;
 
 	}
 
+	/**
+	 * Do if id filter.
+	 *
+	 * @param value the value
+	 * @return the optional
+	 */
 	private Optional<ResponseEntity<UserResponse>> doIfIdFilter(String value) {
 		long id;
 		try {
@@ -409,6 +423,13 @@ public class UserController {
 		return Optional.empty();
 	}
 
+	/**
+	 * Do if appkey.
+	 *
+	 * @param appKey the app key
+	 * @param value the value
+	 * @return the response entity
+	 */
 	private ResponseEntity<UserResponse> doIfAppkey(String appKey, String value) {
 		if (validateAppKey(appKey)) {
 			return createUnathorizedResponse("The AppKey is not valid");
@@ -422,6 +443,14 @@ public class UserController {
 
 	}
 
+	/**
+	 * Do if not app key.
+	 *
+	 * @param filter the filter
+	 * @param value the value
+	 * @param tokenData the token data
+	 * @return the response entity
+	 */
 	private ResponseEntity<UserResponse> doIfNotAppKey(String filter, String value, TokenData tokenData) {
 		if (filter.equalsIgnoreCase("id")) {
 			Optional<ResponseEntity<UserResponse>> oUserResponse = doIfIdFilter(value);

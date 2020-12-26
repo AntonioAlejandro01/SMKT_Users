@@ -47,6 +47,7 @@ default:
    
 oauth:
  id: smkt-oauth
+ path: /oauth/check_token
  user: smkt-users
  secret: smkt-users
  app-key-secret: 58c4581b7d7f9ab295ac3a273d15ad77af90d429f986dbfe82ca3241d9ef3dbb

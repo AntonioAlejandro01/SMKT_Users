@@ -62,9 +62,24 @@ public class PersistentContext {
 		return new ScopesService();
 	}
 
+	/**
+	 * Gets the token utils.
+	 *
+	 * @return the token utils
+	 */
 	@Bean
 	public TokenUtils getTokenUtils() {
 		return new TokenUtils();
+	}
+	
+	/**
+	 * Gets the app enviroment.
+	 *
+	 * @return the app enviroment
+	 */
+	@Bean
+	public AppEnviroment getAppEnviroment() {
+		return new AppEnviroment();
 	}
 
 }
