@@ -22,8 +22,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 import com.antonioalejandro.smkt.users.pojo.TokenData;
 
-import lombok.Getter;
-
 /**
  * The Class TokenUtils.
  */
@@ -42,9 +40,6 @@ public class TokenUtils {
 
 	@Value("${oauth.id}")
 	private String oauthId;
-
-	@Getter
-	private String token;
 
 	@Autowired
 	private DiscoveryClient discoveryClient;

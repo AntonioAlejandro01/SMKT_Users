@@ -1,6 +1,7 @@
 package com.antonioalejandro.smkt.users.model.test.entity.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
@@ -47,6 +48,10 @@ class UserTest {
 		assertEquals(UtilsForTesting.DATAOK, user1.getUsername());
 		assertEquals(UtilsForTesting.LONGOK, user1.getId());
 		assertThat(user1.getRole()).isInstanceOf(Role.class);
+		
 
+		assertThat(user1.getRoleName()).isInstanceOf(String.class);
+		user1.setRole(null);
+		assertNull(user1.getRoleName());
 	}
 }
