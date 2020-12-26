@@ -20,6 +20,7 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -36,6 +37,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class User implements Serializable {
 
 	/** The Constant serialVersionUID. */
@@ -84,7 +86,7 @@ public class User implements Serializable {
 	 */
 	@JsonGetter("role")
 	public String getRoleName() {
-		return role.getName();
+		return role == null ? null:role.getName();
 	}
 
 }

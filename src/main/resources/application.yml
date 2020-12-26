@@ -43,9 +43,11 @@ logging:
 default:
  params:
   roles:
-   id: 2
+   id: 3
    
 oauth:
+ id: smkt-oauth
+ path: /oauth/check_token
  user: smkt-users
  secret: smkt-users
  app-key-secret: 58c4581b7d7f9ab295ac3a273d15ad77af90d429f986dbfe82ca3241d9ef3dbb
@@ -60,23 +62,3 @@ scopes:
  adm: users.adm
  read-min: users.read-min
  update-self: users.update-self
- 
- 
- 
- 
- 
-sonar:
- jdbc:
-  dialect: mssql
- projectKey: smkt_users
- projectName: smkt_users
- projectVersion: 1.0
- sources: src
- language: java
- binaries: build/classes
- tests: junit
- dynamicAnalysis: reuseReports
- junit:
-  reportsPath: build/test-reports
- java:
-  coveragePlugin: jacoco

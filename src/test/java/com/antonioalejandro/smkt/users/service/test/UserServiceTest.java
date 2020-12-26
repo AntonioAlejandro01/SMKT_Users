@@ -7,8 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,15 +23,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.antonioalejandro.smkt.users.UtilsForTesting;
+import com.antonioalejandro.smkt.users.config.AppEnviroment;
 import com.antonioalejandro.smkt.users.dao.UserDao;
 import com.antonioalejandro.smkt.users.entity.Role;
 import com.antonioalejandro.smkt.users.entity.User;
+import com.antonioalejandro.smkt.users.pojo.TokenData;
 import com.antonioalejandro.smkt.users.pojo.request.UserRegistrationRequest;
 import com.antonioalejandro.smkt.users.pojo.request.UserUpdateRequest;
 import com.antonioalejandro.smkt.users.pojo.response.RoleResponse;
 import com.antonioalejandro.smkt.users.pojo.response.UserResponse;
 import com.antonioalejandro.smkt.users.service.RoleService;
 import com.antonioalejandro.smkt.users.service.UserService;
+import com.antonioalejandro.smkt.users.utils.TokenUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 class UserServiceTest {
@@ -41,25 +46,44 @@ class UserServiceTest {
 	private UserDao userDao;
 
 	@Mock
+	private TokenUtils tokenUtils;
+
+	@Mock
 	private RoleService roleService;
+
+	@Mock
+	private AppEnviroment env;
 
 	@Mock
 	private BCryptPasswordEncoder encoder;
 
+	@Mock
+	private TokenData tokenData;
+
 	private final String MOCK_USERNAME_EMAIL = "admin";
 	private final Long MOCK_ID = 1L;
-	private final String MOCK_ROLE_NAME = "ADMIN";
+	private final String MOCK_ROLE_NAME = "USER";
+	private final String MOCK_SCOPE_ADM = "adm";
+	private final String MOCK_SCOPE_SUPER = "super";
+	private final String MOCK_SCOPE_READ = "read";
+	private final String MOCK_SCOPE_UPDATE = "update";
 
 	@BeforeEach
 	public void init() {
 		MockitoAnnotations.initMocks(this);
+		when(env.getScopeReadMin()).thenReturn(MOCK_SCOPE_READ);
+		when(env.getScopeAdm()).thenReturn(MOCK_SCOPE_ADM);
+		when(env.getScopeSuper()).thenReturn(MOCK_SCOPE_SUPER);
+		when(env.getScopeUpdateSelf()).thenReturn(MOCK_SCOPE_UPDATE);
 	}
 
+	/* GET_USERS */
 	@Test
-	void testGetUsersOk() throws Exception {
+	void testGetUsersOkRead() throws Exception {
 		when(userDao.findAll()).thenReturn(createIterableUsers(false));
 
-		UserResponse response = userService.getUsers();
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeReadMin()), tokenData)).thenReturn(true);
+		UserResponse response = userService.getUsers(tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNotNull(response.getUsers());
@@ -67,6 +91,50 @@ class UserServiceTest {
 		assertNull(response.getHttpStatus());
 		assertNull(response.getMessage());
 		assertThat(response.getUsers()).isInstanceOf(List.class);
+	}
+
+	@Test
+	void testGetUsersOkAdm() throws Exception {
+		when(userDao.findAll()).thenReturn(createIterableUsers(false));
+
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeAdm()), tokenData)).thenReturn(true);
+		UserResponse response = userService.getUsers(tokenData);
+
+		assertThat(response).isInstanceOf(UserResponse.class);
+		assertNotNull(response.getUsers());
+		assertNull(response.getUser());
+		assertNull(response.getHttpStatus());
+		assertNull(response.getMessage());
+		assertThat(response.getUsers()).isInstanceOf(List.class);
+	}
+
+	@Test
+	void testGetUsersOkSuper() throws Exception {
+		when(userDao.findAll()).thenReturn(createIterableUsers(false));
+
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)).thenReturn(true);
+		UserResponse response = userService.getUsers(tokenData);
+
+		assertThat(response).isInstanceOf(UserResponse.class);
+		assertNotNull(response.getUsers());
+		assertNull(response.getUser());
+		assertNull(response.getHttpStatus());
+		assertNull(response.getMessage());
+		assertThat(response.getUsers()).isInstanceOf(List.class);
+	}
+
+	@Test
+	void testGetUsersFailScope() throws Exception {
+		when(userDao.findAll()).thenReturn(createIterableUsers(false));
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)).thenReturn(false);
+		UserResponse response = userService.getUsers(tokenData);
+
+		assertThat(response).isInstanceOf(UserResponse.class);
+		assertNull(response.getUsers());
+		assertNull(response.getUser());
+		assertNotNull(response.getHttpStatus());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getHttpStatus());
+		assertNotNull(response.getMessage());
 
 	}
 
@@ -74,7 +142,7 @@ class UserServiceTest {
 	void testGetUsersFail() throws Exception {
 		when(userDao.findAll()).thenReturn(createIterableUsers(true));
 
-		UserResponse response = userService.getUsers();
+		UserResponse response = userService.getUsers(tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -82,15 +150,17 @@ class UserServiceTest {
 		assertNotNull(response.getHttpStatus());
 		assertEquals(HttpStatus.NO_CONTENT, response.getHttpStatus());
 		assertNotNull(response.getMessage());
-		assertEquals("No Content", response.getMessage());
 
 	}
 
+	/* GET_USER_By_Email_Or_Username */
 	@Test
-	void testGetUserByEmailOk() throws Exception {
+	void testGetUserByEmailOkScopeRead() throws Exception {
 		when(userDao.findByEmail(MOCK_USERNAME_EMAIL)).thenReturn(new User());
 
-		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, true);
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeReadMin()), tokenData)).thenReturn(true);
+
+		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, true, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -102,10 +172,67 @@ class UserServiceTest {
 	}
 
 	@Test
+	void testGetUserByEmailOkScopeAdm() throws Exception {
+		User user = new User();
+		Role role = new Role(MOCK_ID, "ADMIN", Set.of());
+		user.setRole(role);
+		when(userDao.findByEmail(MOCK_USERNAME_EMAIL)).thenReturn(user);
+
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeAdm()), tokenData)).thenReturn(true);
+
+		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, true, tokenData);
+
+		assertThat(response).isInstanceOf(UserResponse.class);
+		assertNull(response.getUsers());
+		assertNotNull(response.getUser());
+		assertNull(response.getHttpStatus());
+		assertNull(response.getMessage());
+		assertThat(response.getUser()).isInstanceOf(User.class);
+
+	}
+
+	@Test
+	void testGetUserByEmailOkScopeSuper() throws Exception {
+		when(userDao.findByEmail(MOCK_USERNAME_EMAIL)).thenReturn(new User());
+
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)).thenReturn(true);
+
+		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, true, tokenData);
+
+		assertThat(response).isInstanceOf(UserResponse.class);
+		assertNull(response.getUsers());
+		assertNotNull(response.getUser());
+		assertNull(response.getHttpStatus());
+		assertNull(response.getMessage());
+		assertThat(response.getUser()).isInstanceOf(User.class);
+
+	}
+
+	@Test
+	void testGetUserByEmailOkScopeSuperFail() throws Exception {
+		User user = new User();
+		Role role = new Role(MOCK_ID, "ADMIN", Set.of());
+		user.setRole(role);
+		when(userDao.findByEmail(MOCK_USERNAME_EMAIL)).thenReturn(user);
+
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)).thenReturn(false);
+
+		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, true, tokenData);
+
+		assertThat(response).isInstanceOf(UserResponse.class);
+		assertNull(response.getUsers());
+		assertNull(response.getUser());
+		assertNotNull(response.getHttpStatus());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getHttpStatus());
+		assertNotNull(response.getMessage());
+
+	}
+
+	@Test
 	void testGetUserByEmailFail() throws Exception {
 		when(userDao.findByEmail(MOCK_USERNAME_EMAIL)).thenReturn(null);
 
-		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, true);
+		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, true, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -113,14 +240,13 @@ class UserServiceTest {
 		assertNotNull(response.getHttpStatus());
 		assertEquals(HttpStatus.NOT_FOUND, response.getHttpStatus());
 		assertNotNull(response.getMessage());
-		assertEquals("Email does't exists", response.getMessage());
 	}
 
 	@Test
 	void testGetUserByUsernameOk() throws Exception {
 		when(userDao.findByUsername(MOCK_USERNAME_EMAIL)).thenReturn(new User());
-
-		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, false);
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)).thenReturn(true);
+		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, false, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -135,7 +261,7 @@ class UserServiceTest {
 	void testGetUserByUsernameFail() throws Exception {
 		when(userDao.findByUsername(MOCK_USERNAME_EMAIL)).thenReturn(null);
 
-		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, false);
+		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, false, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -143,14 +269,46 @@ class UserServiceTest {
 		assertNotNull(response.getHttpStatus());
 		assertEquals(HttpStatus.NOT_FOUND, response.getHttpStatus());
 		assertNotNull(response.getMessage());
-		assertEquals("Username does't exists", response.getMessage());
+	}
+
+	/* GET_BY_USERNAME_KEY */
+
+	@Test
+	void testGetUserByUsernameKeyOk() throws Exception {
+		when(userDao.findByUsername(MOCK_USERNAME_EMAIL)).thenReturn(new User());
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)).thenReturn(true);
+		UserResponse response = userService.getUserByUsernameKey(MOCK_USERNAME_EMAIL);
+
+		assertThat(response).isInstanceOf(UserResponse.class);
+		assertNull(response.getUsers());
+		assertNotNull(response.getUser());
+		assertNull(response.getHttpStatus());
+		assertNull(response.getMessage());
+		assertThat(response.getUser()).isInstanceOf(User.class);
+
 	}
 
 	@Test
+	void testGetUserByUsernameKeyFail() throws Exception {
+		when(userDao.findByUsername(MOCK_USERNAME_EMAIL)).thenReturn(null);
+
+		UserResponse response = userService.getUserByEmailOrUsername(MOCK_USERNAME_EMAIL, false, tokenData);
+
+		assertThat(response).isInstanceOf(UserResponse.class);
+		assertNull(response.getUsers());
+		assertNull(response.getUser());
+		assertNotNull(response.getHttpStatus());
+		assertEquals(HttpStatus.NOT_FOUND, response.getHttpStatus());
+		assertNotNull(response.getMessage());
+
+	}
+
+	/* GET_USER_BY_ID */
+	@Test
 	void testGetUserByIdOk() throws Exception {
 		when(userDao.findById(MOCK_ID)).thenReturn(Optional.of(new User()));
-
-		UserResponse response = userService.getUserById(MOCK_ID);
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)).thenReturn(true);
+		UserResponse response = userService.getUserById(MOCK_ID, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -165,7 +323,7 @@ class UserServiceTest {
 	void testGetUserByIdFail() throws Exception {
 		when(userDao.findById(MOCK_ID)).thenReturn(Optional.empty());
 
-		UserResponse response = userService.getUserById(MOCK_ID);
+		UserResponse response = userService.getUserById(MOCK_ID, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -173,14 +331,19 @@ class UserServiceTest {
 		assertNotNull(response.getHttpStatus());
 		assertEquals(HttpStatus.NOT_FOUND, response.getHttpStatus());
 		assertNotNull(response.getMessage());
-		assertEquals("Id not found. ", response.getMessage());
+
 	}
 
+	/* UPDATE_USER */
 	@Test
-	void testUpdateUserOk() throws Exception {
+	void testUpdateUserOkScopeUpdate() throws Exception {
 		User user = createMockUser();
-
+		user.setRole(new Role(MOCK_ID, MOCK_ROLE_NAME, Set.of()));
 		when(userDao.findById(MOCK_ID)).thenReturn(Optional.of(user));
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeUpdateSelf()), tokenData)).thenReturn(true);
+		when(tokenData.getUsername()).thenReturn(user.getUsername());
+
+		when(roleService.getRoleByName(MOCK_ROLE_NAME)).thenReturn(new RoleResponse(new Role()));
 
 		when(userDao.getUsersSameEmail(UtilsForTesting.DATAOK)).thenReturn(0L);
 
@@ -188,11 +351,7 @@ class UserServiceTest {
 
 		when(userDao.save(user)).thenReturn(user);
 
-		UserUpdateRequest request = createUserUpdateResquest();
-		request.setRole(MOCK_ROLE_NAME + "X");
-		when(roleService.getRoleByName(request.getRole())).thenReturn(new RoleResponse(new Role()));
-
-		UserResponse response = userService.updateUser(request, MOCK_ID);
+		UserResponse response = userService.updateUser(createUserUpdateResquest(), MOCK_ID, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -200,17 +359,17 @@ class UserServiceTest {
 		assertNull(response.getHttpStatus());
 		assertNull(response.getMessage());
 		assertThat(response.getUser()).isInstanceOf(User.class);
-
 	}
 
 	@Test
-	void testUpdateUserOkWithoutChangesOnUsernameAndEmail() throws Exception {
+	void testUpdateUserOkScopeAdm() throws Exception {
 		User user = createMockUser();
-
-		user.setEmail(UtilsForTesting.DATAOK);
-		user.setUsername(UtilsForTesting.DATAOK);
-
+		user.setRole(new Role(MOCK_ID, "ADMIN", Set.of()));
 		when(userDao.findById(MOCK_ID)).thenReturn(Optional.of(user));
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeAdm()), tokenData)).thenReturn(true);
+		when(tokenData.getUsername()).thenReturn(user.getUsername());
+
+		when(roleService.getRoleByName(MOCK_ROLE_NAME)).thenReturn(new RoleResponse(new Role()));
 
 		when(userDao.getUsersSameEmail(UtilsForTesting.DATAOK)).thenReturn(0L);
 
@@ -218,11 +377,7 @@ class UserServiceTest {
 
 		when(userDao.save(user)).thenReturn(user);
 
-		UserUpdateRequest request = createUserUpdateResquest();
-
-		when(roleService.getRoleByName(request.getRole())).thenReturn(new RoleResponse(new Role()));
-
-		UserResponse response = userService.updateUser(request, MOCK_ID);
+		UserResponse response = userService.updateUser(createUserUpdateResquest(), MOCK_ID, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -230,7 +385,101 @@ class UserServiceTest {
 		assertNull(response.getHttpStatus());
 		assertNull(response.getMessage());
 		assertThat(response.getUser()).isInstanceOf(User.class);
+	}
 
+	@Test
+	void testUpdateUserOkScopeAdmOther() throws Exception {
+		User user = createMockUser();
+		user.setRole(new Role(MOCK_ID, "USER", Set.of()));
+		when(userDao.findById(MOCK_ID)).thenReturn(Optional.of(user));
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeAdm()), tokenData)).thenReturn(true);
+		when(tokenData.getUsername()).thenReturn(user.getUsername() + "X");
+
+		when(roleService.getRoleByName(MOCK_ROLE_NAME)).thenReturn(new RoleResponse(new Role()));
+
+		when(userDao.getUsersSameEmail(UtilsForTesting.DATAOK)).thenReturn(0L);
+
+		when(userDao.getUsersSameUsername(UtilsForTesting.DATAOK)).thenReturn(0L);
+
+		when(userDao.save(user)).thenReturn(user);
+
+		UserResponse response = userService.updateUser(createUserUpdateResquest(), MOCK_ID, tokenData);
+
+		assertThat(response).isInstanceOf(UserResponse.class);
+		assertNull(response.getUsers());
+		assertNotNull(response.getUser());
+		assertNull(response.getHttpStatus());
+		assertNull(response.getMessage());
+		assertThat(response.getUser()).isInstanceOf(User.class);
+	}
+
+	@Test
+	void testUpdateUserOkScopeSuper() throws Exception {
+		User user = createMockUser();
+		user.setRole(new Role(MOCK_ID, "SUPERADMIN", Set.of()));
+		when(userDao.findById(MOCK_ID)).thenReturn(Optional.of(user));
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)).thenReturn(true);
+		when(tokenData.getUsername()).thenReturn(user.getUsername());
+
+		when(roleService.getRoleByName(MOCK_ROLE_NAME)).thenReturn(new RoleResponse(new Role()));
+
+		when(userDao.getUsersSameEmail(UtilsForTesting.DATAOK)).thenReturn(0L);
+
+		when(userDao.getUsersSameUsername(UtilsForTesting.DATAOK)).thenReturn(0L);
+
+		when(userDao.save(user)).thenReturn(user);
+
+		UserResponse response = userService.updateUser(createUserUpdateResquest(), MOCK_ID, tokenData);
+
+		assertThat(response).isInstanceOf(UserResponse.class);
+		assertNull(response.getUsers());
+		assertNotNull(response.getUser());
+		assertNull(response.getHttpStatus());
+		assertNull(response.getMessage());
+		assertThat(response.getUser()).isInstanceOf(User.class);
+	}
+
+	@Test
+	void testUpdateUserOkScopeSuperOther() throws Exception {
+		User user = createMockUser();
+		user.setRole(new Role(MOCK_ID, "ADMIN", Set.of()));
+		when(userDao.findById(MOCK_ID)).thenReturn(Optional.of(user));
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)).thenReturn(true);
+		when(tokenData.getUsername()).thenReturn(user.getUsername() + "X");
+
+		when(roleService.getRoleByName(MOCK_ROLE_NAME)).thenReturn(new RoleResponse(new Role()));
+
+		when(userDao.getUsersSameEmail(UtilsForTesting.DATAOK)).thenReturn(0L);
+
+		when(userDao.getUsersSameUsername(UtilsForTesting.DATAOK)).thenReturn(0L);
+
+		when(userDao.save(user)).thenReturn(user);
+
+		UserResponse response = userService.updateUser(createUserUpdateResquest(), MOCK_ID, tokenData);
+
+		assertThat(response).isInstanceOf(UserResponse.class);
+		assertNull(response.getUsers());
+		assertNotNull(response.getUser());
+		assertNull(response.getHttpStatus());
+		assertNull(response.getMessage());
+		assertThat(response.getUser()).isInstanceOf(User.class);
+	}
+
+	@Test
+	void testUpdateUserOkScopeSuperFail() throws Exception {
+		User user = createMockUser();
+		user.setRole(new Role(MOCK_ID, "ADMIN", Set.of()));
+		when(userDao.findById(MOCK_ID)).thenReturn(Optional.of(user));
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)).thenReturn(false);
+
+		UserResponse response = userService.updateUser(createUserUpdateResquest(), MOCK_ID, tokenData);
+
+		assertThat(response).isInstanceOf(UserResponse.class);
+		assertNull(response.getUsers());
+		assertNull(response.getUser());
+		assertNotNull(response.getHttpStatus());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getHttpStatus());
+		assertNotNull(response.getMessage());
 	}
 
 	@Test
@@ -239,7 +488,7 @@ class UserServiceTest {
 
 		UserUpdateRequest request = createUserUpdateResquest();
 
-		UserResponse response = userService.updateUser(request, MOCK_ID);
+		UserResponse response = userService.updateUser(request, MOCK_ID, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -255,10 +504,11 @@ class UserServiceTest {
 	void testUpdateUserFailEmail() throws Exception {
 
 		when(userDao.findById(MOCK_ID)).thenReturn(Optional.of(createMockUser()));
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)).thenReturn(true);
 
 		when(userDao.getUsersSameEmail(UtilsForTesting.DATAOK)).thenReturn(1L);
 
-		UserResponse response = userService.updateUser(createUserUpdateResquest(), MOCK_ID);
+		UserResponse response = userService.updateUser(createUserUpdateResquest(), MOCK_ID, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -266,76 +516,14 @@ class UserServiceTest {
 		assertNotNull(response.getHttpStatus());
 		assertEquals(HttpStatus.BAD_REQUEST, response.getHttpStatus());
 		assertNotNull(response.getMessage());
-		assertEquals("Email , Username already exists or Role Name is not valid. ", response.getMessage());
 	}
 
-	@Test
-	void testUpdateUserFailUsername() throws Exception {
-
-		when(userDao.findById(MOCK_ID)).thenReturn(Optional.of(createMockUser()));
-
-		when(userDao.getUsersSameEmail(UtilsForTesting.DATAOK)).thenReturn(0L);
-
-		when(userDao.getUsersSameUsername(UtilsForTesting.DATAOK)).thenReturn(1L);
-
-		UserResponse response = userService.updateUser(createUserUpdateResquest(), MOCK_ID);
-
-		assertThat(response).isInstanceOf(UserResponse.class);
-		assertNull(response.getUsers());
-		assertNull(response.getUser());
-		assertNotNull(response.getHttpStatus());
-		assertEquals(HttpStatus.BAD_REQUEST, response.getHttpStatus());
-		assertNotNull(response.getMessage());
-		assertEquals("Email , Username already exists or Role Name is not valid. ", response.getMessage());
-	}
-
-	@Test
-	void testUpdateUserFailRole() throws Exception {
-
-		when(userDao.findById(MOCK_ID)).thenReturn(Optional.of(createMockUser()));
-
-		when(userDao.getUsersSameEmail(UtilsForTesting.DATAOK)).thenReturn(0L);
-
-		when(userDao.getUsersSameUsername(UtilsForTesting.DATAOK)).thenReturn(0L);
-
-		UserUpdateRequest request = createUserUpdateResquest();
-
-		request.setRole(MOCK_ROLE_NAME + "X");
-
-		when(roleService.getRoleByName(request.getRole())).thenReturn(new RoleResponse(HttpStatus.NOT_FOUND, null));
-
-		UserResponse response = userService.updateUser(request, MOCK_ID);
-
-		assertThat(response).isInstanceOf(UserResponse.class);
-		assertNull(response.getUsers());
-		assertNull(response.getUser());
-		assertNotNull(response.getHttpStatus());
-		assertEquals(HttpStatus.BAD_REQUEST, response.getHttpStatus());
-		assertNotNull(response.getMessage());
-		assertEquals("Email , Username already exists or Role Name is not valid. ", response.getMessage());
-	}
-
-	@Test
-	void testDeleteOk() throws Exception {
-		when(userDao.findById(MOCK_ID)).thenReturn(Optional.of(createMockUser()));
-
-		UserResponse response = userService.deleteUser(MOCK_ID);
-
-		assertThat(response).isInstanceOf(UserResponse.class);
-		assertNull(response.getUsers());
-		assertNull(response.getUser());
-		assertNotNull(response.getHttpStatus());
-		assertEquals(HttpStatus.ACCEPTED, response.getHttpStatus());
-		assertNotNull(response.getMessage());
-		assertEquals("User was deleted", response.getMessage());
-
-	}
-
+	/* DELETE_USER */
 	@Test
 	void testDeleteFailId() throws Exception {
 		when(userDao.findById(MOCK_ID)).thenReturn(Optional.empty());
-
-		UserResponse response = userService.deleteUser(MOCK_ID);
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)).thenReturn(true);
+		UserResponse response = userService.deleteUser(MOCK_ID, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -350,7 +538,7 @@ class UserServiceTest {
 	@Test
 	void testDeleteFailSuper() throws Exception {
 
-		UserResponse response = userService.deleteUser(0L);
+		UserResponse response = userService.deleteUser(0L, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -363,17 +551,61 @@ class UserServiceTest {
 	}
 
 	@Test
+	void testDeleteOkScopeAdm() throws Exception {
+		when(userDao.findById(MOCK_ID)).thenReturn(Optional.of(createMockUser()));
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeAdm()), tokenData)).thenReturn(true);
+		UserResponse response = userService.deleteUser(MOCK_ID, tokenData);
+
+		assertThat(response).isInstanceOf(UserResponse.class);
+		assertNull(response.getUsers());
+		assertNull(response.getUser());
+		assertNotNull(response.getHttpStatus());
+		assertEquals(HttpStatus.ACCEPTED, response.getHttpStatus());
+		assertNotNull(response.getMessage());
+	}
+
+	@Test
+	void testDeleteOkScopeSuper() throws Exception {
+		when(userDao.findById(MOCK_ID)).thenReturn(Optional.of(createMockUser()));
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)).thenReturn(true);
+		UserResponse response = userService.deleteUser(MOCK_ID, tokenData);
+
+		assertThat(response).isInstanceOf(UserResponse.class);
+		assertNull(response.getUsers());
+		assertNull(response.getUser());
+		assertNotNull(response.getHttpStatus());
+		assertEquals(HttpStatus.ACCEPTED, response.getHttpStatus());
+		assertNotNull(response.getMessage());
+	}
+
+	@Test
+	void testDeleteOkScopeSuperFail() throws Exception {
+		when(userDao.findById(MOCK_ID)).thenReturn(Optional.of(createMockUser()));
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)).thenReturn(false);
+		UserResponse response = userService.deleteUser(MOCK_ID, tokenData);
+
+		assertThat(response).isInstanceOf(UserResponse.class);
+		assertNull(response.getUsers());
+		assertNull(response.getUser());
+		assertNotNull(response.getHttpStatus());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getHttpStatus());
+		assertNotNull(response.getMessage());
+	}
+
+	/* CREATE_USER */
+	@Test
 	void testCreateUserOk() throws Exception {
 
 		UserRegistrationRequest request = createUserRegistrationRequest();
-
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeAdm(), env.getScopeSuper()), tokenData))
+				.thenReturn(true);
 		when(roleService.getRoleById(0L)).thenReturn(new RoleResponse(new Role()));
 
 		when(userDao.getUsersSameEmail(request.getEmail())).thenReturn(0L);
 
 		when(userDao.getUsersSameUsername(request.getUsername())).thenReturn(0L);
 
-		UserResponse response = userService.createUser(request);
+		UserResponse response = userService.createUser(request, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -390,13 +622,15 @@ class UserServiceTest {
 
 		request.setLastname(null);
 
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeAdm(), env.getScopeSuper()), tokenData))
+				.thenReturn(true);
 		when(roleService.getRoleById(0L)).thenReturn(new RoleResponse(new Role()));
 
 		when(userDao.getUsersSameEmail(request.getEmail())).thenReturn(0L);
 
 		when(userDao.getUsersSameUsername(request.getUsername())).thenReturn(0L);
 
-		UserResponse response = userService.createUser(request);
+		UserResponse response = userService.createUser(request, tokenData);
 
 		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
@@ -407,23 +641,22 @@ class UserServiceTest {
 	}
 
 	@Test
-	void testCreateUserFailEmail() throws Exception {
+	void testCreateUserFail() throws Exception {
 
 		UserRegistrationRequest request = createUserRegistrationRequest();
 
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeAdm(), env.getScopeSuper()), tokenData))
+				.thenReturn(true);
 		when(roleService.getRoleById(0L)).thenReturn(new RoleResponse(new Role()));
-
 		when(userDao.getUsersSameEmail(request.getEmail())).thenReturn(1L);
 
-		UserResponse response = userService.createUser(request);
+		UserResponse response = userService.createUser(request, tokenData);
 
-		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
 		assertNull(response.getUser());
 		assertNotNull(response.getHttpStatus());
 		assertEquals(HttpStatus.BAD_REQUEST, response.getHttpStatus());
 		assertNotNull(response.getMessage());
-		assertEquals("BAD REQUEST", response.getMessage());
 
 	}
 
@@ -432,21 +665,37 @@ class UserServiceTest {
 
 		UserRegistrationRequest request = createUserRegistrationRequest();
 
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeAdm(), env.getScopeSuper()), tokenData))
+				.thenReturn(true);
 		when(roleService.getRoleById(0L)).thenReturn(new RoleResponse(new Role()));
-
 		when(userDao.getUsersSameEmail(request.getEmail())).thenReturn(0L);
-
 		when(userDao.getUsersSameUsername(request.getUsername())).thenReturn(1L);
 
-		UserResponse response = userService.createUser(request);
+		UserResponse response = userService.createUser(request, tokenData);
 
-		assertThat(response).isInstanceOf(UserResponse.class);
 		assertNull(response.getUsers());
 		assertNull(response.getUser());
 		assertNotNull(response.getHttpStatus());
 		assertEquals(HttpStatus.BAD_REQUEST, response.getHttpStatus());
 		assertNotNull(response.getMessage());
-		assertEquals("BAD REQUEST", response.getMessage());
+
+	}
+
+	@Test
+	void testCreateUserFailScope() throws Exception {
+
+		UserRegistrationRequest request = createUserRegistrationRequest();
+
+		when(tokenUtils.isAuthorized(Arrays.asList(env.getScopeAdm(), env.getScopeSuper()), tokenData))
+				.thenReturn(false);
+
+		UserResponse response = userService.createUser(request, tokenData);
+
+		assertNull(response.getUsers());
+		assertNull(response.getUser());
+		assertNotNull(response.getHttpStatus());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getHttpStatus());
+		assertNotNull(response.getMessage());
 
 	}
 
@@ -495,8 +744,17 @@ class UserServiceTest {
 	private Iterable<User> createIterableUsers(boolean isVoid) {
 		List<User> users = new ArrayList<>();
 
+		User user;
+		Role role;
 		if (!isVoid) {
-			users.add(new User());
+			user = new User();
+			role = new Role(MOCK_ID, "ADMIN", Set.of());
+			user.setRole(role);
+			users.add(user);
+			user = new User();
+			role = new Role(MOCK_ID, "SUPERADMIN", Set.of());
+			user.setRole(role);
+			users.add(user);
 		}
 
 		return () -> users.iterator();

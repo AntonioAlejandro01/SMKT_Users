@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.antonioalejandro.smkt.users.service.RoleService;
 import com.antonioalejandro.smkt.users.service.ScopesService;
 import com.antonioalejandro.smkt.users.service.UserService;
+import com.antonioalejandro.smkt.users.utils.TokenUtils;
 
 /**
  * The Class PersistentContext.
@@ -59,6 +60,26 @@ public class PersistentContext {
 	@Bean
 	public ScopesService getScopesService() {
 		return new ScopesService();
+	}
+
+	/**
+	 * Gets the token utils.
+	 *
+	 * @return the token utils
+	 */
+	@Bean
+	public TokenUtils getTokenUtils() {
+		return new TokenUtils();
+	}
+	
+	/**
+	 * Gets the app enviroment.
+	 *
+	 * @return the app enviroment
+	 */
+	@Bean
+	public AppEnviroment getAppEnviroment() {
+		return new AppEnviroment();
 	}
 
 }
