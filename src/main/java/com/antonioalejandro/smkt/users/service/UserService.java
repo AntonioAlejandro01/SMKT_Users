@@ -54,7 +54,7 @@ public class UserService implements IUserService {
 	@Value("${scopes.read-min}")
 	private String scopeReadMin;
 
-	@Value("${scopes.super}")
+	@Value("${scopes.update-self}")
 	private String scopeUpdateSelf;
 
 	/** The repository. */
@@ -84,7 +84,7 @@ public class UserService implements IUserService {
 		if (users.isEmpty()) {
 			return new UserResponse(HttpStatus.NO_CONTENT, "No Content");
 		}
-		
+
 		return adaptUsersByScopes(users, tokenData);
 	}
 
@@ -108,7 +108,7 @@ public class UserService implements IUserService {
 
 		return adaptUserByScopes(user, tokenData);
 	}
-	
+
 	@Override
 	public UserResponse getUserByUsernameKey(final String value) {
 
@@ -159,12 +159,12 @@ public class UserService implements IUserService {
 		if (currentUser == null) {
 			return new UserResponse(HttpStatus.BAD_REQUEST, "Id don't exists. ");
 		}
-		Optional<UserResponse> oUserResponse = canUpdate(tokenData, currentUser,userUpdateRequest);
-		
+		Optional<UserResponse> oUserResponse = canUpdate(tokenData, currentUser, userUpdateRequest);
+
 		if (oUserResponse.isPresent()) {
 			return oUserResponse.get();
 		}
-		
+
 		if (!updateEmail(currentUser, userUpdateRequest) || !updateUsername(currentUser, userUpdateRequest)
 				|| !updateRole(currentUser, userUpdateRequest)) {
 			return new UserResponse(HttpStatus.BAD_REQUEST,
@@ -189,8 +189,9 @@ public class UserService implements IUserService {
 			return new UserResponse(HttpStatus.BAD_REQUEST, "Super Admin user can't be deleted. ");
 		}
 		boolean canDelete = false;
-
-		if (tokenUtils.isAuthorized(Arrays.asList(scopeAdm), tokenData)) {
+		if(tokenUtils.isAuthorized(Arrays.asList(scopeSuper),tokenData)) {
+			canDelete = true;
+		} else if (tokenUtils.isAuthorized(Arrays.asList(scopeAdm), tokenData)) {
 			Optional<User> objectiveUser = repository.findById(id);
 			if (objectiveUser.isPresent() && "USER".equals(objectiveUser.get().getRole().getName())) {
 				canDelete = true;
@@ -322,9 +323,9 @@ public class UserService implements IUserService {
 			}).collect(Collectors.toList());
 		} else if (tokenUtils.isAuthorized(Arrays.asList(scopeAdm), tokenData)) {
 			users = users.stream().map(user -> {
-				if ("SUPERADMIN".equals(user.getRole().getName())) {
+				user.setId(null);
+				if ("SUPERADMIN".equals(user.getRole().getName()) || "ADMIN".equals(user.getRole().getName())) {
 					user.setPassword(null);
-					user.setId(null);
 				}
 				return user;
 			}).collect(Collectors.toList());
@@ -334,29 +335,32 @@ public class UserService implements IUserService {
 
 		return new UserResponse(users);
 	}
-	
-	
+
 	private UserResponse adaptUserByScopes(User user, TokenData tokenData) {
 		if (tokenUtils.isAuthorized(Arrays.asList(scopeReadMin), tokenData)) {
 			String username = user.getUsername();
 			user = new User();
 			user.setUsername(username);
 		} else if (tokenUtils.isAuthorized(Arrays.asList(scopeAdm), tokenData)) {
-			user.setPassword(null);
 			user.setId(null);
+			if ("SUPERADMIN".equals(user.getRole().getName()) || "ADMIN".equals(user.getRole().getName())) {
+				user.setPassword(null);
+			}
+
 		} else if (!tokenUtils.isAuthorized(Arrays.asList(scopeSuper), tokenData)) {
 			return new UserResponse(HttpStatus.UNAUTHORIZED, "You haven't got the correct scope");
 		}
 		return new UserResponse(user);
 	}
-	
-	private Optional<UserResponse> canUpdate(TokenData tokenData, User currentUser,UserUpdateRequest userUpdateRequest) {
-		
+
+	private Optional<UserResponse> canUpdate(TokenData tokenData, User currentUser,
+			UserUpdateRequest userUpdateRequest) {
+
 		if (tokenUtils.isAuthorized(Arrays.asList(scopeUpdateSelf), tokenData)) {
 			if (currentUser.getUsername().equals(tokenData.getUsername())) {
 				userUpdateRequest.setRole("USER");
 				return Optional.empty();
-			} else {				
+			} else {
 				return Optional.of(new UserResponse(HttpStatus.BAD_REQUEST, "You only can update yourself"));
 			}
 		} else if (tokenUtils.isAuthorized(Arrays.asList(scopeAdm), tokenData)) {
@@ -366,20 +370,21 @@ public class UserService implements IUserService {
 			} else {
 				if ("USER".equals(currentUser.getRole().getName())) {
 					userUpdateRequest.setRole("USER");
-					return Optional.empty();	
+					return Optional.empty();
 				} else {
-					return Optional.of(new UserResponse(HttpStatus.BAD_REQUEST, "You can't update ADMIN users or SUPERADMIN user"));					
+					return Optional.of(new UserResponse(HttpStatus.BAD_REQUEST,
+							"You can't update ADMIN users or SUPERADMIN user"));
 				}
 			}
 		} else if (tokenUtils.isAuthorized(Arrays.asList(scopeSuper), tokenData)) {
 			if (currentUser.getUsername().equals(tokenData.getUsername())) {
 				userUpdateRequest.setRole("SUPERADMIN");
 				return Optional.empty();
-			} 
+			}
 			if ("SUPERADMIN".equals(userUpdateRequest.getRole())) {
 				return Optional.of(new UserResponse(HttpStatus.BAD_REQUEST, "You can't update to SUPERADMIN user"));
 			}
-			return Optional.empty();	
+			return Optional.empty();
 		} else {
 			return Optional.of(new UserResponse(HttpStatus.UNAUTHORIZED, "You can't update users"));
 		}

@@ -4,7 +4,7 @@ spring:
    smkt-users
  datasource:
   url:
-   jdbc:mysql://smkt-mysql:3306/SMKT_USERS?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Madrid
+   jdbc:mysql://localhost:3306/SMKT_USERS?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Madrid
   username:
    root
   password:
@@ -29,7 +29,7 @@ eureka:
  client:
   service-url:
    defaultZone: 
-    http://smkt-eureka:8761/eureka
+    http://localhost:8761/eureka
   fetchRegistry: true
 
 logging:
@@ -46,6 +46,7 @@ default:
    id: 3
    
 oauth:
+ id: smkt-oauth
  user: smkt-users
  secret: smkt-users
  app-key-secret: 58c4581b7d7f9ab295ac3a273d15ad77af90d429f986dbfe82ca3241d9ef3dbb
