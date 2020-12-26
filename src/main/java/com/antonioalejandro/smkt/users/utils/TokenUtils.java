@@ -64,11 +64,11 @@ public class TokenUtils {
 
 		TokenData data;
 		try {
-			data =  client.post().uri("/oauth/check_token").contentType(MediaType.APPLICATION_FORM_URLENCODED)
-				.body(BodyInserters.fromFormData(body)).exchange().block().bodyToMono(TokenData.class)
-				.block();
-		}catch (WebClientResponseException e) {
-			throw new WebClientResponseException(401, HttpStatus.UNAUTHORIZED.toString(), HttpHeaders.EMPTY, null,null);
+			data = client.post().uri("/oauth/check_token").contentType(MediaType.APPLICATION_FORM_URLENCODED)
+					.body(BodyInserters.fromFormData(body)).retrieve().bodyToMono(TokenData.class).block();
+		} catch (WebClientResponseException e) {
+			throw new WebClientResponseException(401, HttpStatus.UNAUTHORIZED.toString(), HttpHeaders.EMPTY, null,
+					null);
 		}
 
 		return data;
