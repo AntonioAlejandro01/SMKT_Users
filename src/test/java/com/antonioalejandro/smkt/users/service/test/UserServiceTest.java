@@ -56,6 +56,8 @@ class UserServiceTest {
 	@Mock
 	private BCryptPasswordEncoder encoder;
 	
+	@Mock
+	private TokenData tokenData;
 
 	private final String MOCK_USERNAME_EMAIL = "admin";
 	private final Long MOCK_ID = 1L;
@@ -64,8 +66,6 @@ class UserServiceTest {
 	private final String MOCK_SCOPE_SUPER = "super";
 	private final String MOCK_SCOPE_READ = "read";
 	private final String MOCK_SCOPE_UPDATE = "update";
-
-	private TokenData tokenData = new TokenData();
 
 	@BeforeEach
 	public void init() {
@@ -395,7 +395,9 @@ class UserServiceTest {
 	void testCreateUserOk() throws Exception {
 
 		UserRegistrationRequest request = createUserRegistrationRequest();
-
+		when(env.getScopeAdm()).thenReturn(MOCK_SCOPE_ADM);
+		when(env.getScopeSuper()).thenReturn(MOCK_SCOPE_SUPER);
+		when(tokenUtils.isAuthorized(Arrays.asList(MOCK_SCOPE_ADM,MOCK_SCOPE_SUPER), tokenData)).thenReturn(true);
 		when(roleService.getRoleById(0L)).thenReturn(new RoleResponse(new Role()));
 
 		when(userDao.getUsersSameEmail(request.getEmail())).thenReturn(0L);
@@ -418,7 +420,9 @@ class UserServiceTest {
 		UserRegistrationRequest request = createUserRegistrationRequest();
 
 		request.setLastname(null);
-
+		when(env.getScopeAdm()).thenReturn(MOCK_SCOPE_ADM);
+		when(env.getScopeSuper()).thenReturn(MOCK_SCOPE_SUPER);
+		when(tokenUtils.isAuthorized(Arrays.asList(MOCK_SCOPE_ADM,MOCK_SCOPE_SUPER), tokenData)).thenReturn(true);
 		when(roleService.getRoleById(0L)).thenReturn(new RoleResponse(new Role()));
 
 		when(userDao.getUsersSameEmail(request.getEmail())).thenReturn(0L);
@@ -434,10 +438,31 @@ class UserServiceTest {
 		assertNull(response.getMessage());
 
 	}
+	@Test
+	void testCreateUserFail() throws Exception {
+
+		UserRegistrationRequest request = createUserRegistrationRequest();
+
+		request.setLastname(null);
+		when(env.getScopeAdm()).thenReturn(MOCK_SCOPE_ADM.toUpperCase());
+		when(env.getScopeSuper()).thenReturn(MOCK_SCOPE_SUPER.toUpperCase());
+		when(tokenUtils.isAuthorized(Arrays.asList(MOCK_SCOPE_ADM,MOCK_SCOPE_SUPER), tokenData)).thenReturn(false);
+		
+		UserResponse response = userService.createUser(request, tokenData);
+
+		assertThat(response).isInstanceOf(UserResponse.class);
+		assertNull(response.getUsers());
+		assertNull(response.getUser());
+		assertNotNull(response.getHttpStatus());
+		assertNotNull(response.getMessage());
+
+	}
 
 	@Test
 	void testCreateUserFailEmail() throws Exception {
-
+		when(env.getScopeAdm()).thenReturn(MOCK_SCOPE_ADM);
+		when(env.getScopeSuper()).thenReturn(MOCK_SCOPE_SUPER);
+		when(tokenUtils.isAuthorized(Arrays.asList(MOCK_SCOPE_ADM,MOCK_SCOPE_SUPER), tokenData)).thenReturn(true);
 		UserRegistrationRequest request = createUserRegistrationRequest();
 
 		when(roleService.getRoleById(0L)).thenReturn(new RoleResponse(new Role()));
@@ -460,7 +485,9 @@ class UserServiceTest {
 	void testCreateUserFailUsername() throws Exception {
 
 		UserRegistrationRequest request = createUserRegistrationRequest();
-
+		when(env.getScopeAdm()).thenReturn(MOCK_SCOPE_ADM);
+		when(env.getScopeSuper()).thenReturn(MOCK_SCOPE_SUPER);
+		when(tokenUtils.isAuthorized(Arrays.asList(MOCK_SCOPE_ADM,MOCK_SCOPE_SUPER), tokenData)).thenReturn(true);
 		when(roleService.getRoleById(0L)).thenReturn(new RoleResponse(new Role()));
 
 		when(userDao.getUsersSameEmail(request.getEmail())).thenReturn(0L);
@@ -485,6 +512,30 @@ class UserServiceTest {
 		User user = createMockUser();
 		when(env.getScopeUpdateSelf()).thenReturn(MOCK_SCOPE_UPDATE);
 		when(tokenUtils.isAuthorized(Arrays.asList(MOCK_SCOPE_UPDATE), tokenData)).thenReturn(true);
+		when(userDao.findById(MOCK_ID)).thenReturn(Optional.of(user));
+
+		when(userDao.getUsersSameEmail(UtilsForTesting.DATAOK)).thenReturn(0L);
+
+		when(userDao.getUsersSameUsername(UtilsForTesting.DATAOK)).thenReturn(0L);
+
+		when(userDao.save(user)).thenReturn(user);
+
+		UserUpdateRequest request = createUserUpdateResquest();
+		request.setRole(MOCK_ROLE_NAME + "X");
+		when(roleService.getRoleByName(request.getRole())).thenReturn(new RoleResponse(new Role()));
+
+		UserResponse response = userService.updateUser(request, MOCK_ID, null);
+
+		assertThat(response).isInstanceOf(UserResponse.class);
+
+	}
+	@Test
+	void testUpdateUserOkUpdateScopeUpdate2() throws Exception {
+		User user = createMockUser();
+		user.setUsername("X");
+		when(env.getScopeUpdateSelf()).thenReturn(MOCK_SCOPE_UPDATE);
+		when(tokenUtils.isAuthorized(Arrays.asList(MOCK_SCOPE_UPDATE), tokenData)).thenReturn(true);
+		when(tokenData.getUsername()).thenReturn("X");
 		when(userDao.findById(MOCK_ID)).thenReturn(Optional.of(user));
 
 		when(userDao.getUsersSameEmail(UtilsForTesting.DATAOK)).thenReturn(0L);

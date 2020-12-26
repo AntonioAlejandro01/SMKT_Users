@@ -21,11 +21,11 @@ public class AppEnviroment {
 
 	/** The default role id. */
 	@Value("${default.params.roles.id}")
-	private long defaultRoleId;
+	private Long defaultRoleId;
 
 	/** The super admin id. */
 	@Value(value = "${superadmin.id}")
-	private long superAdminId;
+	private Long superAdminId;
 
 	/** The scope super. */
 	@Value("${scopes.super}")

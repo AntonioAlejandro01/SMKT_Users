@@ -215,6 +215,10 @@ public class UserService implements IUserService {
 	public UserResponse createUser(final UserRegistrationRequest userRequest, final TokenData tokenData) {
 		log.debug("Call to Save");
 
+		if (!tokenUtils.isAuthorized(Arrays.asList(env.getScopeAdm(), env.getScopeSuper()), tokenData)) {
+			return new UserResponse(HttpStatus.UNAUTHORIZED, HttpStatus.UNAUTHORIZED.toString());
+		}
+
 		final Role role = roleService.getRoleById(env.getDefaultRoleId()).getRole();
 
 		if (existsEmail(userRequest.getEmail()) || existsUsername(userRequest.getUsername())) {
