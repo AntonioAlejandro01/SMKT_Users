@@ -11,7 +11,7 @@ public class WebClientFactory {
 	private WebClientFactory() {
 	}
 
-	public static WebClient getWebClient(String url, String username, String secret) {
+	public static WebClient getWebClient(String url) {
 		return WebClient.builder().baseUrl(url)
 				.defaultHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType())
 				.defaultHeader(HttpHeaders.AUTHORIZATION, String.format("Basic %s", "c21hcnRraXRjaGVuYXBwOjEzMzMx"))

@@ -12,10 +12,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.antonioalejandro.smkt.users.pojo.TokenData;
 
@@ -54,14 +57,21 @@ public class TokenUtils {
 	 */
 	public TokenData getDataToken(String token) {
 		WebClient client = WebClientFactory
-				.getWebClient(WebClientFactory.getURLInstanceService(oauthId, discoveryClient), appUser, appSecret);
+				.getWebClient(WebClientFactory.getURLInstanceService(oauthId, discoveryClient));
 
 		LinkedMultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 		body.add("token", token.split(" ")[1]);
 
-		return client.post().uri("/oauth/check_token").contentType(MediaType.APPLICATION_FORM_URLENCODED)
+		TokenData data;
+		try {
+			data =  client.post().uri("/oauth/check_token").contentType(MediaType.APPLICATION_FORM_URLENCODED)
 				.body(BodyInserters.fromFormData(body)).exchange().block().bodyToMono(TokenData.class)
 				.block();
+		}catch (WebClientResponseException e) {
+			throw new WebClientResponseException(401, HttpStatus.UNAUTHORIZED.toString(), HttpHeaders.EMPTY, null,null);
+		}
+
+		return data;
 
 	}
 

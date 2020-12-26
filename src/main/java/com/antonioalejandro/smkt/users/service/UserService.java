@@ -27,6 +27,7 @@ import com.antonioalejandro.smkt.users.pojo.request.UserRegistrationRequest;
 import com.antonioalejandro.smkt.users.pojo.request.UserUpdateRequest;
 import com.antonioalejandro.smkt.users.pojo.response.RoleResponse;
 import com.antonioalejandro.smkt.users.pojo.response.UserResponse;
+import com.antonioalejandro.smkt.users.utils.Constants;
 import com.antonioalejandro.smkt.users.utils.TokenUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -193,7 +194,7 @@ public class UserService implements IUserService {
 			canDelete = true;
 		} else if (tokenUtils.isAuthorized(Arrays.asList(scopeAdm), tokenData)) {
 			Optional<User> objectiveUser = repository.findById(id);
-			if (objectiveUser.isPresent() && "USER".equals(objectiveUser.get().getRole().getName())) {
+			if (objectiveUser.isPresent() && Constants.USER_ROLE_NAME.equals(objectiveUser.get().getRole().getName())) {
 				canDelete = true;
 			}
 		}
@@ -324,7 +325,7 @@ public class UserService implements IUserService {
 		} else if (tokenUtils.isAuthorized(Arrays.asList(scopeAdm), tokenData)) {
 			users = users.stream().map(user -> {
 				user.setId(null);
-				if ("SUPERADMIN".equals(user.getRole().getName()) || "ADMIN".equals(user.getRole().getName())) {
+				if (Constants.SUPERADMIN_ROLE_NAME.equals(user.getRole().getName()) || Constants.ADMIN_ROLE_NAME.equals(user.getRole().getName())) {
 					user.setPassword(null);
 				}
 				return user;
@@ -343,7 +344,7 @@ public class UserService implements IUserService {
 			user.setUsername(username);
 		} else if (tokenUtils.isAuthorized(Arrays.asList(scopeAdm), tokenData)) {
 			user.setId(null);
-			if ("SUPERADMIN".equals(user.getRole().getName()) || "ADMIN".equals(user.getRole().getName())) {
+			if (Constants.SUPERADMIN_ROLE_NAME.equals(user.getRole().getName()) || Constants.ADMIN_ROLE_NAME.equals(user.getRole().getName())) {
 				user.setPassword(null);
 			}
 
@@ -357,19 +358,14 @@ public class UserService implements IUserService {
 			UserUpdateRequest userUpdateRequest) {
 
 		if (tokenUtils.isAuthorized(Arrays.asList(scopeUpdateSelf), tokenData)) {
-			if (currentUser.getUsername().equals(tokenData.getUsername())) {
-				userUpdateRequest.setRole("USER");
-				return Optional.empty();
-			} else {
-				return Optional.of(new UserResponse(HttpStatus.BAD_REQUEST, "You only can update yourself"));
-			}
+			return doIfUpdateYourself(currentUser, userUpdateRequest, tokenData);
 		} else if (tokenUtils.isAuthorized(Arrays.asList(scopeAdm), tokenData)) {
 			if (currentUser.getUsername().equals(tokenData.getUsername())) {
-				userUpdateRequest.setRole("ADMIN");
+				userUpdateRequest.setRole(Constants.ADMIN_ROLE_NAME);
 				return Optional.empty();
 			} else {
-				if ("USER".equals(currentUser.getRole().getName())) {
-					userUpdateRequest.setRole("USER");
+				if (Constants.USER_ROLE_NAME.equals(currentUser.getRole().getName())) {
+					userUpdateRequest.setRole(Constants.USER_ROLE_NAME);
 					return Optional.empty();
 				} else {
 					return Optional.of(new UserResponse(HttpStatus.BAD_REQUEST,
@@ -378,15 +374,24 @@ public class UserService implements IUserService {
 			}
 		} else if (tokenUtils.isAuthorized(Arrays.asList(scopeSuper), tokenData)) {
 			if (currentUser.getUsername().equals(tokenData.getUsername())) {
-				userUpdateRequest.setRole("SUPERADMIN");
+				userUpdateRequest.setRole(Constants.SUPERADMIN_ROLE_NAME);
 				return Optional.empty();
 			}
-			if ("SUPERADMIN".equals(userUpdateRequest.getRole())) {
+			if (Constants.SUPERADMIN_ROLE_NAME.equals(userUpdateRequest.getRole())) {
 				return Optional.of(new UserResponse(HttpStatus.BAD_REQUEST, "You can't update to SUPERADMIN user"));
 			}
 			return Optional.empty();
 		} else {
 			return Optional.of(new UserResponse(HttpStatus.UNAUTHORIZED, "You can't update users"));
+		}
+	}
+	
+	private Optional<UserResponse> doIfUpdateYourself(User currentUser,UserUpdateRequest userUpdateRequest, TokenData tokenData) {
+		if (currentUser.getUsername().equals(tokenData.getUsername())) {
+			userUpdateRequest.setRole(Constants.USER_ROLE_NAME);
+			return Optional.empty();
+		} else {
+			return Optional.of(new UserResponse(HttpStatus.BAD_REQUEST, "You only can update yourself"));
 		}
 	}
 

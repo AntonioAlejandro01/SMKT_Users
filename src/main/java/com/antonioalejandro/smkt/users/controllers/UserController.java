@@ -7,6 +7,7 @@
  */
 package com.antonioalejandro.smkt.users.controllers;
 
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -122,45 +123,10 @@ public class UserController {
 				return createBadRequestException("The filter and value are mandatory. ");
 			}
 
-			TokenData tokenData = tokenUtils.getDataToken(token);
-
-			UserResponse userResponse;
-
-			if (filter.equalsIgnoreCase("id")) {
-				long id;
-				try {
-					id = Long.parseLong(value);
-				} catch (Exception e) {
-					return createBadRequestException("The id must be a number");
-				}
-				String ms = validateId(id);
-				if (!ms.isEmpty()) {
-					return createBadRequestException(ms);
-				}
-				userResponse = userService.getUserById(id, tokenData);
-			} else if (filter.equalsIgnoreCase("username") || filter.equalsIgnoreCase("email")) {
-				boolean isUsername = filter.equalsIgnoreCase("username");
-				String ms = isUsername ? validateUsername(value) : validateEmail(value);
-				if (!ms.isEmpty()) {
-					return createBadRequestException(ms);
-				}
-				userResponse = userService.getUserByEmailOrUsername(value, !isUsername, tokenData);
-			} else {
-				return createBadRequestException("Filter type is not valid. (id, username or email). ");
-			}
-
-			return prepareResponse(userResponse, HttpStatus.OK);
+			return doIfNotAppKey(filter, value, tokenUtils.getDataToken(token));
 		}
 
-		if (validateAppKey(appKey)) {
-			return createUnathorizedResponse("The AppKey is not valid");
-		} else {
-			String ms = validateUsername(value);
-			if (!ms.isEmpty()) {
-				return createBadRequestException(ms);
-			}
-			return prepareResponse(userService.getUserByUsernameKey(value), HttpStatus.OK);
-		}
+		return doIfAppkey(appKey, value);
 
 	}
 
@@ -427,6 +393,52 @@ public class UserController {
 	private boolean validateNullFields(String filter, String value) {
 		return filter == null || value == null;
 
+	}
+
+	private Optional<ResponseEntity<UserResponse>> doIfIdFilter(String value) {
+		long id;
+		try {
+			id = Long.parseLong(value);
+		} catch (Exception e) {
+			return Optional.of(createBadRequestException("The id must be a number"));
+		}
+		String ms = validateId(id);
+		if (!ms.isEmpty()) {
+			return Optional.of(createBadRequestException(ms));
+		}
+		return Optional.empty();
+	}
+
+	private ResponseEntity<UserResponse> doIfAppkey(String appKey, String value) {
+		if (validateAppKey(appKey)) {
+			return createUnathorizedResponse("The AppKey is not valid");
+		} else {
+			String ms = validateUsername(value);
+			if (!ms.isEmpty()) {
+				return createBadRequestException(ms);
+			}
+			return prepareResponse(userService.getUserByUsernameKey(value), HttpStatus.OK);
+		}
+
+	}
+
+	private ResponseEntity<UserResponse> doIfNotAppKey(String filter, String value, TokenData tokenData) {
+		if (filter.equalsIgnoreCase("id")) {
+			Optional<ResponseEntity<UserResponse>> oUserResponse = doIfIdFilter(value);
+			if (oUserResponse.isPresent()) {
+				return oUserResponse.get();
+			}
+			return prepareResponse(userService.getUserById(Long.parseLong(value), tokenData), HttpStatus.OK);
+		}
+		if (filter.equalsIgnoreCase("username") || filter.equalsIgnoreCase("email")) {
+			boolean isUsername = filter.equalsIgnoreCase("username");
+			String ms = isUsername ? validateUsername(value) : validateEmail(value);
+			if (!ms.isEmpty()) {
+				return createBadRequestException(ms);
+			}
+			return prepareResponse(userService.getUserByEmailOrUsername(value, !isUsername, tokenData), HttpStatus.OK);
+		}
+		return createBadRequestException("Filter type is not valid. (id, username or email). ");
 	}
 
 }
