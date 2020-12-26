@@ -1,5 +1,6 @@
 package com.antonioalejandro.smkt.users;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ class AppEnviromentTest {
 		assertNull(env.getScopeUpdateSelf());
 		assertNull(env.getSecretApp());
 		assertNull(env.getSuperAdminId());
+		assertNotNull(env.toString());
 
 	}
 }

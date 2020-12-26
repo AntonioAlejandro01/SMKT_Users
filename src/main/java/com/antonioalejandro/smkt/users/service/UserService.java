@@ -106,7 +106,7 @@ public class UserService implements IUserService {
 	@Override
 	public UserResponse getUserByUsernameKey(final String value) {
 
-		log.debug("Call to getUserByEmailOrUsername. Value:{}", value);
+		log.debug("Call to getUserByUsernameKey Value:{}", value);
 
 		final User user = repository.findByUsername(value);
 
@@ -194,8 +194,11 @@ public class UserService implements IUserService {
 				canDelete = true;
 			}
 		}
+		if (!canDelete) {
+			return  new UserResponse(HttpStatus.UNAUTHORIZED, HttpStatus.UNAUTHORIZED.toString());
+		}
 
-		if (canDelete && repository.findById(id).isPresent()) {
+		if (repository.findById(id).isPresent()) {
 			repository.deleteById(id);
 			return new UserResponse(HttpStatus.ACCEPTED, "User was deleted");
 		} else {
@@ -358,17 +361,21 @@ public class UserService implements IUserService {
 			String username = user.getUsername();
 			user = new User();
 			user.setUsername(username);
-		} else if (tokenUtils.isAuthorized(Arrays.asList(env.getScopeAdm()), tokenData)) {
+			return new UserResponse(user);
+		}
+		if (tokenUtils.isAuthorized(Arrays.asList(env.getScopeAdm()), tokenData)) {
 			user.setId(null);
 			if (Constants.SUPERADMIN_ROLE_NAME.equals(user.getRole().getName())
 					|| Constants.ADMIN_ROLE_NAME.equals(user.getRole().getName())) {
 				user.setPassword(null);
 			}
-
-		} else if (!tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)) {
-			return new UserResponse(HttpStatus.UNAUTHORIZED, "You haven't got the correct scope");
+			return new UserResponse(user);
 		}
-		return new UserResponse(user);
+		if (tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)) {
+			return new UserResponse(user);
+		}
+		return new UserResponse(HttpStatus.UNAUTHORIZED, "You haven't got the correct scope");
+		
 	}
 
 	/**
