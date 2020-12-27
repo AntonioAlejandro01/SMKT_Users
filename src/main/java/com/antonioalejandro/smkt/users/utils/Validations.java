@@ -7,7 +7,7 @@
  */
 package com.antonioalejandro.smkt.users.utils;
 
-import java.util.List;
+import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  * The Class Validations.
@@ -133,7 +133,7 @@ public class Validations {
 	/**
 	 * Validate id.
 	 *
-	 * @param id the id
+	 * @param id          the id
 	 * @param isMandatory the is mandatory
 	 * @return the string
 	 */
@@ -145,44 +145,6 @@ public class Validations {
 			return formatMessage(Constants.ID_LESS_EQUAL_THAN_ZERO_MESSAGE);
 		}
 		return Constants.MESSAGE_EMPTY;
-	}
-	
-	/**
-	 * Validate list scopes.
-	 *
-	 * @param scopes the scopes
-	 * @return the string
-	 */
-	public static String validateListScopes(List<String> scopes) {
-		if (scopes == null || scopes.isEmpty()) {
-			return formatMessage(Constants.LIST_SCOPES_MANDATORY);
-		}
-		return validateFormatScopes(scopes);
-	}
-	
-	/**
-	 * Validate format scopes.
-	 *
-	 * @param scopes the scopes
-	 * @return the string
-	 */
-	private static String validateFormatScopes(List<String> scopes) {
-		for(String scope: scopes) {
-			if (validateScope(scope)) {
-				return formatMessage(String.format(Constants.TEMPLATE_FORMAT_SCOPE_NOT_VALID, scope));
-			}
-		}
-		return Constants.MESSAGE_EMPTY;
-	}
-	
-	/**
-	 * Validate scope.
-	 *
-	 * @param scope the scope
-	 * @return true, if successful
-	 */
-	public static boolean validateScope(String scope) {
-		return Constants.VALID_SCOPE_REGEX.matcher(scope).find();
 	}
 
 	/**
@@ -208,11 +170,33 @@ public class Validations {
 	/**
 	 * Checks if is length field ok.
 	 *
-	 * @param field the field
+	 * @param field  the field
 	 * @param length the length
 	 * @return true, if is length field ok
 	 */
 	public static boolean isLengthFieldOk(String field, int length) {
 		return field.length() >= length;
+	}
+
+	/**
+	 * Validate app key.
+	 *
+	 * @param appKey the app key
+	 * @return true, if successful
+	 */
+	public static boolean validateAppKey(String appKey, String secret) {
+		return appKey != null && !secret.equals(DigestUtils.sha256Hex(appKey));
+	}
+
+	/**
+	 * Validate null fields.
+	 *
+	 * @param filter the filter
+	 * @param value  the value
+	 * @return true, if successful
+	 */
+	public static boolean validateNullFields(String filter, String value) {
+		return filter == null || value == null;
+
 	}
 }

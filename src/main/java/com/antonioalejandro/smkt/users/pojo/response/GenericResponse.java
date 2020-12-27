@@ -45,8 +45,9 @@ public class GenericResponse {
 		if (status != null) {
 			this.status = status.toString();
 			this.message = message == null ? status.getReasonPhrase():message;
+		} else {
+			this.message = message;
 		}
-		this.message = message;
 	}
 
 	/**

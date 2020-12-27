@@ -9,7 +9,6 @@ package com.antonioalejandro.smkt.users.controllers;
 
 import java.util.Optional;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -113,7 +112,7 @@ public class UserController {
 
 		if (appKey == null || appKey.isBlank()) {
 
-			if (validateNullFields(filter, value)) {
+			if (Validations.validateNullFields(filter, value)) {
 				return createBadRequestException("The filter and value are mandatory. ");
 			}
 
@@ -261,28 +260,6 @@ public class UserController {
 	}
 
 	/**
-	 * Validate app key.
-	 *
-	 * @param appKey the app key
-	 * @return true, if successful
-	 */
-	private boolean validateAppKey(String appKey) {
-		return appKey != null && !env.getSecretApp().equals(DigestUtils.sha256Hex(appKey));
-	}
-
-	/**
-	 * Validate null fields.
-	 *
-	 * @param filter the filter
-	 * @param value  the value
-	 * @return true, if successful
-	 */
-	private boolean validateNullFields(String filter, String value) {
-		return filter == null || value == null;
-
-	}
-
-	/**
 	 * Do if id filter.
 	 *
 	 * @param value the value
@@ -310,7 +287,7 @@ public class UserController {
 	 * @return the response entity
 	 */
 	private ResponseEntity<UserResponse> doIfAppkey(String appKey, String value) {
-		if (validateAppKey(appKey)) {
+		if (Validations.validateAppKey(appKey, env.getAppSecret())) {
 			return createUnathorizedResponse("The AppKey is not valid");
 		} else {
 			String ms = Validations.validateUsername(value);

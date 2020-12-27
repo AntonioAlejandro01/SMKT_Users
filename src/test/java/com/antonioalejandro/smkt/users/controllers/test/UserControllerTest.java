@@ -72,7 +72,6 @@ class UserControllerTest {
 
 		ResponseEntity<UserResponse> response = controller.searchUser(TOKEN, null, null, null);
 
-		assertThat(response).isInstanceOf(ResponseEntity.class);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertNotNull(response.getBody());
 		assertThat(response.getBody()).isInstanceOf(UserResponse.class);
@@ -80,13 +79,11 @@ class UserControllerTest {
 		assertNotNull(userResponse.getHttpStatus());
 		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
 		assertNotNull(userResponse.getMessage());
-		assertEquals("The filter and value are mandatory. ", userResponse.getMessage());
 		assertNull(userResponse.getUser());
 		assertNull(userResponse.getUsers());
 
 		response = controller.searchUser(TOKEN, null, "", null);
 
-		assertThat(response).isInstanceOf(ResponseEntity.class);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertNotNull(response.getBody());
 		assertThat(response.getBody()).isInstanceOf(UserResponse.class);
@@ -94,13 +91,11 @@ class UserControllerTest {
 		assertNotNull(userResponse.getHttpStatus());
 		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
 		assertNotNull(userResponse.getMessage());
-		assertEquals("The filter and value are mandatory. ", userResponse.getMessage());
 		assertNull(userResponse.getUser());
 		assertNull(userResponse.getUsers());
 
 		response = controller.searchUser(TOKEN, null, "", "");
 
-		assertThat(response).isInstanceOf(ResponseEntity.class);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertNotNull(response.getBody());
 		assertThat(response.getBody()).isInstanceOf(UserResponse.class);
@@ -108,13 +103,11 @@ class UserControllerTest {
 		assertNotNull(userResponse.getHttpStatus());
 		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
 		assertNotNull(userResponse.getMessage());
-		assertEquals("Filter type is not valid. (id, username or email). ", userResponse.getMessage());
 		assertNull(userResponse.getUser());
 		assertNull(userResponse.getUsers());
 
 		response = controller.searchUser(TOKEN, null, "id", "4s");
 
-		assertThat(response).isInstanceOf(ResponseEntity.class);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertNotNull(response.getBody());
 		assertThat(response.getBody()).isInstanceOf(UserResponse.class);
@@ -122,13 +115,11 @@ class UserControllerTest {
 		assertNotNull(userResponse.getHttpStatus());
 		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
 		assertNotNull(userResponse.getMessage());
-		assertEquals("The id must be a number", userResponse.getMessage());
 		assertNull(userResponse.getUser());
 		assertNull(userResponse.getUsers());
 
 		response = controller.searchUser(TOKEN, null, "username", "4sas");
 
-		assertThat(response).isInstanceOf(ResponseEntity.class);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertNotNull(response.getBody());
 		assertThat(response.getBody()).isInstanceOf(UserResponse.class);
@@ -142,7 +133,6 @@ class UserControllerTest {
 
 		response = controller.searchUser(TOKEN, null, "username", "");
 
-		assertThat(response).isInstanceOf(ResponseEntity.class);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertNotNull(response.getBody());
 		assertThat(response.getBody()).isInstanceOf(UserResponse.class);
@@ -150,13 +140,11 @@ class UserControllerTest {
 		assertNotNull(userResponse.getHttpStatus());
 		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
 		assertNotNull(userResponse.getMessage());
-		assertEquals("username is mandatory. ", userResponse.getMessage());
 		assertNull(userResponse.getUser());
 		assertNull(userResponse.getUsers());
 
 		response = controller.searchUser(TOKEN, null, "email", "");
 
-		assertThat(response).isInstanceOf(ResponseEntity.class);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertNotNull(response.getBody());
 		assertThat(response.getBody()).isInstanceOf(UserResponse.class);
@@ -164,13 +152,11 @@ class UserControllerTest {
 		assertNotNull(userResponse.getHttpStatus());
 		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
 		assertNotNull(userResponse.getMessage());
-		assertEquals("Email is mandatory. ", userResponse.getMessage());
 		assertNull(userResponse.getUser());
 		assertNull(userResponse.getUsers());
 
 		response = controller.searchUser(TOKEN, null, "email", "asdasd");
 
-		assertThat(response).isInstanceOf(ResponseEntity.class);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertNotNull(response.getBody());
 		assertThat(response.getBody()).isInstanceOf(UserResponse.class);
@@ -178,7 +164,6 @@ class UserControllerTest {
 		assertNotNull(userResponse.getHttpStatus());
 		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
 		assertNotNull(userResponse.getMessage());
-		assertEquals("Email is not valid. ", userResponse.getMessage());
 		assertNull(userResponse.getUser());
 		assertNull(userResponse.getUsers());
 

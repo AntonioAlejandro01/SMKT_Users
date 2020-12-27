@@ -7,15 +7,11 @@
  */
 package com.antonioalejandro.smkt.users.controllers;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -92,33 +88,6 @@ public class RoleController {
 			return new ResponseEntity<>(new RoleResponse(HttpStatus.BAD_REQUEST, ms), HttpStatus.BAD_REQUEST);
 		}
 		RoleResponse roleResponse = roleService.getRoleByName(name);
-		return new ResponseEntity<>(roleResponse,
-				roleResponse.haveData() ? HttpStatus.OK : roleResponse.getHttpStatus());
-	}
-
-	/**
-	 * Adds the role scopes.
-	 *
-	 * @param scopes the scopes
-	 * @param id     the id
-	 * @return the response entity
-	 */
-	@ApiOperation(value = "Update role with scopes", response = RoleResponse.class, tags = "Roles")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Ok", response = RoleResponse.class),
-			@ApiResponse(code = 400, message = "Bad Request", response = RoleResponse.class),
-			@ApiResponse(code = 404, message = "Not Found", response = RoleResponse.class) })
-	@PatchMapping("/{id}")
-	public ResponseEntity<RoleResponse> addRoleScopes(@RequestBody(required = true) final List<String> scopes,
-			@PathVariable(name = "id", required = true) final Long id) {
-		log.info("Call roles/{}", id);
-
-		StringBuilder ms = new StringBuilder();
-		ms.append(Validations.validateId(id, true)).append(Validations.validateListScopes(scopes));
-		if (!ms.isEmpty()) {
-			return new ResponseEntity<>(new RoleResponse(HttpStatus.BAD_REQUEST, ms.toString()),
-					HttpStatus.BAD_REQUEST);
-		}
-		RoleResponse roleResponse = roleService.addScopesToRole(id, scopes);
 		return new ResponseEntity<>(roleResponse,
 				roleResponse.haveData() ? HttpStatus.OK : roleResponse.getHttpStatus());
 	}

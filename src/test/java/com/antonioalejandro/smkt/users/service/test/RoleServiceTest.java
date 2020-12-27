@@ -117,7 +117,6 @@ class RoleServiceTest {
 		assertNotNull(response.getHttpStatus());
 		assertNotNull(response.getMessage());
 		assertEquals(HttpStatus.NOT_FOUND, response.getHttpStatus());
-		assertEquals("Not Found by name", response.getMessage());
 	}
 
 	private Iterable<Role> createIterableRole() {
