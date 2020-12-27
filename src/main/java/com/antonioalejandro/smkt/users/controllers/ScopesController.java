@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.antonioalejandro.smkt.users.pojo.response.ScopeResponse;
 import com.antonioalejandro.smkt.users.service.IScopesService;
+import com.antonioalejandro.smkt.users.utils.Validations;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -52,7 +53,7 @@ public class ScopesController {
 	public ResponseEntity<ScopeResponse> getScopesForRole(
 			@RequestParam(name = "roleId", required = true) final Long roleId) {
 
-		String ms = validateId(roleId);
+		String ms = Validations.validateId(roleId, true);
 
 		if (!ms.isEmpty()) {
 			return new ResponseEntity<>(new ScopeResponse(HttpStatus.BAD_REQUEST, ms), HttpStatus.BAD_REQUEST);
@@ -68,20 +69,4 @@ public class ScopesController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	/**
-	 * Validate id.
-	 *
-	 * @param id the id
-	 * @return the string
-	 */
-	private String validateId(Long id) {
-		if (id == null) {
-			return "Role id is mandatory. ";
-		} else {
-			if (id < 1) {
-				return "id can't be less or equal than zero. ";
-			}
-		}
-		return "";
-	}
 }

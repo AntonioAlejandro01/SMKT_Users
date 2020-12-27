@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.antonioalejandro.smkt.users.pojo.response.RoleResponse;
 import com.antonioalejandro.smkt.users.service.IRoleService;
+import com.antonioalejandro.smkt.users.utils.Validations;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -55,12 +56,12 @@ public class RoleController {
 		log.info("Call getRoles");
 
 		RoleResponse roleResponse = roleService.getRoles();
-		
+
 		if (roleResponse.getRoles().isEmpty()) {
-			return new ResponseEntity<>(new RoleResponse(HttpStatus.NO_CONTENT,"No Content"),HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(new RoleResponse(HttpStatus.NO_CONTENT), HttpStatus.NO_CONTENT);
 		}
-		
-		return new ResponseEntity<>(roleResponse,HttpStatus.OK);
+
+		return new ResponseEntity<>(roleResponse, HttpStatus.OK);
 	}
 
 	/**
@@ -82,26 +83,13 @@ public class RoleController {
 			@PathVariable(name = "name", required = true) final String name) {
 		log.info("Call roles/{}", name);
 
-		String ms = validateName(name);
+		String ms = Validations.validateName(name);
 		if (!ms.isEmpty()) {
 			return new ResponseEntity<>(new RoleResponse(HttpStatus.BAD_REQUEST, ms), HttpStatus.BAD_REQUEST);
 		}
 		RoleResponse roleResponse = roleService.getRoleByName(name);
 		return new ResponseEntity<>(roleResponse,
 				roleResponse.haveData() ? HttpStatus.OK : roleResponse.getHttpStatus());
-	}
-
-	/**
-	 * Validate name.
-	 *
-	 * @param name the name
-	 * @return the string
-	 */
-	private String validateName(String name) {
-		if (name == null || name.isBlank()) {
-			return "Name is mandatory. ";
-		}
-		return "";
 	}
 
 }

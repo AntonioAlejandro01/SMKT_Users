@@ -54,7 +54,7 @@ public class RoleService implements IRoleService {
 		log.debug("Call get role: {}", id);
 		Optional<Role> role = repository.findById(id);
 		if (!role.isPresent()) {
-			return new RoleResponse(HttpStatus.NOT_FOUND, "Not Found");
+			return new RoleResponse(HttpStatus.NOT_FOUND);
 		}
 		return new RoleResponse(role.get());
 	}
@@ -71,7 +71,7 @@ public class RoleService implements IRoleService {
 
 		Role role = repository.findByName(name);
 		if (role == null) {
-			return new RoleResponse(HttpStatus.NOT_FOUND, "Not Found by name");
+			return new RoleResponse(HttpStatus.NOT_FOUND);
 		}
 		return new RoleResponse(role);
 	}

@@ -26,23 +26,22 @@ import lombok.Getter;
 public class ScopeResponse extends GenericResponse {
 
 	/** The scopes. */
-
+	
 	/**
 	 * Gets the scopes.
 	 *
 	 * @return the scopes
 	 */
 	@Getter
-
 	@JsonProperty("scopes")
 	private List<String> scopes;
 
 	/**
 	 * Instantiates a new scope response.
 	 *
-	 * @param status  the status
+	 * @param status the status
 	 * @param message the message
-	 * @param scopes  the scopes
+	 * @param scopes the scopes
 	 */
 	public ScopeResponse(HttpStatus status, String message, List<String> scopes) {
 		super(status, message);
@@ -52,11 +51,21 @@ public class ScopeResponse extends GenericResponse {
 	/**
 	 * Instantiates a new scope response.
 	 *
-	 * @param status  the status
+	 * @param status the status
 	 * @param message the message
 	 */
 	public ScopeResponse(HttpStatus status, String message) {
 		super(status, message);
+		scopes = null;
+	}
+	
+	/**
+	 * Instantiates a new scope response.
+	 *
+	 * @param status the status
+	 */
+	public ScopeResponse(HttpStatus status) {
+		super(status, null);
 		scopes = null;
 	}
 

@@ -8,9 +8,7 @@
 package com.antonioalejandro.smkt.users.controllers;
 
 import java.util.Optional;
-import java.util.regex.Matcher;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +30,8 @@ import com.antonioalejandro.smkt.users.pojo.request.UserUpdateRequest;
 import com.antonioalejandro.smkt.users.pojo.response.GenericResponse;
 import com.antonioalejandro.smkt.users.pojo.response.UserResponse;
 import com.antonioalejandro.smkt.users.service.UserService;
-import com.antonioalejandro.smkt.users.utils.Constants;
 import com.antonioalejandro.smkt.users.utils.TokenUtils;
+import com.antonioalejandro.smkt.users.utils.Validations;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -90,10 +88,10 @@ public class UserController {
 	/**
 	 * Search user.
 	 *
-	 * @param token the token
+	 * @param token  the token
 	 * @param appKey the app key
 	 * @param filter the filter
-	 * @param value the value
+	 * @param value  the value
 	 * @return the response entity
 	 */
 	@ApiOperation(value = "Saerch user by username, email or id ", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
@@ -114,7 +112,7 @@ public class UserController {
 
 		if (appKey == null || appKey.isBlank()) {
 
-			if (validateNullFields(filter, value)) {
+			if (Validations.validateNullFields(filter, value)) {
 				return createBadRequestException("The filter and value are mandatory. ");
 			}
 
@@ -129,7 +127,7 @@ public class UserController {
 	 * Creates the.
 	 *
 	 * @param token the token
-	 * @param req the req
+	 * @param req   the req
 	 * @return the response entity
 	 */
 	@ApiOperation(value = "Create a user ", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
@@ -151,9 +149,10 @@ public class UserController {
 
 		StringBuilder ms = new StringBuilder();
 
-		ms.append(validateEmail(req.getEmail())).append(validateName(req.getName()))
-				.append(validateUsername(req.getUsername())).append(validatePassword(req.getPassword()))
-				.append(validateLastname(req.getLastname()));
+		ms.append(Validations.validateEmail(req.getEmail())).append(Validations.validateName(req.getName()))
+				.append(Validations.validateUsername(req.getUsername()))
+				.append(Validations.validatePassword(req.getPassword()))
+				.append(Validations.validateLastname(req.getLastname()));
 
 		if (!ms.toString().isEmpty()) {
 			return createBadRequestException(ms.toString());
@@ -166,7 +165,7 @@ public class UserController {
 	 * Delete user.
 	 *
 	 * @param token the token
-	 * @param id the id
+	 * @param id    the id
 	 * @return the response entity
 	 */
 	@ApiOperation(value = "Delete user by id ", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
@@ -184,7 +183,7 @@ public class UserController {
 
 		log.info("Call users/delete/{}", id);
 
-		String ms = validateId(id);
+		String ms = Validations.validateId(id, true);
 		if (!ms.isEmpty()) {
 			return createBadRequestException(ms);
 		}
@@ -196,8 +195,8 @@ public class UserController {
 	 * Put user by id.
 	 *
 	 * @param token the token
-	 * @param req the req
-	 * @param id the id
+	 * @param req   the req
+	 * @param id    the id
 	 * @return the response entity
 	 */
 	@ApiOperation(value = "Update user by id", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
@@ -217,133 +216,12 @@ public class UserController {
 
 		log.info("Call users/id");
 
-		String ms = validateId(id);
+		String ms = Validations.validateId(id, true);
 		if (!ms.isEmpty()) {
 			return createBadRequestException(ms);
 		}
 
 		return prepareResponse(userService.updateUser(req, id, tokenUtils.getDataToken(token)), HttpStatus.ACCEPTED);
-	}
-
-	/**
-	 * Validate email.
-	 *
-	 * @param email the email
-	 * @return the string
-	 */
-	private String validateEmail(String email) {
-		if (email.isBlank()) {
-			return "Email is mandatory. ";
-		} else {
-			if (!validateEmailRegex(email)) {
-				return "Email is not valid. ";
-			}
-		}
-		return "";
-
-	}
-
-	/**
-	 * Validate email regex.
-	 *
-	 * @param email the email
-	 * @return true, if successful
-	 */
-	private boolean validateEmailRegex(String email) {
-		Matcher matcher = Constants.VALID_EMAIL_ADDRESS_REGEX.matcher(email);
-		return matcher.find();
-	}
-
-	/**
-	 * Validate name.
-	 *
-	 * @param name the name
-	 * @return the string
-	 */
-	private String validateName(String name) {
-		if (name.isBlank()) {
-			return "Name is mandatory. ";
-		} else {
-			if (name.length() < 3) {
-				return "Name minimun length is 3. ";
-			}
-		}
-		return "";
-	}
-
-	/**
-	 * Validate username.
-	 *
-	 * @param username the username
-	 * @return the string
-	 */
-	private String validateUsername(String username) {
-
-		if (username.isBlank()) {
-			return "username is mandatory. ";
-		} else {
-			if (username.length() < 5) {
-				return "Username minimun length is 5. ";
-			}
-		}
-
-		return "";
-	}
-
-	/**
-	 * Validate password.
-	 *
-	 * @param password the password
-	 * @return the string
-	 */
-	private String validatePassword(String password) {
-		if (password.isBlank()) {
-			return "Password is mandatory. ";
-		} else {
-			if (!validatePasswordRegex(password)) {
-				return "Password is not valid. " + "The password minimun requirements are: "
-						+ "one number, one upper case ," + " one lower case,"
-						+ " one special character ( !, @, #, (, &, ) ) and length 8~20. ";
-			}
-		}
-		return "";
-	}
-
-	/**
-	 * Validate password regex.
-	 *
-	 * @param password the password
-	 * @return true, if successful
-	 */
-	private boolean validatePasswordRegex(String password) {
-		Matcher matcher = Constants.VALID_PASSWORD_REGEX.matcher(password);
-		return matcher.find();
-	}
-
-	/**
-	 * Validate lastname.
-	 *
-	 * @param lastname the lastname
-	 * @return the string
-	 */
-	private String validateLastname(String lastname) {
-		if (lastname != null && !lastname.isBlank() && lastname.length() < 3) {
-			return "Lastname minimun length is 3. ";
-		}
-		return "";
-	}
-
-	/**
-	 * Validate id.
-	 *
-	 * @param id the id
-	 * @return the string
-	 */
-	private String validateId(Long id) {
-		if (id < 1) {
-			return "id can't be less or equal than zero. ";
-		}
-		return "";
 	}
 
 	/**
@@ -374,33 +252,11 @@ public class UserController {
 	 * Prepare response.
 	 *
 	 * @param userResponse the user response
-	 * @param okOption the ok option
+	 * @param okOption     the ok option
 	 * @return the response entity
 	 */
 	private ResponseEntity<UserResponse> prepareResponse(UserResponse userResponse, HttpStatus okOption) {
 		return new ResponseEntity<>(userResponse, userResponse.haveData() ? okOption : userResponse.getHttpStatus());
-	}
-
-	/**
-	 * Validate app key.
-	 *
-	 * @param appKey the app key
-	 * @return true, if successful
-	 */
-	private boolean validateAppKey(String appKey) {
-		return appKey != null && !env.getSecretApp().equals(DigestUtils.sha256Hex(appKey));
-	}
-
-	/**
-	 * Validate null fields.
-	 *
-	 * @param filter the filter
-	 * @param value the value
-	 * @return true, if successful
-	 */
-	private boolean validateNullFields(String filter, String value) {
-		return filter == null || value == null;
-
 	}
 
 	/**
@@ -416,7 +272,7 @@ public class UserController {
 		} catch (Exception e) {
 			return Optional.of(createBadRequestException("The id must be a number"));
 		}
-		String ms = validateId(id);
+		String ms = Validations.validateId(id, true);
 		if (!ms.isEmpty()) {
 			return Optional.of(createBadRequestException(ms));
 		}
@@ -427,14 +283,14 @@ public class UserController {
 	 * Do if appkey.
 	 *
 	 * @param appKey the app key
-	 * @param value the value
+	 * @param value  the value
 	 * @return the response entity
 	 */
 	private ResponseEntity<UserResponse> doIfAppkey(String appKey, String value) {
-		if (validateAppKey(appKey)) {
+		if (Validations.validateAppKey(appKey, env.getAppSecret())) {
 			return createUnathorizedResponse("The AppKey is not valid");
 		} else {
-			String ms = validateUsername(value);
+			String ms = Validations.validateUsername(value);
 			if (!ms.isEmpty()) {
 				return createBadRequestException(ms);
 			}
@@ -446,8 +302,8 @@ public class UserController {
 	/**
 	 * Do if not app key.
 	 *
-	 * @param filter the filter
-	 * @param value the value
+	 * @param filter    the filter
+	 * @param value     the value
 	 * @param tokenData the token data
 	 * @return the response entity
 	 */
@@ -461,7 +317,7 @@ public class UserController {
 		}
 		if (filter.equalsIgnoreCase("username") || filter.equalsIgnoreCase("email")) {
 			boolean isUsername = filter.equalsIgnoreCase("username");
-			String ms = isUsername ? validateUsername(value) : validateEmail(value);
+			String ms = isUsername ? Validations.validateUsername(value) : Validations.validateEmail(value);
 			if (!ms.isEmpty()) {
 				return createBadRequestException(ms);
 			}

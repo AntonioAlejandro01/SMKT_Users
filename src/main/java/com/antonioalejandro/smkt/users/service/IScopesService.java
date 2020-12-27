@@ -21,4 +21,5 @@ public interface IScopesService {
 	 * @return the scopes for role
 	 */
 	public ScopeResponse getScopesForRole(Long roleId);
+
 }
