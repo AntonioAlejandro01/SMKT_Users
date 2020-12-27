@@ -15,7 +15,7 @@ WORKDIR /opt/server
 COPY --from=build /app.jar  ./app.jar
 
 ARG port=4060
-ARG datasource_url=jdbc:mysql://smkt-mysql:3306/SMKT_USERS?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Madrid
+ARG datasource_url=jdbc:mysql://smkt-mysql:3306/SMKT_USERS?useSSL=false&allowPublicKeyRetrieval=true
 ARG datasource_user=root
 ARG datasource_password=root
 ARG eureka_url=http://smkt-eureka:8761/eureka
