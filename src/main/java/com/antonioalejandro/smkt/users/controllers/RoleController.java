@@ -7,17 +7,22 @@
  */
 package com.antonioalejandro.smkt.users.controllers;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.antonioalejandro.smkt.users.pojo.response.RoleResponse;
 import com.antonioalejandro.smkt.users.service.IRoleService;
+import com.antonioalejandro.smkt.users.utils.Validations;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -55,12 +60,12 @@ public class RoleController {
 		log.info("Call getRoles");
 
 		RoleResponse roleResponse = roleService.getRoles();
-		
+
 		if (roleResponse.getRoles().isEmpty()) {
-			return new ResponseEntity<>(new RoleResponse(HttpStatus.NO_CONTENT,"No Content"),HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(new RoleResponse(HttpStatus.NO_CONTENT), HttpStatus.NO_CONTENT);
 		}
-		
-		return new ResponseEntity<>(roleResponse,HttpStatus.OK);
+
+		return new ResponseEntity<>(roleResponse, HttpStatus.OK);
 	}
 
 	/**
@@ -82,7 +87,7 @@ public class RoleController {
 			@PathVariable(name = "name", required = true) final String name) {
 		log.info("Call roles/{}", name);
 
-		String ms = validateName(name);
+		String ms = Validations.validateName(name);
 		if (!ms.isEmpty()) {
 			return new ResponseEntity<>(new RoleResponse(HttpStatus.BAD_REQUEST, ms), HttpStatus.BAD_REQUEST);
 		}
@@ -92,16 +97,30 @@ public class RoleController {
 	}
 
 	/**
-	 * Validate name.
+	 * Adds the role scopes.
 	 *
-	 * @param name the name
-	 * @return the string
+	 * @param scopes the scopes
+	 * @param id     the id
+	 * @return the response entity
 	 */
-	private String validateName(String name) {
-		if (name == null || name.isBlank()) {
-			return "Name is mandatory. ";
+	@ApiOperation(value = "Update role with scopes", response = RoleResponse.class, tags = "Roles")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Ok", response = RoleResponse.class),
+			@ApiResponse(code = 400, message = "Bad Request", response = RoleResponse.class),
+			@ApiResponse(code = 404, message = "Not Found", response = RoleResponse.class) })
+	@PatchMapping("/{id}")
+	public ResponseEntity<RoleResponse> addRoleScopes(@RequestBody(required = true) final List<String> scopes,
+			@PathVariable(name = "id", required = true) final Long id) {
+		log.info("Call roles/{}", id);
+
+		StringBuilder ms = new StringBuilder();
+		ms.append(Validations.validateId(id, true)).append(Validations.validateListScopes(scopes));
+		if (!ms.isEmpty()) {
+			return new ResponseEntity<>(new RoleResponse(HttpStatus.BAD_REQUEST, ms.toString()),
+					HttpStatus.BAD_REQUEST);
 		}
-		return "";
+		RoleResponse roleResponse = roleService.addScopesToRole(id, scopes);
+		return new ResponseEntity<>(roleResponse,
+				roleResponse.haveData() ? HttpStatus.OK : roleResponse.getHttpStatus());
 	}
 
 }

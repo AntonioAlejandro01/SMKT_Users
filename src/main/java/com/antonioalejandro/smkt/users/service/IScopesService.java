@@ -7,6 +7,7 @@
  */
 package com.antonioalejandro.smkt.users.service;
 
+import com.antonioalejandro.smkt.users.entity.Scope;
 import com.antonioalejandro.smkt.users.pojo.response.ScopeResponse;
 
 /**
@@ -21,4 +22,12 @@ public interface IScopesService {
 	 * @return the scopes for role
 	 */
 	public ScopeResponse getScopesForRole(Long roleId);
+	
+	/**
+	 * Adds the scope.
+	 *
+	 * @param scope the scope
+	 * @return the scope
+	 */
+	public Scope addScope(String scope);
 }

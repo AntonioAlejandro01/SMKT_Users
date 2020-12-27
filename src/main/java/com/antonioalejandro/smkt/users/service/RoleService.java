@@ -7,7 +7,9 @@
  */
 package com.antonioalejandro.smkt.users.service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -16,6 +18,7 @@ import org.springframework.http.HttpStatus;
 
 import com.antonioalejandro.smkt.users.dao.RoleDao;
 import com.antonioalejandro.smkt.users.entity.Role;
+import com.antonioalejandro.smkt.users.entity.Scope;
 import com.antonioalejandro.smkt.users.pojo.response.RoleResponse;
 
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +32,9 @@ public class RoleService implements IRoleService {
 	/** The repository. */
 	@Autowired
 	private RoleDao repository;
+
+	@Autowired
+	private IScopesService scopeService;
 
 	/**
 	 * Gets the roles.
@@ -54,7 +60,7 @@ public class RoleService implements IRoleService {
 		log.debug("Call get role: {}", id);
 		Optional<Role> role = repository.findById(id);
 		if (!role.isPresent()) {
-			return new RoleResponse(HttpStatus.NOT_FOUND, "Not Found");
+			return new RoleResponse(HttpStatus.NOT_FOUND);
 		}
 		return new RoleResponse(role.get());
 	}
@@ -71,9 +77,29 @@ public class RoleService implements IRoleService {
 
 		Role role = repository.findByName(name);
 		if (role == null) {
-			return new RoleResponse(HttpStatus.NOT_FOUND, "Not Found by name");
+			return new RoleResponse(HttpStatus.NOT_FOUND);
 		}
 		return new RoleResponse(role);
+	}
+
+	/**
+	 * Adds the scopes to role.
+	 *
+	 * @param id the id
+	 * @param scopes the scopes
+	 * @return the role response
+	 */
+	@Override
+	public RoleResponse addScopesToRole(long id, List<String> scopes) {
+		log.debug("Call add scope to Role with id: {}", id);
+		Optional<Role> oRole = repository.findById(id);
+		if (oRole.isEmpty()) {
+			return new RoleResponse(HttpStatus.NOT_FOUND);
+		}
+		Role role = oRole.get();
+		Set<Scope> sScope = role.getScopes();
+		scopes.stream().map(scopeService::addScope).forEach(sScope::add);
+		return new RoleResponse(repository.save(role));
 	}
 
 }

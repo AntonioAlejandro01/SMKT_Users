@@ -74,6 +74,17 @@ public class RoleResponse extends GenericResponse {
 		role = null;
 		roles = null;
 	}
+	
+	/**
+	 * Instantiates a new role response.
+	 *
+	 * @param status the status
+	 */
+	public RoleResponse(HttpStatus status) {
+		super(status, null);
+		role = null;
+		roles = null;
+	}
 
 	/**
 	 * Instantiates a new role response.
