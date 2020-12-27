@@ -57,11 +57,5 @@ public class ScopesService implements IScopesService {
 		return new ScopeResponse(scopes);
 
 	}
-	
-	@Override
-	public Scope addScope(String scope) {
-		// TODO: METHOD
-		return null;
-	}
 
 }
