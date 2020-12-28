@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Instantiates a new user registration request.
+ * The Class UserRegistrationRequest.
  */
 @Getter
 @Setter

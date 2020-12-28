@@ -37,7 +37,7 @@ public class RoleService implements IRoleService {
 	 */
 	@Override
 	public RoleResponse getRoles() {
-		log.debug("Call get all roles");
+		log.info("Call get all roles");
 		return new RoleResponse(
 				StreamSupport.stream(repository.findAll().spliterator(), false).collect(Collectors.toList()));
 	}
@@ -50,12 +50,14 @@ public class RoleService implements IRoleService {
 	 */
 	@Override
 	public RoleResponse getRoleById(long id) {
+		log.info("Call get role: {}", id);
 
-		log.debug("Call get role: {}", id);
 		Optional<Role> role = repository.findById(id);
-		if (!role.isPresent()) {
+
+		if (role.isEmpty()) {
 			return new RoleResponse(HttpStatus.NOT_FOUND);
 		}
+
 		return new RoleResponse(role.get());
 	}
 
@@ -67,13 +69,15 @@ public class RoleService implements IRoleService {
 	 */
 	@Override
 	public RoleResponse getRoleByName(String name) {
-		log.debug("Call get Role by name: {}", name);
+		log.info("Call get Role by name: {}", name);
 
-		Role role = repository.findByName(name);
-		if (role == null) {
+		Optional<Role> oRole = Optional.ofNullable(repository.findByName(name));
+
+		if (oRole.isEmpty()) {
 			return new RoleResponse(HttpStatus.NOT_FOUND);
 		}
-		return new RoleResponse(role);
+
+		return new RoleResponse(oRole.get());
 	}
 
 }

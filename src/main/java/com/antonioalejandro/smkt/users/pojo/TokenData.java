@@ -16,6 +16,7 @@ import lombok.Getter;
 /**
  * The Class TokenData.
  */
+
 @Getter
 public class TokenData {
 

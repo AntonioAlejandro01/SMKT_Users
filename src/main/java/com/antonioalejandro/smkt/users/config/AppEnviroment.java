@@ -57,7 +57,7 @@ public class AppEnviroment {
 
 	/** The secret app. */
 	@Value("${oauth.app-key-secret}")
-	private String secretApp;
+	private String appKeySecret;
 
 	/** The oauth path. */
 	@Value("${oauth.path}")

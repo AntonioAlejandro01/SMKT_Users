@@ -24,7 +24,7 @@ public class GenericResponse {
 
 	/** The status. */
 	@JsonProperty("status")
-	private String status;
+	private Integer status;
 
 	/** The message. */
 	@JsonProperty("message")
@@ -43,7 +43,7 @@ public class GenericResponse {
 	public GenericResponse(HttpStatus status, String message) {
 		this.httpStatus = status;
 		if (status != null) {
-			this.status = status.toString();
+			this.status = status.value();
 			this.message = message == null ? status.getReasonPhrase():message;
 		} else {
 			this.message = message;
