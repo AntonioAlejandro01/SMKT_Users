@@ -21,7 +21,7 @@ class AppEnviromentTest {
 		assertNull(env.getScopeReadMin());
 		assertNull(env.getScopeSuper());
 		assertNull(env.getScopeUpdateSelf());
-		assertNull(env.getSecretApp());
+		assertNull(env.getAppKeySecret());
 		assertNull(env.getSuperAdminId());
 		assertNotNull(env.toString());
 

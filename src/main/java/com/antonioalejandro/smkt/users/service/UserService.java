@@ -195,7 +195,7 @@ public class UserService implements IUserService {
 			}
 		}
 		if (!canDelete) {
-			return  new UserResponse(HttpStatus.UNAUTHORIZED, HttpStatus.UNAUTHORIZED.toString());
+			return new UserResponse(HttpStatus.UNAUTHORIZED, HttpStatus.UNAUTHORIZED.toString());
 		}
 
 		if (repository.findById(id).isPresent()) {
@@ -375,7 +375,7 @@ public class UserService implements IUserService {
 			return new UserResponse(user);
 		}
 		return new UserResponse(HttpStatus.UNAUTHORIZED, "You haven't got the correct scope");
-		
+
 	}
 
 	/**

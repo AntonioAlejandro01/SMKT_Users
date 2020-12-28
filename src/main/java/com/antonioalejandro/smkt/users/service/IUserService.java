@@ -20,6 +20,7 @@ public interface IUserService {
 	/**
 	 * Gets the users.
 	 *
+	 * @param tokenData the token data
 	 * @return the users
 	 */
 	public UserResponse getUsers(TokenData tokenData);
@@ -27,18 +28,26 @@ public interface IUserService {
 	/**
 	 * Gets the user by email or username.
 	 *
-	 * @param value   the value
-	 * @param isEmail the is email
+	 * @param value     the value
+	 * @param isEmail   the is email
+	 * @param tokenData the token data
 	 * @return the user by email or username
 	 */
 	public UserResponse getUserByEmailOrUsername(String value, boolean isEmail, TokenData tokenData);
-	
+
+	/**
+	 * Gets the user by username key.
+	 *
+	 * @param value the value
+	 * @return the user by username key
+	 */
 	public UserResponse getUserByUsernameKey(String value);
 
 	/**
 	 * Gets the user by id.
 	 *
-	 * @param id the id
+	 * @param id        the id
+	 * @param tokenData the token data
 	 * @return the user by id
 	 */
 	public UserResponse getUserById(long id, TokenData tokenData);
@@ -48,6 +57,7 @@ public interface IUserService {
 	 *
 	 * @param userUpdateRequest the user update request
 	 * @param id                the id
+	 * @param tokenData         the token data
 	 * @return the user response
 	 */
 	public UserResponse updateUser(UserUpdateRequest userUpdateRequest, long id, TokenData tokenData);
@@ -55,7 +65,8 @@ public interface IUserService {
 	/**
 	 * Creates the user.
 	 *
-	 * @param user the user
+	 * @param user      the user
+	 * @param tokenData the token data
 	 * @return the user response
 	 */
 	public UserResponse createUser(UserRegistrationRequest user, TokenData tokenData);
@@ -63,7 +74,8 @@ public interface IUserService {
 	/**
 	 * Delete user.
 	 *
-	 * @param id the id
+	 * @param id        the id
+	 * @param tokenData the token data
 	 * @return the user response
 	 */
 	public UserResponse deleteUser(long id, TokenData tokenData);

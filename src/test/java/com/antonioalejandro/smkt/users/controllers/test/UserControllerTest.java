@@ -67,11 +67,8 @@ class UserControllerTest {
 
 	}
 
-	@Test
-	void testSearchUsersBadRequest() throws Exception {
-
-		ResponseEntity<UserResponse> response = controller.searchUser(TOKEN, null, null, null);
-
+	
+	void verifyBadRequest(ResponseEntity<UserResponse> response) {
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertNotNull(response.getBody());
 		assertThat(response.getBody()).isInstanceOf(UserResponse.class);
@@ -82,90 +79,19 @@ class UserControllerTest {
 		assertNull(userResponse.getUser());
 		assertNull(userResponse.getUsers());
 
-		response = controller.searchUser(TOKEN, null, "", null);
+	}
 
-		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-		assertNotNull(response.getBody());
-		assertThat(response.getBody()).isInstanceOf(UserResponse.class);
-		userResponse = response.getBody();
-		assertNotNull(userResponse.getHttpStatus());
-		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
-		assertNotNull(userResponse.getMessage());
-		assertNull(userResponse.getUser());
-		assertNull(userResponse.getUsers());
+	@Test
+	void testSearchUsersBadRequest() throws Exception {
 
-		response = controller.searchUser(TOKEN, null, "", "");
-
-		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-		assertNotNull(response.getBody());
-		assertThat(response.getBody()).isInstanceOf(UserResponse.class);
-		userResponse = response.getBody();
-		assertNotNull(userResponse.getHttpStatus());
-		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
-		assertNotNull(userResponse.getMessage());
-		assertNull(userResponse.getUser());
-		assertNull(userResponse.getUsers());
-
-		response = controller.searchUser(TOKEN, null, "id", "4s");
-
-		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-		assertNotNull(response.getBody());
-		assertThat(response.getBody()).isInstanceOf(UserResponse.class);
-		userResponse = response.getBody();
-		assertNotNull(userResponse.getHttpStatus());
-		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
-		assertNotNull(userResponse.getMessage());
-		assertNull(userResponse.getUser());
-		assertNull(userResponse.getUsers());
-
-		response = controller.searchUser(TOKEN, null, "username", "4sas");
-
-		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-		assertNotNull(response.getBody());
-		assertThat(response.getBody()).isInstanceOf(UserResponse.class);
-		userResponse = response.getBody();
-		assertNotNull(userResponse.getHttpStatus());
-		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
-		assertNotNull(userResponse.getMessage());
-		assertEquals("Username minimun length is 5. ", userResponse.getMessage());
-		assertNull(userResponse.getUser());
-		assertNull(userResponse.getUsers());
-
-		response = controller.searchUser(TOKEN, null, "username", "");
-
-		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-		assertNotNull(response.getBody());
-		assertThat(response.getBody()).isInstanceOf(UserResponse.class);
-		userResponse = response.getBody();
-		assertNotNull(userResponse.getHttpStatus());
-		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
-		assertNotNull(userResponse.getMessage());
-		assertNull(userResponse.getUser());
-		assertNull(userResponse.getUsers());
-
-		response = controller.searchUser(TOKEN, null, "email", "");
-
-		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-		assertNotNull(response.getBody());
-		assertThat(response.getBody()).isInstanceOf(UserResponse.class);
-		userResponse = response.getBody();
-		assertNotNull(userResponse.getHttpStatus());
-		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
-		assertNotNull(userResponse.getMessage());
-		assertNull(userResponse.getUser());
-		assertNull(userResponse.getUsers());
-
-		response = controller.searchUser(TOKEN, null, "email", "asdasd");
-
-		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-		assertNotNull(response.getBody());
-		assertThat(response.getBody()).isInstanceOf(UserResponse.class);
-		userResponse = response.getBody();
-		assertNotNull(userResponse.getHttpStatus());
-		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
-		assertNotNull(userResponse.getMessage());
-		assertNull(userResponse.getUser());
-		assertNull(userResponse.getUsers());
+		verifyBadRequest(controller.searchUser(TOKEN, null, null, null));
+		verifyBadRequest(controller.searchUser(TOKEN, null, "", null));
+		verifyBadRequest(controller.searchUser(TOKEN, null, "", ""));
+		verifyBadRequest(controller.searchUser(TOKEN, null, "id", "4s"));
+		verifyBadRequest(controller.searchUser(TOKEN, null, "username", "4sas"));
+		verifyBadRequest(controller.searchUser(TOKEN, null, "username", ""));
+		verifyBadRequest(controller.searchUser(TOKEN, null, "email", ""));
+		verifyBadRequest(controller.searchUser(TOKEN, null, "email", "asdasd"));
 
 	}
 

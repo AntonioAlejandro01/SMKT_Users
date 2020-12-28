@@ -32,8 +32,6 @@ class RollerControllerTest {
 	@Mock
 	private RoleService service;
 
-	private final String TOKEN = "t.o.k.e.n";
-
 	private final String MOCK_NAME = "ADMIN";
 
 	@BeforeEach
@@ -45,7 +43,7 @@ class RollerControllerTest {
 	void testGetRolesOk() throws Exception {
 		when(service.getRoles()).thenReturn(new RoleResponse(createRoleList()));
 
-		ResponseEntity<RoleResponse> response = roleController.getRoles(TOKEN);
+		ResponseEntity<RoleResponse> response = roleController.getRoles();
 
 		assertThat(response).isInstanceOf(ResponseEntity.class);
 
@@ -70,7 +68,7 @@ class RollerControllerTest {
 	void testGetRolesFail() throws Exception {
 		when(service.getRoles()).thenReturn(new RoleResponse(new ArrayList<Role>()));
 
-		ResponseEntity<RoleResponse> response = roleController.getRoles(TOKEN);
+		ResponseEntity<RoleResponse> response = roleController.getRoles();
 
 		assertThat(response).isInstanceOf(ResponseEntity.class);
 
@@ -94,7 +92,7 @@ class RollerControllerTest {
 	void testGetRoleByNameOk() throws Exception {
 		when(service.getRoleByName(MOCK_NAME)).thenReturn(new RoleResponse(new Role()));
 
-		ResponseEntity<RoleResponse> response = roleController.getRoleByName(TOKEN, MOCK_NAME);
+		ResponseEntity<RoleResponse> response = roleController.getRoleByName(MOCK_NAME);
 
 		assertThat(response).isInstanceOf(ResponseEntity.class);
 
@@ -117,7 +115,7 @@ class RollerControllerTest {
 	@Test
 	void testGetRoleByNameFailBadRequest() throws Exception {
 
-		ResponseEntity<RoleResponse> response = roleController.getRoleByName(TOKEN, "");
+		ResponseEntity<RoleResponse> response = roleController.getRoleByName("");
 
 		assertThat(response).isInstanceOf(ResponseEntity.class);
 
@@ -142,7 +140,7 @@ class RollerControllerTest {
 	@Test
 	void testGetRoleByNameFailBadRequest2() throws Exception {
 
-		ResponseEntity<RoleResponse> response = roleController.getRoleByName(TOKEN, null);
+		ResponseEntity<RoleResponse> response = roleController.getRoleByName(null);
 
 		assertThat(response).isInstanceOf(ResponseEntity.class);
 
@@ -168,7 +166,7 @@ class RollerControllerTest {
 	void testGetRoleByNameFail() throws Exception {
 		when(service.getRoleByName(MOCK_NAME)).thenReturn(new RoleResponse(HttpStatus.NOT_FOUND, "X"));
 
-		ResponseEntity<RoleResponse> response = roleController.getRoleByName(TOKEN, MOCK_NAME);
+		ResponseEntity<RoleResponse> response = roleController.getRoleByName(MOCK_NAME);
 
 		assertThat(response).isInstanceOf(ResponseEntity.class);
 

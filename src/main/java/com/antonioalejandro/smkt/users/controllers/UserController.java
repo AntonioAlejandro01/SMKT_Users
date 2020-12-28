@@ -30,6 +30,7 @@ import com.antonioalejandro.smkt.users.pojo.request.UserUpdateRequest;
 import com.antonioalejandro.smkt.users.pojo.response.GenericResponse;
 import com.antonioalejandro.smkt.users.pojo.response.UserResponse;
 import com.antonioalejandro.smkt.users.service.UserService;
+import com.antonioalejandro.smkt.users.utils.Constants;
 import com.antonioalejandro.smkt.users.utils.TokenUtils;
 import com.antonioalejandro.smkt.users.utils.Validations;
 
@@ -88,10 +89,10 @@ public class UserController {
 	/**
 	 * Search user.
 	 *
-	 * @param token  the token
+	 * @param token the token
 	 * @param appKey the app key
 	 * @param filter the filter
-	 * @param value  the value
+	 * @param value the value
 	 * @return the response entity
 	 */
 	@ApiOperation(value = "Saerch user by username, email or id ", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
@@ -110,7 +111,7 @@ public class UserController {
 			@RequestParam(name = "filter", required = true) final String filter,
 			@RequestParam(name = "value", required = true) final String value) {
 
-		if (appKey == null || appKey.isBlank()) {
+		if (!Validations.isFieldPresent(appKey)) {
 
 			if (Validations.validateNullFields(filter, value)) {
 				return createBadRequestException("The filter and value are mandatory. ");
@@ -127,7 +128,7 @@ public class UserController {
 	 * Creates the.
 	 *
 	 * @param token the token
-	 * @param req   the req
+	 * @param req the req
 	 * @return the response entity
 	 */
 	@ApiOperation(value = "Create a user ", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
@@ -165,7 +166,7 @@ public class UserController {
 	 * Delete user.
 	 *
 	 * @param token the token
-	 * @param id    the id
+	 * @param id the id
 	 * @return the response entity
 	 */
 	@ApiOperation(value = "Delete user by id ", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
@@ -195,8 +196,8 @@ public class UserController {
 	 * Put user by id.
 	 *
 	 * @param token the token
-	 * @param req   the req
-	 * @param id    the id
+	 * @param req the req
+	 * @param id the id
 	 * @return the response entity
 	 */
 	@ApiOperation(value = "Update user by id", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
@@ -217,6 +218,7 @@ public class UserController {
 		log.info("Call users/id");
 
 		String ms = Validations.validateId(id, true);
+		
 		if (!ms.isEmpty()) {
 			return createBadRequestException(ms);
 		}
@@ -232,7 +234,7 @@ public class UserController {
 	 */
 	private ResponseEntity<UserResponse> createUnathorizedResponse(String ms) {
 		return new ResponseEntity<>(
-				new UserResponse(HttpStatus.UNAUTHORIZED, ms == null || ms.isBlank() ? "Unauthorized" : ms),
+				new UserResponse(HttpStatus.UNAUTHORIZED, !Validations.isFieldPresent(ms) ? HttpStatus.UNAUTHORIZED.getReasonPhrase() : ms),
 				HttpStatus.UNAUTHORIZED);
 	}
 
@@ -244,7 +246,7 @@ public class UserController {
 	 */
 	private ResponseEntity<UserResponse> createBadRequestException(String ms) {
 		return new ResponseEntity<>(
-				new UserResponse(HttpStatus.BAD_REQUEST, ms == null || ms.isBlank() ? "Bad Request" : ms),
+				new UserResponse(HttpStatus.BAD_REQUEST, !Validations.isFieldPresent(ms) ? HttpStatus.BAD_REQUEST.getReasonPhrase() : ms),
 				HttpStatus.BAD_REQUEST);
 	}
 
@@ -252,7 +254,7 @@ public class UserController {
 	 * Prepare response.
 	 *
 	 * @param userResponse the user response
-	 * @param okOption     the ok option
+	 * @param okOption the ok option
 	 * @return the response entity
 	 */
 	private ResponseEntity<UserResponse> prepareResponse(UserResponse userResponse, HttpStatus okOption) {
@@ -270,7 +272,7 @@ public class UserController {
 		try {
 			id = Long.parseLong(value);
 		} catch (Exception e) {
-			return Optional.of(createBadRequestException("The id must be a number"));
+			return Optional.of(createBadRequestException(Constants.ID_MUST_BE_A_NUMBER));
 		}
 		String ms = Validations.validateId(id, true);
 		if (!ms.isEmpty()) {
@@ -283,12 +285,12 @@ public class UserController {
 	 * Do if appkey.
 	 *
 	 * @param appKey the app key
-	 * @param value  the value
+	 * @param value the value
 	 * @return the response entity
 	 */
 	private ResponseEntity<UserResponse> doIfAppkey(String appKey, String value) {
-		if (Validations.validateAppKey(appKey, env.getAppSecret())) {
-			return createUnathorizedResponse("The AppKey is not valid");
+		if (Validations.validateAppKey(appKey, env.getAppKeySecret())) {
+			return createUnathorizedResponse(Constants.APPKEY_NOT_VALID);
 		} else {
 			String ms = Validations.validateUsername(value);
 			if (!ms.isEmpty()) {
@@ -302,28 +304,28 @@ public class UserController {
 	/**
 	 * Do if not app key.
 	 *
-	 * @param filter    the filter
-	 * @param value     the value
+	 * @param filter the filter
+	 * @param value the value
 	 * @param tokenData the token data
 	 * @return the response entity
 	 */
 	private ResponseEntity<UserResponse> doIfNotAppKey(String filter, String value, TokenData tokenData) {
-		if (filter.equalsIgnoreCase("id")) {
+		if (filter.equalsIgnoreCase(Constants.FILTER_ID)) {
 			Optional<ResponseEntity<UserResponse>> oUserResponse = doIfIdFilter(value);
 			if (oUserResponse.isPresent()) {
 				return oUserResponse.get();
 			}
 			return prepareResponse(userService.getUserById(Long.parseLong(value), tokenData), HttpStatus.OK);
 		}
-		if (filter.equalsIgnoreCase("username") || filter.equalsIgnoreCase("email")) {
-			boolean isUsername = filter.equalsIgnoreCase("username");
+		if (filter.equalsIgnoreCase(Constants.FILTER_USERNAME) || filter.equalsIgnoreCase(Constants.FILTER_EMAIL)) {
+			boolean isUsername = filter.equalsIgnoreCase(Constants.FILTER_USERNAME);
 			String ms = isUsername ? Validations.validateUsername(value) : Validations.validateEmail(value);
 			if (!ms.isEmpty()) {
 				return createBadRequestException(ms);
 			}
 			return prepareResponse(userService.getUserByEmailOrUsername(value, !isUsername, tokenData), HttpStatus.OK);
 		}
-		return createBadRequestException("Filter type is not valid. (id, username or email). ");
+		return createBadRequestException(Constants.FILTER_NOT_VALID);
 	}
 
 }

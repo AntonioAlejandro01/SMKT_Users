@@ -182,6 +182,7 @@ public class Validations {
 	 * Validate app key.
 	 *
 	 * @param appKey the app key
+	 * @param secret the secret
 	 * @return true, if successful
 	 */
 	public static boolean validateAppKey(String appKey, String secret) {

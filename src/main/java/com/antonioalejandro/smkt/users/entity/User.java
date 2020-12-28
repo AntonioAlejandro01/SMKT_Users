@@ -86,7 +86,7 @@ public class User implements Serializable {
 	 */
 	@JsonGetter("role")
 	public String getRoleName() {
-		return role == null ? null:role.getName();
+		return role == null ? null : role.getName();
 	}
 
 }

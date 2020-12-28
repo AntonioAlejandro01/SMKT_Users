@@ -60,6 +60,7 @@ public class ScopesController {
 		}
 
 		log.info("Call get scopes for role {}", roleId);
+
 		ScopeResponse response = scopeService.getScopesForRole(roleId);
 
 		if (!response.haveData()) {

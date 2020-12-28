@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,8 +20,6 @@ import com.antonioalejandro.smkt.users.service.IRoleService;
 import com.antonioalejandro.smkt.users.utils.Validations;
 
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -51,8 +48,7 @@ public class RoleController {
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "Ok", response = RoleResponse.class, responseContainer = "List") })
 	@GetMapping()
-	public ResponseEntity<RoleResponse> getRoles(
-			@RequestHeader(name = "Authorization", required = true) final String token) {
+	public ResponseEntity<RoleResponse> getRoles() {
 		log.info("Call getRoles");
 
 		RoleResponse roleResponse = roleService.getRoles();
@@ -75,12 +71,8 @@ public class RoleController {
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Ok", response = RoleResponse.class),
 			@ApiResponse(code = 400, message = "Bad Request", response = RoleResponse.class),
 			@ApiResponse(code = 404, message = "Not Found", response = RoleResponse.class) })
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "Authorization", value = "toke JWT", required = true, dataType = "string", paramType = "header", readOnly = true) })
 	@GetMapping("/{name}")
-	public ResponseEntity<RoleResponse> getRoleByName(
-			@RequestHeader(name = "Authorization", required = true) final String token,
-			@PathVariable(name = "name", required = true) final String name) {
+	public ResponseEntity<RoleResponse> getRoleByName(@PathVariable(name = "name", required = true) final String name) {
 		log.info("Call roles/{}", name);
 
 		String ms = Validations.validateName(name);
