@@ -3,11 +3,9 @@ name: CI-Develop
 on:
   push:
     branches:
-      - master
       - development
   pull_request:
     branches:
-      - master
       - development
     types: [opened, synchronize, reopened]
     
