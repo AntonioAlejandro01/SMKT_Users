@@ -2,6 +2,7 @@
 
 ![Build](https://github.com/AntonioAlejandro01/SMKT_Users/workflows/Build/badge.svg?branch=master)
 ![CI-Develop](https://github.com/AntonioAlejandro01/SMKT_Users/workflows/CI-Develop/badge.svg?branch=development)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=AntonioAlejandro01_SMKT_Users&metric=coverage)](https://sonarcloud.io/dashboard?id=AntonioAlejandro01_SMKT_Users)
 ## Description
 
 This MS serve users in the database
