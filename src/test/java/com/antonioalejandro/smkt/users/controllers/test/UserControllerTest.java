@@ -67,12 +67,35 @@ class UserControllerTest {
 
 	}
 
-	
-	void verifyBadRequest(ResponseEntity<UserResponse> response) {
+	@Test
+	void testSearchUsersBadRequest() throws Exception {
+		ResponseEntity<UserResponse> response;
+		UserResponse userResponse;
+
+		response = controller.searchUser(TOKEN, null, null, null);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertNotNull(response.getBody());
-		assertThat(response.getBody()).isInstanceOf(UserResponse.class);
-		UserResponse userResponse = response.getBody();
+		userResponse = response.getBody();
+		assertNotNull(userResponse.getHttpStatus());
+		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
+		assertNotNull(userResponse.getMessage());
+		assertNull(userResponse.getUser());
+		assertNull(userResponse.getUsers());
+
+		response = controller.searchUser(TOKEN, null, "", null);
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertNotNull(response.getBody());
+		userResponse = response.getBody();
+		assertNotNull(userResponse.getHttpStatus());
+		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
+		assertNotNull(userResponse.getMessage());
+		assertNull(userResponse.getUser());
+		assertNull(userResponse.getUsers());
+
+		response = controller.searchUser(TOKEN, null, "", "");
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertNotNull(response.getBody());
+		userResponse = response.getBody();
 		assertNotNull(userResponse.getHttpStatus());
 		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
 		assertNotNull(userResponse.getMessage());
@@ -82,16 +105,73 @@ class UserControllerTest {
 	}
 
 	@Test
-	void testSearchUsersBadRequest() throws Exception {
+	void testSearchUsersBadRequestEmail() throws Exception {
+		ResponseEntity<UserResponse> response;
+		UserResponse userResponse;
 
-		verifyBadRequest(controller.searchUser(TOKEN, null, null, null));
-		verifyBadRequest(controller.searchUser(TOKEN, null, "", null));
-		verifyBadRequest(controller.searchUser(TOKEN, null, "", ""));
-		verifyBadRequest(controller.searchUser(TOKEN, null, "id", "4s"));
-		verifyBadRequest(controller.searchUser(TOKEN, null, "username", "4sas"));
-		verifyBadRequest(controller.searchUser(TOKEN, null, "username", ""));
-		verifyBadRequest(controller.searchUser(TOKEN, null, "email", ""));
-		verifyBadRequest(controller.searchUser(TOKEN, null, "email", "asdasd"));
+		response = controller.searchUser(TOKEN, null, "email", "");
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertNotNull(response.getBody());
+		userResponse = response.getBody();
+		assertNotNull(userResponse.getHttpStatus());
+		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
+		assertNotNull(userResponse.getMessage());
+		assertNull(userResponse.getUser());
+		assertNull(userResponse.getUsers());
+
+		response = controller.searchUser(TOKEN, null, "email", "asdasd");
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertNotNull(response.getBody());
+		userResponse = response.getBody();
+		assertNotNull(userResponse.getHttpStatus());
+		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
+		assertNotNull(userResponse.getMessage());
+		assertNull(userResponse.getUser());
+		assertNull(userResponse.getUsers());
+
+	}
+
+	@Test
+	void testSearchUsersBadRequestUsername() throws Exception {
+		ResponseEntity<UserResponse> response;
+		UserResponse userResponse;
+
+		response = controller.searchUser(TOKEN, null, "username", "4sas");
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertNotNull(response.getBody());
+		userResponse = response.getBody();
+		assertNotNull(userResponse.getHttpStatus());
+		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
+		assertNotNull(userResponse.getMessage());
+		assertNull(userResponse.getUser());
+		assertNull(userResponse.getUsers());
+
+		response = controller.searchUser(TOKEN, null, "username", "");
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertNotNull(response.getBody());
+		userResponse = response.getBody();
+		assertNotNull(userResponse.getHttpStatus());
+		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
+		assertNotNull(userResponse.getMessage());
+		assertNull(userResponse.getUser());
+		assertNull(userResponse.getUsers());
+
+	}
+
+	@Test
+	void testSearchUsersBadRequestId() throws Exception {
+		ResponseEntity<UserResponse> response;
+		UserResponse userResponse;
+
+		response = controller.searchUser(TOKEN, null, "id", "4s");
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertNotNull(response.getBody());
+		userResponse = response.getBody();
+		assertNotNull(userResponse.getHttpStatus());
+		assertEquals(HttpStatus.BAD_REQUEST, userResponse.getHttpStatus());
+		assertNotNull(userResponse.getMessage());
+		assertNull(userResponse.getUser());
+		assertNull(userResponse.getUsers());
 
 	}
 
