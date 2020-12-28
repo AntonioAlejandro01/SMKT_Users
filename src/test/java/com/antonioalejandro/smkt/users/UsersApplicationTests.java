@@ -1,13 +1,17 @@
 package com.antonioalejandro.smkt.users;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest
+import org.junit.jupiter.api.Test;
+
 class UsersApplicationTests {
 
 	@Test
 	void contextLoads() {
+		String hola = "";
+		String Q = "";
+
+		assertEquals(hola, Q);
 	}
 
 }

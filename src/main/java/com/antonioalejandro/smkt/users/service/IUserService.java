@@ -1,25 +1,83 @@
+/*
+ * @Author AntonioAlejandro01
+ * 
+ * @link http://antonioalejandro.com
+ * @link https://github.com/AntonioAlejandro01/SMKT_Users
+ * 
+ */
 package com.antonioalejandro.smkt.users.service;
 
-import java.util.List;
+import com.antonioalejandro.smkt.users.pojo.TokenData;
+import com.antonioalejandro.smkt.users.pojo.request.UserRegistrationRequest;
+import com.antonioalejandro.smkt.users.pojo.request.UserUpdateRequest;
+import com.antonioalejandro.smkt.users.pojo.response.UserResponse;
 
-import com.antonioalejandro.smkt.users.entity.User;
-import com.antonioalejandro.smkt.users.pojo.UserDTO;
-import com.antonioalejandro.smkt.users.pojo.UserRegistrationDTO;
-import com.antonioalejandro.smkt.users.pojo.UserResponse;
-
+/**
+ * The Interface IUserService.
+ */
 public interface IUserService {
 
-	public List<UserDTO> getUsers();
+	/**
+	 * Gets the users.
+	 *
+	 * @param tokenData the token data
+	 * @return the users
+	 */
+	public UserResponse getUsers(TokenData tokenData);
 
-	public List<UserDTO> getUsersByEmail(String email);
+	/**
+	 * Gets the user by email or username.
+	 *
+	 * @param value     the value
+	 * @param isEmail   the is email
+	 * @param tokenData the token data
+	 * @return the user by email or username
+	 */
+	public UserResponse getUserByEmailOrUsername(String value, boolean isEmail, TokenData tokenData);
 
-	public UserDTO getUserById(long id);
+	/**
+	 * Gets the user by username key.
+	 *
+	 * @param value the value
+	 * @return the user by username key
+	 */
+	public UserResponse getUserByUsernameKey(String value);
 
-	public UserResponse UpdateUser(UserRegistrationDTO registrationDTO, Long id);
+	/**
+	 * Gets the user by id.
+	 *
+	 * @param id        the id
+	 * @param tokenData the token data
+	 * @return the user by id
+	 */
+	public UserResponse getUserById(long id, TokenData tokenData);
 
-	public UserDTO create(UserRegistrationDTO user);
+	/**
+	 * Update user.
+	 *
+	 * @param userUpdateRequest the user update request
+	 * @param id                the id
+	 * @param tokenData         the token data
+	 * @return the user response
+	 */
+	public UserResponse updateUser(UserUpdateRequest userUpdateRequest, long id, TokenData tokenData);
 
-	public UserResponse delete(Long id);
+	/**
+	 * Creates the user.
+	 *
+	 * @param user      the user
+	 * @param tokenData the token data
+	 * @return the user response
+	 */
+	public UserResponse createUser(UserRegistrationRequest user, TokenData tokenData);
 
-	public boolean verifyUser(String usernameOrEmail, String password);
+	/**
+	 * Delete user.
+	 *
+	 * @param id        the id
+	 * @param tokenData the token data
+	 * @return the user response
+	 */
+	public UserResponse deleteUser(long id, TokenData tokenData);
+
 }

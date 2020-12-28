@@ -1,39 +1,85 @@
+/*
+ * @Author AntonioAlejandro01
+ * 
+ * @link http://antonioalejandro.com
+ * @link https://github.com/AntonioAlejandro01/SMKT_Users
+ * 
+ */
 package com.antonioalejandro.smkt.users.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.antonioalejandro.smkt.users.converter.RoleConverter;
-import com.antonioalejandro.smkt.users.converter.UserConverter;
 import com.antonioalejandro.smkt.users.service.RoleService;
+import com.antonioalejandro.smkt.users.service.ScopesService;
 import com.antonioalejandro.smkt.users.service.UserService;
+import com.antonioalejandro.smkt.users.utils.TokenUtils;
 
+/**
+ * The Class PersistentContext.
+ */
 @Configuration
 public class PersistentContext {
 
+	/**
+	 * Gets the user service.
+	 *
+	 * @return the user service
+	 */
 	@Bean
 	public UserService getUserService() {
 		return new UserService();
 	}
+
+	/**
+	 * Gets the role service.
+	 *
+	 * @return the role service
+	 */
 	@Bean
 	public RoleService getRoleService() {
 		return new RoleService();
 	}
-	
-	@Bean
-	public RoleConverter getRoleConverter() {
-		return new RoleConverter();
-	}
-	
-	@Bean
-	public UserConverter getUserConcverter() {
-		return new UserConverter();
-	}
-	
+
+	/**
+	 * Gets the encoder.
+	 *
+	 * @return the encoder
+	 */
 	@Bean
 	public BCryptPasswordEncoder getEncoder() {
 		return new BCryptPasswordEncoder();
+	}
+
+	/**
+	 * Gets the scopes service.
+	 *
+	 * @return the scopes service
+	 */
+	@Bean
+	public ScopesService getScopesService() {
+		return new ScopesService();
+	}
+
+	/**
+	 * Gets the token utils.
+	 *
+	 * @return the token utils
+	 */
+	@Bean
+	public TokenUtils getTokenUtils() {
+		return new TokenUtils();
+	}
+	
+	/**
+	 * Gets the app enviroment.
+	 *
+	 * @return the app enviroment
+	 */
+	@Bean
+	public AppEnviroment getAppEnviroment() {
+		return new AppEnviroment();
 	}
 
 }
