@@ -1,6 +1,6 @@
 # SMKT_Users
 
-![CI-Develop](https://github.com/AntonioAlejandro01/SMKT_Users/workflows/CI-Develop/badge.svg?branch=development)
+![Scan](https://github.com/AntonioAlejandro01/SMKT_Users/workflows/Scan/badge.svg?branch=master)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=AntonioAlejandro01_SMKT_Users&metric=coverage)](https://sonarcloud.io/dashboard?id=AntonioAlejandro01_SMKT_Users)
 
 ## Description
