@@ -6,6 +6,9 @@ INSERT INTO `scopes` (name) VALUES ('users.adm'); /*Solo puede acceder a los dat
 INSERT INTO `scopes` (name) VALUES ('users.update-self');
 INSERT INTO `scopes` (name) VALUES ('users.read-min');
 
+INSERT INTO `scopes` (name) VALUES ('files.excel');
+INSERT INTO `scopes` (name) VALUES ('files.pdf');
+
 
 
 
@@ -27,3 +30,15 @@ INSERT INTO `roles_scopes` (role_id,scopes_id) VALUES (2,2);
 /*USERS*/
 INSERT INTO `roles_scopes` (role_id,scopes_id) VALUES (3,3);
 INSERT INTO `roles_scopes` (role_id,scopes_id) VALUES (3,4);
+
+/*FILES*/
+
+/*Excel*/
+INSERT INTO `roles_scopes` (role_id,scopes_id) VALUES (1,5);
+INSERT INTO `roles_scopes` (role_id,scopes_id) VALUES (2,5);
+INSERT INTO `roles_scopes` (role_id,scopes_id) VALUES (3,5);
+
+/*Pdf*/
+INSERT INTO `roles_scopes` (role_id,scopes_id) VALUES (1,6);
+INSERT INTO `roles_scopes` (role_id,scopes_id) VALUES (2,6);
+INSERT INTO `roles_scopes` (role_id,scopes_id) VALUES (3,6);
