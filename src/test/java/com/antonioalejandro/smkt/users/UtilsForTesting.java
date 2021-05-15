@@ -2,9 +2,9 @@ package com.antonioalejandro.smkt.users;
 
 import java.util.HashSet;
 
-import com.antonioalejandro.smkt.users.entity.Role;
-import com.antonioalejandro.smkt.users.entity.Scope;
-import com.antonioalejandro.smkt.users.entity.User;
+import com.antonioalejandro.smkt.users.model.entity.Role;
+import com.antonioalejandro.smkt.users.model.entity.Scope;
+import com.antonioalejandro.smkt.users.model.entity.User;
 
 public class UtilsForTesting {
 

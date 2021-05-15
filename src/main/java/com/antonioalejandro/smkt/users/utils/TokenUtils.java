@@ -20,7 +20,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.antonioalejandro.smkt.users.config.AppEnviroment;
-import com.antonioalejandro.smkt.users.pojo.TokenData;
+import com.antonioalejandro.smkt.users.model.TokenData;
 
 /**
  * The Class TokenUtils.
