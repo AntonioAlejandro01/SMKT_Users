@@ -7,7 +7,7 @@ on:
     branches: [master,develop]
     types: [opened, synchronize, closed]
 jobs:
-  build:
+  sonar:
     name: Sonar
     runs-on: ubuntu-latest
     steps:
