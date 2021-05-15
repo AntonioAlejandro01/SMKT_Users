@@ -6,7 +6,7 @@ COPY . .
 
 RUN mvn clean compile install
 
-RUN mv ./smkt-users.jar /app.jar
+RUN mv ./target/smkt-users.jar /app.jar
 
 FROM openjdk:11
 
