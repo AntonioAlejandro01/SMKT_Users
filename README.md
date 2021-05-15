@@ -1,13 +1,10 @@
 # SMKT_Users
 
-![Scan](https://github.com/AntonioAlejandro01/SMKT_Users/workflows/Scan/badge.svg?branch=master)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=AntonioAlejandro01_SMKT_Users&metric=coverage)](https://sonarcloud.io/dashboard?id=AntonioAlejandro01_SMKT_Users)
 
 ## Description
 
 This MS serve users in the database
-
-![X](smktusers.png)
 
 ## Endpoints
 
@@ -34,7 +31,7 @@ This MS serve users in the database
 
 ### Aclarations
 
-<sup>*</sup> The endpoint users need headers authorization except when you call a _/users/search_ and _App-Key_ is present in headers with the correct value.
+<sup>\*</sup> The endpoint users need headers authorization except when you call a _/users/search_ and _App-Key_ is present in headers with the correct value.
 
 <sup>1</sup>The Output change depends your scope.If your scope is minimun you only can see usernames. For a Admin scope you not can't see id and password(cyphered password) but if you have superadmin scope you can see all data for users.
 
@@ -48,41 +45,29 @@ This MS serve users in the database
 
 Docker image : `antonioalejandro01/smkt-users:latest`
 
-Download image : ```docker pull antonioalejandro01/smkt-users:latest```
+Download image : `docker pull antonioalejandro01/smkt-users:latest`
 
 Run image
 
 ```bash
-docker run 
+docker run
 -rm
 --name smkt-users
--p 6060:6060 
--e port=6060 
--e datasource_url="jdbc:mysql://localhost:3306/SMKT_USERS" 
--e datasource_user="root" 
+-p 6060:6060
+-e port=6060
+-e datasource_url="jdbc:mysql://localhost:3306/SMKT_USERS"
+-e datasource_user="root"
 -e datasource_password="root_password"
 -e eureka_url="http://localhost:8761/eureka"
-antonioalejandro01/smkt-users:latest 
+antonioalejandro01/smkt-users:latest
 ```
 
 ### Args
 
-| Name | Description | Example |
-| ---- | ----------- | ------- |
-| port | The port that ther server is listening | 4060 |
-| datasource_url | the url databse | jdbc:mysql://smkt-mysql:3306/SMKT_USERS |
-| datasource_user | the databse user | root |
-| datasource_password | the password for the user databse | root_password |
-| eureka_url | the eureka URL to can connect | http: //smkt-eureka:8761/eureka |
-
-## Others Micro-services
-
-- [SMKT_Eureka](https://github.com/AntonioAlejandro01/SMKT_Eureka)
-- [SMKT_Gateway](https://github.com/AntonioAlejandro01/SMKT_Gateway)
-- [SMKT_Oauth](https://github.com/AntonioAlejandro01/SMKT_Oauth)
-- [SMKT_Files](https://github.com/AntonioAlejandro01/SMKT_Files)
-- [SMKT_Kitchen](https://github.com/AntonioAlejandro01/SMKT_Kitchen)
-
-## Frontend
-
-- [SMKTF_Kitchen](https://github.com/AntonioAlejandro01/SMKTF_Kitchen)
+| Name                | Description                            | Example                                 |
+| ------------------- | -------------------------------------- | --------------------------------------- |
+| port                | The port that ther server is listening | 4060                                    |
+| datasource_url      | the url databse                        | jdbc:mysql://smkt-mysql:3306/SMKT_USERS |
+| datasource_user     | the databse user                       | root                                    |
+| datasource_password | the password for the user databse      | root_password                           |
+| eureka_url          | the eureka URL to can connect          | http: //smkt-eureka:8761/eureka         |

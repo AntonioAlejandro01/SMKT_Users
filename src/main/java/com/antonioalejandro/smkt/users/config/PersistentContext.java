@@ -11,9 +11,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.antonioalejandro.smkt.users.service.RoleService;
-import com.antonioalejandro.smkt.users.service.ScopesService;
-import com.antonioalejandro.smkt.users.service.UserService;
+import com.antonioalejandro.smkt.users.service.impl.RoleServiceImpl;
+import com.antonioalejandro.smkt.users.service.impl.ScopesServiceImpl;
+import com.antonioalejandro.smkt.users.service.impl.UserServiceImpl;
 import com.antonioalejandro.smkt.users.utils.TokenUtils;
 
 /**
@@ -28,8 +28,8 @@ public class PersistentContext {
 	 * @return the user service
 	 */
 	@Bean
-	public UserService getUserService() {
-		return new UserService();
+	public UserServiceImpl getUserService() {
+		return new UserServiceImpl();
 	}
 
 	/**
@@ -38,8 +38,8 @@ public class PersistentContext {
 	 * @return the role service
 	 */
 	@Bean
-	public RoleService getRoleService() {
-		return new RoleService();
+	public RoleServiceImpl getRoleService() {
+		return new RoleServiceImpl();
 	}
 
 	/**
@@ -58,8 +58,8 @@ public class PersistentContext {
 	 * @return the scopes service
 	 */
 	@Bean
-	public ScopesService getScopesService() {
-		return new ScopesService();
+	public ScopesServiceImpl getScopesService() {
+		return new ScopesServiceImpl();
 	}
 
 	/**

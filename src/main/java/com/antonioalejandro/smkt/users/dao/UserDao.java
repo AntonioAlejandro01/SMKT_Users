@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.antonioalejandro.smkt.users.entity.User;
+import com.antonioalejandro.smkt.users.model.entity.User;
 
 /**
  * The Interface UserDao.
