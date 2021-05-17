@@ -31,9 +31,6 @@ public class Constants {
 	public static final Pattern VALID_PASSWORD_REGEX = Pattern
 			.compile("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{8,20}$");
 
-	/** The Constant VALID_SCOPE_REGEX. */
-	public static final Pattern VALID_SCOPE_REGEX = Pattern.compile("^[a-z]{3,}.[a-z]{3,}$");
-
 	/** The Constant TOKEN_KEY. */
 	public static final String TOKEN_KEY = "Bearer ";
 
