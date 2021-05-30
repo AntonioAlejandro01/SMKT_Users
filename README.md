@@ -15,16 +15,14 @@ Service to manage products in SmartKitchen App
 
 ## User Structure
 
-```JSON
-    {
-        "id": 23, 
-        "name" : "John",
-        "lastName": "Smith", // Optional
-        "username": "john.smith", // Unique
-        "password": "P@ssword2021", // Requirements - Length: 8 ~ 20, Uppercase: Min. 1, Symbols: Min 1
-        "email": "exaxmple@human.com", // Valid e-mail structure
-        "role": "USER" // Assigned when it created. Depends the property DEFAULT_ROLE_ID. The Role Id can be verified in her endpoint.
-    }
+```yml
+    id: 23
+    name : John
+    lastName: Smith # Optional
+    username: john.smith # Unique
+    password: P@ssword2021 # Requirements - Length: 8 ~ 20, Uppercase: Min. 1, Symbols: Min 1
+    email: exaxmple@human.com # Valid e-mail structure
+    role: USER # Assigned when it created. Depends the property DEFAULT_ROLE_ID. The Role Id can be verified in her endpoint.
  ```
 
 ## Use With Docker
