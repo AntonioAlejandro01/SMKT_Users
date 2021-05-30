@@ -1,10 +1,3 @@
-/*
- * @Author AntonioAlejandro01
- * 
- * @link http://antonioalejandro.com
- * @link https://github.com/AntonioAlejandro01/SMKT_Users
- * 
- */
 package com.antonioalejandro.smkt.users.dao;
 
 import org.springframework.data.jpa.repository.Query;
@@ -14,7 +7,10 @@ import org.springframework.data.repository.query.Param;
 import com.antonioalejandro.smkt.users.model.entity.User;
 
 /**
- * The Interface UserDao.
+ * User DAO repository
+ * 
+ * @author AntonioALejandro01 - www.antonioalejandro.com
+ * @version 1.0.0
  */
 public interface UserDao extends PagingAndSortingRepository<User, Long> {
 

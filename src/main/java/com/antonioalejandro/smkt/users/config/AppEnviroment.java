@@ -1,10 +1,3 @@
-/*
- * @Author AntonioAlejandro01
- * 
- * @link http://antonioalejandro.com
- * @link https://github.com/AntonioAlejandro01/SMKT_Users
- * 
- */
 package com.antonioalejandro.smkt.users.config;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +6,10 @@ import lombok.Getter;
 import lombok.ToString;
 
 /**
- * The Class AppEnviroment.
+ * App Enviroment Class
+ * 
+ * @author AntonioAlejandro01 - www.antonioalejandro.com
+ * @version 1.0.0
  */
 @Getter
 @ToString
@@ -42,14 +38,6 @@ public class AppEnviroment {
 	/** The scope update self. */
 	@Value("${scopes.update-self}")
 	private String scopeUpdateSelf;
-
-	/** The app user. */
-	@Value("${oauth.user}")
-	private String appUser;
-
-	/** The app secret. */
-	@Value("${oauth.secret}")
-	private String appSecret;
 
 	/** The oauth id. */
 	@Value("${oauth.id}")

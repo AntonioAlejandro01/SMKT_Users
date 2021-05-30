@@ -1,10 +1,3 @@
-/*
- * @Author AntonioAlejandro01
- * 
- * @link http://antonioalejandro.com
- * @link https://github.com/AntonioAlejandro01/SMKT_Users
- * 
- */
 package com.antonioalejandro.smkt.users.service;
 
 import com.antonioalejandro.smkt.users.model.TokenData;
@@ -13,7 +6,10 @@ import com.antonioalejandro.smkt.users.model.request.UserUpdateRequest;
 import com.antonioalejandro.smkt.users.model.response.UserResponse;
 
 /**
- * The Interface IUserService.
+ * User Service Interface
+ * 
+ * @author AntonioAlejandro01 - www.antonioalejandro.com
+ * @version 1.0.0s
  */
 public interface UserService {
 

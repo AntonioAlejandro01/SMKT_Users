@@ -1,10 +1,3 @@
-/*
- * @Author AntonioAlejandro01
- * 
- * @link http://antonioalejandro.com
- * @link https://github.com/AntonioAlejandro01/SMKT_Users
- * 
- */
 package com.antonioalejandro.smkt.users.model.response;
 
 import java.util.List;
@@ -20,7 +13,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 
 /**
- * The Class RoleResponse.
+ * Role Response class
+ * 
+ * @author AntonioAlejandro01 - www.antonioalejandro.com
+ * @version 1.0.0
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
@@ -74,7 +70,7 @@ public class RoleResponse extends GenericResponse {
 		role = null;
 		roles = null;
 	}
-	
+
 	/**
 	 * Instantiates a new role response.
 	 *

@@ -1,10 +1,3 @@
-/*
- * @Author AntonioAlejandro01
- * 
- * @link http://antonioalejandro.com
- * @link https://github.com/AntonioAlejandro01/SMKT_Users
- * 
- */
 package com.antonioalejandro.smkt.users.service.impl;
 
 import java.util.Optional;
@@ -22,7 +15,10 @@ import com.antonioalejandro.smkt.users.service.RoleService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * The Class RoleService.
+ * Role Service Implementation
+ * 
+ * @author AntonioAlejandro01 - www.antonioalejandro.com
+ * @version 1.0.0
  */
 @Slf4j
 public class RoleServiceImpl implements RoleService {

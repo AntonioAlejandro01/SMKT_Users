@@ -1,73 +1,125 @@
 # SMKT_Users
 
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=AntonioAlejandro01_SMKT_Users&metric=coverage)](https://sonarcloud.io/dashboard?id=AntonioAlejandro01_SMKT_Users)
+Service to manage products in SmartKitchen App
 
-## Description
+[![Build Dev](https://github.com/AntonioAlejandro01/SMKT_Users/actions/workflows/buildDevVersion.yml/badge.svg?branch=develop)](https://github.com/AntonioAlejandro01/SMKT_Users/actions/workflows/buildDevVersion.yml) [![Build Snapshot](https://github.com/AntonioAlejandro01/SMKT_Users/actions/workflows/BuildSnapshot.yml/badge.svg?branch=main)](https://github.com/AntonioAlejandro01/SMKT_Users/actions/workflows/buildDevVersion.yml) [![Build Release](https://github.com/AntonioAlejandro01/SMKT_Users/actions/workflows/BuildRelease.yml/badge.svg?branch=main)](https://github.com/AntonioAlejandro01/SMKT_Users/actions/workflows/buildDevVersion.yml)
 
-This MS serve users in the database
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=AntonioAlejandro01_SMKT_Users&metric=alert_status)](https://sonarcloud.io/dashboard?id=AntonioAlejandro01_SMKT_Users) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=AntonioAlejandro01_SMKT_Users&metric=coverage)](https://sonarcloud.io/dashboard?id=AntonioAlejandro01_SMKT_Users)
 
-## Endpoints
+## Use With Docker
 
-### Users<sup>\*<sup>
+Use this Service with Docker as Docker container. The Repo have 3 types of images.
 
-- **/users GET** -> Get all users in DB<sup>1</sup>
-- **/users POST** -> Create a new user.<sup>12</sup>
-- **/users/{id} PUT** -> Update a user.<sup>13</sup>
-- **/users/{id} DELETE** -> Delete a user<sup>4</sup>
-- **/users/search?filter=filterValue&value=value GET** -> Search by filter. All fields are mandatory.<sup>1</sup>
-  - Filter values:
-    - id
-    - username
-    - email
+### Types
 
-### Roles
-
-- **/roles GET** -> Get all roles
-- **/roles/{name} GET** -> Get al role filter by her name
-
-### Scopes
-
-- **/scopes?roleId=value GET** -> Get scopes from Role that have the same roleId
-
-### Aclarations
-
-<sup>\*</sup> The endpoint users need headers authorization except when you call a _/users/search_ and _App-Key_ is present in headers with the correct value.
-
-<sup>1</sup>The Output change depends your scope.If your scope is minimun you only can see usernames. For a Admin scope you not can't see id and password(cyphered password) but if you have superadmin scope you can see all data for users.
-
-<sup>2</sup>The user always will have USER role, if you can change , you should update.Only can create users admin and super admin scopes.
-
-<sup>3</sup>The user that you can update have restrictions depends your scope.If your a normal user, you only can update your data.If your scope is admin you can update normal users and you. The superadmin scope can update all users in DB. **Only can exists one superadmin**
-
-<sup>4</sup> The superadmin user can't be deleted. The admin users can be delete normal users. Normal users can't use this operation. In any case you can delete yourself.
-
-## Usage as docker image
-
-Docker image : `antonioalejandro01/smkt-users:latest`
-
-Download image : `docker pull antonioalejandro01/smkt-users:latest`
-
-Run image
+- **Stable**: this are the images that in her tag is a specific version ex.: `antonioalejandro01/smkt-users:vX.X.X`. the last tag version have latest tag.
 
 ```bash
-docker run
--rm
---name smkt-users
--p 6060:6060
--e port=6060
--e datasource_url="jdbc:mysql://localhost:3306/SMKT_USERS"
--e datasource_user="root"
--e datasource_password="root_password"
--e eureka_url="http://localhost:8761/eureka"
-antonioalejandro01/smkt-users:latest
+    docker pull antonioalejandro01/smkt-users:v1.0.0
+    # The last stable version
+    docker pull antonioalejandro01/smkt-users:latest
 ```
 
-### Args
+- **Snapshot**: this are the images that in her tag is snapshot ex.: `antonioalejandro01/smkt-users:snapshot`
 
-| Name                | Description                            | Example                                 |
-| ------------------- | -------------------------------------- | --------------------------------------- |
-| port                | The port that ther server is listening | 4060                                    |
-| datasource_url      | the url databse                        | jdbc:mysql://smkt-mysql:3306/SMKT_USERS |
-| datasource_user     | the databse user                       | root                                    |
-| datasource_password | the password for the user databse      | root_password                           |
-| eureka_url          | the eureka URL to can connect          | http: //smkt-eureka:8761/eureka         |
+```bash
+    docker pull antonioalejandro01/smkt-users:snapshot
+```
+
+- **Dev**: this image is only for developers and in her tag have dev `antonioalejandro01/smkt-users:dev`
+
+```bash
+    docker pull antonioalejandro01/smkt-users:dev
+```
+
+### Environment variables for Docker image
+
+<table align="center" width="100%" style="margin:1em;">
+<thead>
+    <tr>
+        <th>Name</th>
+        <th>Default Value</th>
+        <th>Description</th>
+    </tr>
+</thead>
+<tbody>
+    <tr>
+        <td>PORT</td>
+        <td>4060</td>
+        <td>Micro service port</td>
+    </tr>
+    <tr>
+        <td>EUREKA_URL</td>
+        <td>http://smkt-eureka:8761/eureka</td>
+        <td>The url where the smkt-eureka be</td>
+    </tr>
+    <tr>
+        <td>SQL_LEVEL</td>
+        <td>INFO</td>
+        <td>Log level for all log relational for sql. <i>Recommend only change for development</i></td>
+    </tr>
+    <tr>
+        <td>DATA_SOURCE_URL</td>
+        <td>jdbc:mysql://smkt-mysql:3306/SMKT_USERS</td>
+        <td>URL connection</td>
+    </tr>
+    <tr>
+        <td>DATA_SOURCE_USER</td>
+        <td>smkt</td>
+        <td>User for database</td>
+    </tr>
+    <tr>
+        <td>DATA_SOURCE_PASSWORD</td>
+        <td>root</td>
+        <td>Password for database</td>
+    </tr>
+    <tr>
+        <td>DEFAULT_ROLE_ID</td>
+        <td>3</td>
+        <td>Role that new users will have it</td>
+    </tr>
+    <tr>
+        <td>OAUTH_ID</td>
+        <td>smkt-oauth</td>
+        <td>Id that service <a>smkt-oauth</a> have it in <a href="http://github.com/antonioAlejandro01/SMKT_Eureka">smkt-eureka</a></td>
+    </tr>
+    <tr>
+        <td>OAUTH_SEARCH_USER_SECRET_SHA256</td>
+        <td>58c4581b7d7f9ab295ac3a273d15ad77af90d429f986dbfe82ca3241d9ef3dbb</td>
+        <td>Password for endpoint that smkt-oauth use to verify user</td>
+      </tr>
+</tbody>
+</table>
+
+#### Docker command
+
+```bash
+    docker run -d -p4060:4060 -ePORT=4060 -eEUREKA_URL=http://127.0.0.1:8761/eureka -eDATA_SOURCE_URL=jdbc:mysql://localhost:3306/SMKT_USERS -eDATA_SOURCE_USER=smkt -eDATA_SOURCE_PASSWORD=root -t antonioalejandro01/smkt-users:latest
+```
+
+## Use in Docker Compose
+
+```yaml
+users:
+  image: antonioalejandro01/smkt-users:latest
+  container_name: smkt-users
+  environment:
+    PORT: 4060
+    EUREKA_URL: http://127.0.0.1:8761/eureka
+    DATA_SOURCE_URL: jdbc:mysql://smkt-mysql:3306/SMKT_USERS
+    DATA_SOURCE_USER: smkt
+    DATA_SOURCE_PASSWORD: Smkt@123
+  expose:
+    - "4060"
+  ports:
+    - "4060:4060"
+mysqlDB:
+  image: mysql:latest
+  container_name: smkt-mysql
+  restart: always
+  environment:
+    MYSQL_DATABASE: SMKT_USERS
+    MYSQL_USER: smkt
+    MYSQL_PASSWORD: Smkt@123
+    MYSQL_ROOT_PASSWORD: password
+```

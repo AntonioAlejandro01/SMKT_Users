@@ -1,10 +1,3 @@
-/*
- * @Author AntonioAlejandro01
- * 
- * @link http://antonioalejandro.com
- * @link https://github.com/AntonioAlejandro01/SMKT_Users
- * 
- */
 package com.antonioalejandro.smkt.users.utils;
 
 import java.util.List;
@@ -16,14 +9,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.antonioalejandro.smkt.users.config.AppEnviroment;
 import com.antonioalejandro.smkt.users.model.TokenData;
 
 /**
- * The Class TokenUtils.
+ * Token Utils Class
+ * 
+ * @author AntonioAlejandro01 - www.antonioalejandro.com
+ * @version 1.0.0
  */
 public class TokenUtils {
 
@@ -42,7 +37,7 @@ public class TokenUtils {
 	 * @return the data token
 	 */
 	public TokenData getDataToken(String token) {
-		WebClient client = WebClientFactory
+		var client = WebClientFactory
 				.getWebClient(WebClientFactory.getURLInstanceService(env.getOauthId(), discoveryClient));
 
 		LinkedMultiValueMap<String, String> body = new LinkedMultiValueMap<>();
@@ -65,7 +60,7 @@ public class TokenUtils {
 	 * Checks if is authorized.
 	 *
 	 * @param scopesPermitted the scopes permitted
-	 * @param tokenData the token data
+	 * @param tokenData       the token data
 	 * @return true, if is authorized
 	 */
 	public boolean isAuthorized(List<String> scopesPermitted, TokenData tokenData) {

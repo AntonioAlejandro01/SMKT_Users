@@ -1,10 +1,3 @@
-/*
- * @Author AntonioAlejandro01
- * 
- * @link http://antonioalejandro.com
- * @link https://github.com/AntonioAlejandro01/SMKT_Users
- * 
- */
 package com.antonioalejandro.smkt.users.web;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +19,10 @@ import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * The Class RoleController.
+ * role Controller Class
+ * 
+ * @author AntonioAlejandro01 - www.antonioalejandro.com
+ * @version 1.0.0
  */
 @Api(value = "/roles", tags = { "Roles" })
 @Slf4j
@@ -51,7 +47,7 @@ public class RoleController {
 	public ResponseEntity<RoleResponse> getRoles() {
 		log.info("Call getRoles");
 
-		RoleResponse roleResponse = roleService.getRoles();
+		var roleResponse = roleService.getRoles();
 
 		if (roleResponse.getRoles().isEmpty()) {
 			return new ResponseEntity<>(new RoleResponse(HttpStatus.NO_CONTENT), HttpStatus.NO_CONTENT);
@@ -79,7 +75,7 @@ public class RoleController {
 		if (!ms.isEmpty()) {
 			return new ResponseEntity<>(new RoleResponse(HttpStatus.BAD_REQUEST, ms), HttpStatus.BAD_REQUEST);
 		}
-		RoleResponse roleResponse = roleService.getRoleByName(name);
+		var roleResponse = roleService.getRoleByName(name);
 		return new ResponseEntity<>(roleResponse,
 				roleResponse.haveData() ? HttpStatus.OK : roleResponse.getHttpStatus());
 	}

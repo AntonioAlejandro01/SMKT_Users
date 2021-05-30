@@ -1,7 +1,7 @@
 
-INSERT INTO `scopes` (name) VALUES ('users.super'); /*Puede hacer y ver todo*/
+INSERT INTO `scopes` (name) VALUES ('users.super'); 
 
-INSERT INTO `scopes` (name) VALUES ('users.adm'); /*Solo puede acceder a los datos de los normal users*/
+INSERT INTO `scopes` (name) VALUES ('users.adm'); 
 
 INSERT INTO `scopes` (name) VALUES ('users.update-self');
 INSERT INTO `scopes` (name) VALUES ('users.read-min');
@@ -12,9 +12,9 @@ INSERT INTO `scopes` (name) VALUES ('files.pdf');
 
 
 
-INSERT INTO `roles` (name) VALUES ('SUPERADMIN'); /*Los scpoes criticos => read,write,delete,update*/
-INSERT INTO `roles` (name) VALUES ('ADMIN'); /*los scopes adm*/
-INSERT INTO `roles` (name) VALUES ('USER'); /*scopes */
+INSERT INTO `roles` (name) VALUES ('SUPERADMIN'); 
+INSERT INTO `roles` (name) VALUES ('ADMIN'); 
+INSERT INTO `roles` (name) VALUES ('USER'); 
 
 
 

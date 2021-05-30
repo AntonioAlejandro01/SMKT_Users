@@ -1,0 +1,67 @@
+{"properties": [
+  {
+    "name": "default.params.roles.id",
+    "type": "java.lang.String",
+    "description": "A description for 'default.params.roles.id'"
+  },
+  {
+    "name": "oauth.app-key-secret",
+    "type": "java.lang.String",
+    "description": "A description for 'oauth.app-key-secret'"
+  },
+  {
+    "name": "oauth.id",
+    "type": "java.lang.String",
+    "description": "A description for 'oauth.id'"
+  },
+  {
+    "name": "oauth.path",
+    "type": "java.lang.String",
+    "description": "A description for 'oauth.path'"
+  },
+  {
+    "name": "oauth.secret",
+    "type": "java.lang.String",
+    "description": "A description for 'oauth.secret'"
+  },
+  {
+    "name": "oauth.user",
+    "type": "java.lang.String",
+    "description": "A description for 'oauth.user'"
+  },
+  {
+    "name": "scopes.adm",
+    "type": "java.lang.String",
+    "description": "A description for 'scopes.adm'"
+  },
+  {
+    "name": "scopes.files-excel",
+    "type": "java.lang.String",
+    "description": "A description for 'scopes.files-excel'"
+  },
+  {
+    "name": "scopes.files-pdf",
+    "type": "java.lang.String",
+    "description": "A description for 'scopes.files-pdf'"
+  },
+  {
+    "name": "scopes.read-min",
+    "type": "java.lang.String",
+    "description": "A description for 'scopes.read-min'"
+  },
+  {
+    "name": "scopes.super",
+    "type": "java.lang.String",
+    "description": "A description for 'scopes.super'"
+  },
+  {
+    "name": "scopes.update-self",
+    "type": "java.lang.String",
+    "description": "A description for 'scopes.update-self'"
+  },
+  {
+    "name": "superadmin.id",
+    "type": "java.lang.String",
+    "description": "A description for 'superadmin.id'"
+  }
+]}

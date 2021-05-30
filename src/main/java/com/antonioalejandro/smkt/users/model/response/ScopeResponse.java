@@ -1,10 +1,3 @@
-/*
- * @Author AntonioAlejandro01
- * 
- * @link http://antonioalejandro.com
- * @link https://github.com/AntonioAlejandro01/SMKT_Users
- * 
- */
 package com.antonioalejandro.smkt.users.model.response;
 
 import java.util.List;
@@ -18,7 +11,10 @@ import io.swagger.annotations.ApiModel;
 import lombok.Getter;
 
 /**
- * The Class ScopeResponse.
+ * Scope Response Class
+ * 
+ * @author AntonioAlejandro01 - www.antonioalejandro.com
+ * @version 1.0.0
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @ApiModel(value = "ScopeResponse", description = "Response for scopes endpoints", subTypes = { String.class,
@@ -26,7 +22,7 @@ import lombok.Getter;
 public class ScopeResponse extends GenericResponse {
 
 	/** The scopes. */
-	
+
 	/**
 	 * Gets the scopes.
 	 *
@@ -39,9 +35,9 @@ public class ScopeResponse extends GenericResponse {
 	/**
 	 * Instantiates a new scope response.
 	 *
-	 * @param status the status
+	 * @param status  the status
 	 * @param message the message
-	 * @param scopes the scopes
+	 * @param scopes  the scopes
 	 */
 	public ScopeResponse(HttpStatus status, String message, List<String> scopes) {
 		super(status, message);
@@ -51,14 +47,14 @@ public class ScopeResponse extends GenericResponse {
 	/**
 	 * Instantiates a new scope response.
 	 *
-	 * @param status the status
+	 * @param status  the status
 	 * @param message the message
 	 */
 	public ScopeResponse(HttpStatus status, String message) {
 		super(status, message);
 		scopes = null;
 	}
-	
+
 	/**
 	 * Instantiates a new scope response.
 	 *

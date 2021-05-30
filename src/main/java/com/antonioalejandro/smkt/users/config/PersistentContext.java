@@ -1,10 +1,3 @@
-/*
- * @Author AntonioAlejandro01
- * 
- * @link http://antonioalejandro.com
- * @link https://github.com/AntonioAlejandro01/SMKT_Users
- * 
- */
 package com.antonioalejandro.smkt.users.config;
 
 import org.springframework.context.annotation.Bean;
@@ -17,7 +10,9 @@ import com.antonioalejandro.smkt.users.service.impl.UserServiceImpl;
 import com.antonioalejandro.smkt.users.utils.TokenUtils;
 
 /**
- * The Class PersistentContext.
+ * Persistent Context Class
+ * @author AntonioAlejandro01 - www.antonioalejandro.com
+ * @version 1.0.0
  */
 @Configuration
 public class PersistentContext {
