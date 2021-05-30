@@ -1,10 +1,3 @@
-/*
- * @Author AntonioAlejandro01
- * 
- * @link http://antonioalejandro.com
- * @link https://github.com/AntonioAlejandro01/SMKT_Users
- * 
- */
 package com.antonioalejandro.smkt.users.model;
 
 import java.util.List;
@@ -14,7 +7,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 
 /**
- * The Class TokenData.
+ * Token Data Class
+ * 
+ * @author AntonioAlejandro01 - www.antonioalejandro.com
+ * @version 1.0.0
  */
 
 @Getter

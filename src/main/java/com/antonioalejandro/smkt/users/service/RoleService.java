@@ -1,16 +1,12 @@
-/*
- * @Author AntonioAlejandro01
- * 
- * @link http://antonioalejandro.com
- * @link https://github.com/AntonioAlejandro01/SMKT_Users
- * 
- */
 package com.antonioalejandro.smkt.users.service;
 
 import com.antonioalejandro.smkt.users.model.response.RoleResponse;
 
 /**
- * The Interface IRoleService.
+ * Role Service Implementation
+ * 
+ * @author AntonioAlejandro01 - www.antonioalejandro.com
+ * @version 1.0.0
  */
 public interface RoleService {
 

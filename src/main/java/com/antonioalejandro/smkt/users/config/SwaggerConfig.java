@@ -1,10 +1,3 @@
-/*
- * @Author AntonioAlejandro01
- * 
- * @link http://antonioalejandro.com
- * @link https://github.com/AntonioAlejandro01/SMKT_Users
- * 
- */
 package com.antonioalejandro.smkt.users.config;
 
 import org.springframework.context.annotation.Bean;
@@ -19,7 +12,10 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
- * The Class SwaggerConfig.
+ * Swagger Config class
+ * 
+ * @author AntonioAlejandro01 - www.antonioalejandro.com
+ * @version 1.0.0
  */
 @Configuration
 @EnableSwagger2
@@ -33,7 +29,7 @@ public class SwaggerConfig {
 	@Bean
 	public Docket usersApi() {
 		return new Docket(DocumentationType.SWAGGER_2).apiInfo(usersApiInfo()).select().paths(PathSelectors.any())
-				.apis(RequestHandlerSelectors.basePackage("com.antonioalejandro.smkt.users.controllers")).build();
+				.apis(RequestHandlerSelectors.basePackage("com.antonioalejandro.smkt.users.web")).build();
 	}
 
 	/**

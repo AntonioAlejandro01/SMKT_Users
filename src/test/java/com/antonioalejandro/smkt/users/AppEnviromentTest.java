@@ -12,8 +12,6 @@ class AppEnviromentTest {
 	@Test
 	void test() throws Exception {
 		AppEnviroment env = new AppEnviroment();
-		assertNull(env.getAppSecret());
-		assertNull(env.getAppUser());
 		assertNull(env.getDefaultRoleId());
 		assertNull(env.getOauthId());
 		assertNull(env.getOauthPath());

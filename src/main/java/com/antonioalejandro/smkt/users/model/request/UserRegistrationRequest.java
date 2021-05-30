@@ -1,10 +1,3 @@
-/*
- * @Author AntonioAlejandro01
- * 
- * @link http://antonioalejandro.com
- * @link https://github.com/AntonioAlejandro01/SMKT_Users
- * 
- */
 package com.antonioalejandro.smkt.users.model.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,7 +7,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * The Class UserRegistrationRequest.
+ * User Registration Request Class
+ * 
+ * @author AntonioAlejandro01 - www.antonioalejandro.com
+ * @version 1.0.0
  */
 @Getter
 @Setter

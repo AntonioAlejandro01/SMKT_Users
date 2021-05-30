@@ -1,10 +1,3 @@
-/*
- * @Author AntonioAlejandro01
- * 
- * @link http://antonioalejandro.com
- * @link https://github.com/AntonioAlejandro01/SMKT_Users
- * 
- */
 package com.antonioalejandro.smkt.users.service.impl;
 
 import java.util.Arrays;
@@ -21,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.antonioalejandro.smkt.users.config.AppEnviroment;
 import com.antonioalejandro.smkt.users.dao.UserDao;
 import com.antonioalejandro.smkt.users.model.TokenData;
-import com.antonioalejandro.smkt.users.model.entity.Role;
 import com.antonioalejandro.smkt.users.model.entity.User;
 import com.antonioalejandro.smkt.users.model.request.UserRegistrationRequest;
 import com.antonioalejandro.smkt.users.model.request.UserUpdateRequest;
@@ -34,7 +26,10 @@ import com.antonioalejandro.smkt.users.utils.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * The Class UserService.
+ * User Service Implementation
+ * 
+ * @author AntonioAlejandro01 - www.antonioalejandro.com
+ * @version 1.0.0
  */
 @Slf4j
 public class UserServiceImpl implements UserService {
@@ -109,7 +104,7 @@ public class UserServiceImpl implements UserService {
 
 		log.debug("Call to getUserByUsernameKey Value:{}", value);
 
-		final User user = repository.findByUsername(value);
+		final var user = repository.findByUsername(value);
 
 		if (user == null) {
 			return new UserResponse(HttpStatus.NOT_FOUND, "Username does't exists");
@@ -152,7 +147,7 @@ public class UserServiceImpl implements UserService {
 	public UserResponse updateUser(final UserUpdateRequest userUpdateRequest, final long id,
 			final TokenData tokenData) {
 		log.debug("Call to UpdateUser -> id: {}, user: {}", id, userUpdateRequest);
-		final User currentUser = repository.findById(id).orElse(null);
+		final var currentUser = repository.findById(id).orElse(null);
 		if (currentUser == null) {
 			return new UserResponse(HttpStatus.BAD_REQUEST, "Id don't exists. ");
 		}
@@ -186,7 +181,7 @@ public class UserServiceImpl implements UserService {
 		if (id == env.getSuperAdminId()) {
 			return new UserResponse(HttpStatus.BAD_REQUEST, "Super Admin user can't be deleted. ");
 		}
-		boolean canDelete = false;
+		var canDelete = false;
 		if (tokenUtils.isAuthorized(Arrays.asList(env.getScopeSuper()), tokenData)) {
 			canDelete = true;
 		} else if (tokenUtils.isAuthorized(Arrays.asList(env.getScopeAdm()), tokenData)) {
@@ -223,13 +218,13 @@ public class UserServiceImpl implements UserService {
 			return new UserResponse(HttpStatus.UNAUTHORIZED, HttpStatus.UNAUTHORIZED.toString());
 		}
 
-		final Role role = roleService.getRoleById(env.getDefaultRoleId()).getRole();
+		final var role = roleService.getRoleById(env.getDefaultRoleId()).getRole();
 
 		if (existsEmail(userRequest.getEmail()) || existsUsername(userRequest.getUsername())) {
 			return new UserResponse(HttpStatus.BAD_REQUEST, "BAD REQUEST");
 		}
 
-		final User newUser = new User();
+		final var newUser = new User();
 
 		newUser.setName(userRequest.getName());
 		newUser.setUsername(userRequest.getUsername());
@@ -330,7 +325,7 @@ public class UserServiceImpl implements UserService {
 
 		if (tokenUtils.isAuthorized(Arrays.asList(env.getScopeReadMin()), tokenData)) {
 			users = users.stream().map(user -> {
-				User newUser = new User();
+				var newUser = new User();
 				newUser.setUsername(user.getUsername());
 				return newUser;
 			}).collect(Collectors.toList());

@@ -1,10 +1,3 @@
-/*
- * @Author AntonioAlejandro01
- * 
- * @link http://antonioalejandro.com
- * @link https://github.com/AntonioAlejandro01/SMKT_Users
- * 
- */
 package com.antonioalejandro.smkt.users.model.response;
 
 import org.springframework.http.HttpStatus;
@@ -16,7 +9,10 @@ import io.swagger.annotations.ApiModel;
 import lombok.Getter;
 
 /**
- * The Class GenericResponse.
+ * Generic Response Class
+ * 
+ * @author AntonioAlejandro01 - www.antonioalejandro.com
+ * @version 1.0.0
  */
 @ApiModel(value = "Generic Response", description = "Response for any endpoints", subTypes = { String.class })
 @Getter
@@ -44,7 +40,7 @@ public class GenericResponse {
 		this.httpStatus = status;
 		if (status != null) {
 			this.status = status.value();
-			this.message = message == null ? status.getReasonPhrase():message;
+			this.message = message == null ? status.getReasonPhrase() : message;
 		} else {
 			this.message = message;
 		}

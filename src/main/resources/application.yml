@@ -6,7 +6,7 @@ spring:
   url:
    jdbc:mysql://localhost:3306/SMKT_USERS?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Madrid
   username:
-   root
+   smkt
   password:
    root
   driver-class-name: 
@@ -25,7 +25,7 @@ server:
 eureka:
  instance:
   instance-id: 
-   ${spring.application.name}:${spring.application.instance_id:${server.port}}
+   ${spring.application.name}:${spring.application.instance_id}:${server.port}
  client:
   service-url:
    defaultZone: 
@@ -48,8 +48,6 @@ default:
 oauth:
  id: smkt-oauth
  path: /oauth/check_token
- user: smkt-users
- secret: smkt-users
  app-key-secret: 58c4581b7d7f9ab295ac3a273d15ad77af90d429f986dbfe82ca3241d9ef3dbb
  
  

@@ -1,10 +1,3 @@
-/*
- * @Author AntonioAlejandro01
- * 
- * @link http://antonioalejandro.com
- * @link https://github.com/AntonioAlejandro01/SMKT_Users
- * 
- */
 package com.antonioalejandro.smkt.users.web;
 
 import java.util.Optional;
@@ -43,7 +36,10 @@ import io.swagger.annotations.AuthorizationScope;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * The Class UserController.
+ * User Controller Class
+ * 
+ * @author AntonioAlejandro.com
+ * @version 1.0.0
  */
 @RestController
 @Slf4j
@@ -89,10 +85,10 @@ public class UserController {
 	/**
 	 * Search user.
 	 *
-	 * @param token the token
+	 * @param token  the token
 	 * @param appKey the app key
 	 * @param filter the filter
-	 * @param value the value
+	 * @param value  the value
 	 * @return the response entity
 	 */
 	@ApiOperation(value = "Saerch user by username, email or id ", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
@@ -128,7 +124,7 @@ public class UserController {
 	 * Creates the.
 	 *
 	 * @param token the token
-	 * @param req the req
+	 * @param req   the req
 	 * @return the response entity
 	 */
 	@ApiOperation(value = "Create a user ", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
@@ -148,7 +144,7 @@ public class UserController {
 
 		log.debug("User -> {}", req.toString());
 
-		StringBuilder ms = new StringBuilder();
+		var ms = new StringBuilder();
 
 		ms.append(Validations.validateEmail(req.getEmail())).append(Validations.validateName(req.getName()))
 				.append(Validations.validateUsername(req.getUsername()))
@@ -166,7 +162,7 @@ public class UserController {
 	 * Delete user.
 	 *
 	 * @param token the token
-	 * @param id the id
+	 * @param id    the id
 	 * @return the response entity
 	 */
 	@ApiOperation(value = "Delete user by id ", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
@@ -196,8 +192,8 @@ public class UserController {
 	 * Put user by id.
 	 *
 	 * @param token the token
-	 * @param req the req
-	 * @param id the id
+	 * @param req   the req
+	 * @param id    the id
 	 * @return the response entity
 	 */
 	@ApiOperation(value = "Update user by id", produces = "application/json", response = UserResponse.class, tags = "Users", authorizations = {
@@ -218,7 +214,7 @@ public class UserController {
 		log.info("Call users/id");
 
 		String ms = Validations.validateId(id, true);
-		
+
 		if (!ms.isEmpty()) {
 			return createBadRequestException(ms);
 		}
@@ -234,7 +230,8 @@ public class UserController {
 	 */
 	private ResponseEntity<UserResponse> createUnathorizedResponse(String ms) {
 		return new ResponseEntity<>(
-				new UserResponse(HttpStatus.UNAUTHORIZED, !Validations.isFieldPresent(ms) ? HttpStatus.UNAUTHORIZED.getReasonPhrase() : ms),
+				new UserResponse(HttpStatus.UNAUTHORIZED,
+						!Validations.isFieldPresent(ms) ? HttpStatus.UNAUTHORIZED.getReasonPhrase() : ms),
 				HttpStatus.UNAUTHORIZED);
 	}
 
@@ -246,7 +243,8 @@ public class UserController {
 	 */
 	private ResponseEntity<UserResponse> createBadRequestException(String ms) {
 		return new ResponseEntity<>(
-				new UserResponse(HttpStatus.BAD_REQUEST, !Validations.isFieldPresent(ms) ? HttpStatus.BAD_REQUEST.getReasonPhrase() : ms),
+				new UserResponse(HttpStatus.BAD_REQUEST,
+						!Validations.isFieldPresent(ms) ? HttpStatus.BAD_REQUEST.getReasonPhrase() : ms),
 				HttpStatus.BAD_REQUEST);
 	}
 
@@ -254,7 +252,7 @@ public class UserController {
 	 * Prepare response.
 	 *
 	 * @param userResponse the user response
-	 * @param okOption the ok option
+	 * @param okOption     the ok option
 	 * @return the response entity
 	 */
 	private ResponseEntity<UserResponse> prepareResponse(UserResponse userResponse, HttpStatus okOption) {
@@ -285,7 +283,7 @@ public class UserController {
 	 * Do if appkey.
 	 *
 	 * @param appKey the app key
-	 * @param value the value
+	 * @param value  the value
 	 * @return the response entity
 	 */
 	private ResponseEntity<UserResponse> doIfAppkey(String appKey, String value) {
@@ -304,8 +302,8 @@ public class UserController {
 	/**
 	 * Do if not app key.
 	 *
-	 * @param filter the filter
-	 * @param value the value
+	 * @param filter    the filter
+	 * @param value     the value
 	 * @param tokenData the token data
 	 * @return the response entity
 	 */

@@ -1,10 +1,3 @@
-/*
- * @Author AntonioAlejandro01
- * 
- * @link http://antonioalejandro.com
- * @link https://github.com/AntonioAlejandro01/SMKT_Users
- * 
- */
 package com.antonioalejandro.smkt.users.utils;
 
 import org.springframework.cloud.client.ServiceInstance;
@@ -13,7 +6,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * A factory for creating WebClient objects.
+ * WebClient Factory Class
+ * 
+ * @author AntonioAlejandro01 - www.antonioalejandro.com
+ * @version 1.0.0
  */
 public class WebClientFactory {
 
@@ -33,14 +29,14 @@ public class WebClientFactory {
 		return WebClient.builder().baseUrl(url)
 				.defaultHeader(HttpHeaders.AUTHORIZATION, String.format("Basic %s", "c21hcnRraXRjaGVuYXBwOjEzMzMx"))
 				.build();
-		
+
 	}
 
 	/**
 	 * Gets the URL instance service.
 	 *
 	 * @param serviceId the service id
-	 * @param client the client
+	 * @param client    the client
 	 * @return the URL instance service
 	 */
 	public static String getURLInstanceService(String serviceId, DiscoveryClient client) {

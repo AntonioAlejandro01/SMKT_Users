@@ -1,10 +1,3 @@
-/*
- * @Author AntonioAlejandro01
- * 
- * @link http://antonioalejandro.com
- * @link https://github.com/AntonioAlejandro01/SMKT_Users
- * 
- */
 package com.antonioalejandro.smkt.users.dao;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -13,7 +6,10 @@ import org.springframework.data.repository.query.Param;
 import com.antonioalejandro.smkt.users.model.entity.Role;
 
 /**
- * The Interface RoleDao.
+ * Role Dao Repository
+ * 
+ * @author AntonioAlejandro01 - www.antonioalejandro.com
+ * @version 1.0.0
  */
 public interface RoleDao extends PagingAndSortingRepository<Role, Long> {
 
