@@ -1,38 +1,35 @@
-FROM maven:3-openjdk-11 as build
+FROM maven:3-openjdk-11 as Builder
 
-WORKDIR /opt/build
+WORKDIR /build
 
-COPY . .
+COPY pom.xml .
 
-RUN mvn clean compile install
+RUN mvn clean package -Dmaven.test.skip -Dmaven.main.skip -Dspring-boot.repackage.skip && rm -r target/
+
+COPY src ./src
+
+RUN mvn clean package  -Dmaven.test.skip
 
 RUN mv ./target/smkt-users.jar /app.jar
 
-FROM openjdk:11
+####### JAVA 11 jre STAGE ########
+FROM openjdk:11-jre-slim
 
 WORKDIR /opt/server
 
-COPY --from=build /app.jar  ./app.jar
+COPY --from=Builder /app.jar  ./app.jar
 
-ARG port=4060
-ARG datasource_url=jdbc:mysql://smkt-mysql:3306/SMKT_USERS?useSSL=false&allowPublicKeyRetrieval=true
-ARG datasource_user=root
-ARG datasource_password=root
-ARG eureka_url=http://127.0.0.1:8761/eureka
-ARG sql_level=INFO
-ARG default_role_id=3
-ARG oauth_id=smkt-oauth
-ARG oauth_search_user_secret_sha256=58c4581b7d7f9ab295ac3a273d15ad77af90d429f986dbfe82ca3241d9ef3dbb
-
-ENV PORT ${port}
-ENV DATASOURCE_URL ${datasource_url}
-ENV DATASOURCE_USER ${datasource_user}
-ENV DATASOURCE_PASSWORD ${datasource_password}
-ENV EUREKA_URL ${eureka_url}
-ENV SQL_LEVEL ${sql_level}
-ENV DEFAULT_ROLE_ID ${default_role_id}
-ENV OAUTH_ID ${oauth_id}
-ENV OAUTH_SEARCH_USER_SECRET_SHA256 ${oauth_search_user_secret_sha256}
+##### Default enviroment variables #####
+ENV PORT=4060
+ENV DATASOURCE_URL=jdbc:mysql://smkt-mysql:3306/SMKT_USERS
+ENV DATASOURCE_USER=root
+ENV DATASOURCE_PASSWORD=password
+ENV EUREKA_URL=http://127.0.0.1:8761/eureka
+ENV SQL_LEVEL=INFO
+ENV DEFAULT_ROLE_ID=3
+ENV OAUTH_ID=smkt-oauth
+ENV OAUTH_SEARCH_USER_SECRET_SHA256=58c4581b7d7f9ab295ac3a273d15ad77af90d429f986dbfe82ca3241d9ef3dbb
+#########################################
 
 EXPOSE ${PORT}
 
