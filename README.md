@@ -78,17 +78,17 @@ Use this service with Docker as Docker container. The Repo have 3 types of image
         <td>Log level for all log about sql. <i>Recommend only change for development</i></td>
     </tr>
     <tr>
-        <td>DATA_SOURCE_URL</td>
+        <td>DATASOURCE_URL</td>
         <td>jdbc:mysql://smkt-mysql:3306/SMKT_USERS</td>
         <td>URL connection</td>
     </tr>
     <tr>
-        <td>DATA_SOURCE_USER</td>
+        <td>DATASOURCE_USER</td>
         <td>smkt</td>
         <td>User for database</td>
     </tr>
     <tr>
-        <td>DATA_SOURCE_PASSWORD</td>
+        <td>DATASOURCE_PASSWORD</td>
         <td>root</td>
         <td>Password for database</td>
     </tr>
@@ -113,7 +113,7 @@ Use this service with Docker as Docker container. The Repo have 3 types of image
 #### Docker command
 
 ```bash
-    docker run -d -p4060:4060 -ePORT=4060 -eEUREKA_URL=http://127.0.0.1:8761/eureka -eDATA_SOURCE_URL=jdbc:mysql://localhost:3306/SMKT_USERS -eDATA_SOURCE_USER=smkt -eDATA_SOURCE_PASSWORD=root -t antonioalejandro01/smkt-users:latest
+    docker run -d -p4060:4060 -ePORT=4060 -eEUREKA_URL=http://127.0.0.1:8761/eureka -eDATASOURCE_URL=jdbc:mysql://localhost:3306/SMKT_USERS -eDATASOURCE_USER=smkt -eDATASOURCE_PASSWORD=root -t antonioalejandro01/smkt-users:latest
 ```
 
 ## Use in Docker Compose
@@ -125,9 +125,9 @@ users:
   environment:
     PORT: 4060
     EUREKA_URL: http://127.0.0.1:8761/eureka
-    DATA_SOURCE_URL: jdbc:mysql://smkt-mysql:3306/SMKT_USERS
-    DATA_SOURCE_USER: smkt
-    DATA_SOURCE_PASSWORD: Smkt@123
+    DATASOURCE_URL: jdbc:mysql://smkt-mysql:3306/SMKT_USERS
+    DATASOURCE_USER: smkt
+    DATASOURCE_PASSWORD: Smkt@123
   expose:
     - "4060"
   ports:
